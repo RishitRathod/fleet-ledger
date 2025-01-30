@@ -1,14 +1,15 @@
 import React from "react";
-import Sidebar from "../components/sidebar.jsx";
 import { Outlet } from "react-router-dom";
+import Sidebar from "../components/sidebar";
+import "./layout.css"; // For layout-specific styling
 
 const Layout = () => {
   return (
-    <div className="flex h-screen">
+    <div className="layout">
       <Sidebar />
-      <div className="flex-grow p-4">
-        <Outlet /> {/* ✅ This renders the current route (e.g., Home) */}
-      </div>
+      <main className="main-content">
+        <Outlet /> {/* Renders the nested routes' content */}
+      </main>
     </div>
   );
 };
