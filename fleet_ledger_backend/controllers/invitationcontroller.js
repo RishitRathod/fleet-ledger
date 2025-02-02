@@ -1,7 +1,7 @@
 const Invitation = require('../models/Invitation');
 const User = require('../models/User');
 const sendMail = require('../config/mailer');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 // Send Invitation
 // Send Invitation
