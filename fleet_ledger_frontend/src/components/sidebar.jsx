@@ -46,9 +46,8 @@ const Sidebar = () => {
                 <Link to="/vehicles">🚗 Vehicles</Link>
               </li>
               <li>
-                <Link to="/users">👥 Users</Link>
+                <Link to="/admin/users">👥 Users</Link>
               </li>
-
               {/* Show Expenses only for Admins */}
               {role === "admin" && (
                 <li>

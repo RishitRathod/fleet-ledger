@@ -9,10 +9,11 @@ function Signup() {
         email: '',
         password: '',
         role: 'user',  // Default role is 'user'
-        groupName: ''  // New field for group name
+        groupName: ''   // Group name for admins
     });
 
     const navigate = useNavigate();
+    // const BASE_URL = 'http://localhost:5000/auth'; // Base URL for API
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -23,16 +24,18 @@ function Signup() {
         e.preventDefault();
         const { name, email, password, role, groupName } = signupInfo;
 
-        if (!name || !email || !password || !role || (role === 'admin' && !groupName)) {  // Only require groupName if role is 'admin'
-            return handleError('All fields are required');
+        if (!name || !email || !password || !role || (role === 'admin' && !groupName)) {
+            return handleError('All fields are required.');
         }
 
-        try {
-            // Set URL based on role
-            const url = role === 'admin' 
-                ? `http://localhost:5000/auth/adminSignup` 
-                : `http://localhost:5000/auth/userSignup`;
+        const url = role === 'admin' 
+        ? `http://localhost:5000/auth/adminSignup` 
+        : `http://localhost:5000/auth/userSignup`;
+    
 
+        console.log('Sending signup request to:', url, signupInfo);
+
+        try {
             const response = await fetch(url, {
                 method: "POST",
                 headers: {
@@ -41,20 +44,23 @@ function Signup() {
                 body: JSON.stringify(signupInfo)
             });
 
+            if (!response.ok) {
+                const errorResponse = await response.text();
+                console.error('Error Response:', errorResponse);
+                throw new Error(`Signup failed: ${response.status}`);
+            }
+
             const result = await response.json();
             const { success, message, error } = result;
 
             if (success) {
                 handleSuccess(message);
-                setTimeout(() => {
-                    navigate('/login');
-                }, 1000);
-            } else if (error) {
-                handleError(error?.details?.[0]?.message || message);
+                setTimeout(() => navigate('/login'), 1000);
             } else {
-                handleError(message);
+                handleError(error?.details?.[0]?.message || message);
             }
         } catch (err) {
+            console.error('Fetch Error:', err);
             handleError(err.message);
         }
     };
@@ -102,7 +108,6 @@ function Signup() {
                     </select>
                 </div>
 
-                {/* Conditionally render the groupName input only if the role is 'admin' */}
                 {signupInfo.role === 'admin' && (
                     <div>
                         <label htmlFor='groupName'>Group Name</label>
@@ -117,9 +122,7 @@ function Signup() {
                 )}
 
                 <button type='submit'>Signup</button>
-                <span>Already have an account? 
-                    <Link to="/login">Login</Link>
-                </span>
+                <span>Already have an account? <Link to="/login">Login</Link></span>
             </form>
             <ToastContainer />
         </div>

@@ -1,18 +1,18 @@
 // const jwt = require('jsonwebtoken');
-// require('dotenv').config();
+// const User = require('../models/User');
 
-// const protect = (req, res, next) => {
-//     let token = req.header('Authorization');
-//     if (!token) return res.status(401).json({ success: false, message: 'Access denied' });
+// module.exports = async (req, res, next) => {
+//     const token = req.header('Authorization');
+//     if (!token) return res.status(401).json({ error: 'Access denied' });
 
 //     try {
-//         token = token.split(' ')[1]; // Remove "Bearer " prefix
 //         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//         req.user = decoded;
+//         const user = await User.findById(decoded.id);
+//         if (!user || user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+
+//         req.user = user;  // Attach user to request
 //         next();
-//     } catch (error) {
-//         res.status(401).json({ success: false, message: 'Invalid token' });
+//     } catch (err) {
+//         res.status(400).json({ error: 'Invalid token' });
 //     }
 // };
-// //
-// module.exports = protect;

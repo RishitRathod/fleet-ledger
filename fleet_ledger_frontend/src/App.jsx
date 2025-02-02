@@ -1,11 +1,11 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from "react-router-dom";
 import Layout from "./layouts/layout.jsx";
 import Login from "./pages/login.jsx";
 import Signup from "./pages/signup.jsx";
 import Home from "./pages/homepage.jsx";
 import AdminDashboard from "./admin/pages/admin_dashboard.jsx";
-// import UserDashboard from "./user/pages/user_dashboard.jsx";
+import UserPage from "./admin/pages/admin_users.jsx"; // New Users Management Page
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ element }) => {
@@ -26,7 +26,7 @@ function App() {
           <Route path="/" element={<Navigate to="/home" />} /> {/* Redirect '/' to Home */}
           <Route path="/home" element={<Home />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          {/* <Route path="/user/dashboard" element={<UserDashboard />} /> */}
+          <Route path="/admin/users" element={<UserPage />} /> {/* New Users Management Page */}
         </Route>
 
         {/* Redirect unknown routes to login */}
