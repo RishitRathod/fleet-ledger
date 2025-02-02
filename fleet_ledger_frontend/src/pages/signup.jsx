@@ -8,60 +8,61 @@ function Signup() {
         name: '',
         email: '',
         password: '',
-        role: 'user',  // Default role is 'user'
-        groupName: ''   // Group name for admins
+        role: 'user', // Default role is 'user'
+        groupName: '' // Group name for admins
     });
 
     const navigate = useNavigate();
-    // const BASE_URL = 'http://localhost:5000/auth'; // Base URL for API
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setSignupInfo({ ...signupInfo, [name]: value });
+        setSignupInfo((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSignup = async (e) => {
         e.preventDefault();
         const { name, email, password, role, groupName } = signupInfo;
 
+        // Validation
         if (!name || !email || !password || !role || (role === 'admin' && !groupName)) {
-            return handleError('All fields are required.');
+            return handleError('All fields are required. Please fill in all the details.');
         }
 
-        const url = role === 'admin' 
-        ? `http://localhost:5000/auth/adminSignup` 
-        : `http://localhost:5000/auth/userSignup`;
-    
+        // Determine API endpoint based on role
+        const url =
+            role === 'admin'
+                ? `http://localhost:5000/auth/adminSignup`
+                : `http://localhost:5000/auth/userSignup`;
 
-        console.log('Sending signup request to:', url, signupInfo);
+        console.log('Sending signup request to:', url, signupInfo); // Debug log
 
         try {
+            // Send API request
             const response = await fetch(url, {
-                method: "POST",
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(signupInfo)
             });
 
-            if (!response.ok) {
-                const errorResponse = await response.text();
-                console.error('Error Response:', errorResponse);
-                throw new Error(`Signup failed: ${response.status}`);
-            }
-
             const result = await response.json();
+            console.log('Server Response:', result); // Debug log
+
             const { success, message, error } = result;
 
             if (success) {
+                // Display success message and navigate to login
                 handleSuccess(message);
                 setTimeout(() => navigate('/login'), 1000);
             } else {
-                handleError(error?.details?.[0]?.message || message);
+                // Handle validation or server errors
+                handleError(error?.details?.[0]?.message || message || 'Signup failed');
             }
         } catch (err) {
+            // Handle network or unexpected errors
             console.error('Fetch Error:', err);
-            handleError(err.message);
+            handleError(err.message || 'Something went wrong during signup.');
         }
     };
 
@@ -78,6 +79,7 @@ function Signup() {
                         autoFocus
                         placeholder='Enter your name...'
                         value={signupInfo.name}
+                        required
                     />
                 </div>
                 <div>
@@ -88,6 +90,7 @@ function Signup() {
                         name='email'
                         placeholder='Enter your email...'
                         value={signupInfo.email}
+                        required
                     />
                 </div>
                 <div>
@@ -98,6 +101,7 @@ function Signup() {
                         name='password'
                         placeholder='Enter your password...'
                         value={signupInfo.password}
+                        required
                     />
                 </div>
                 <div>
@@ -108,6 +112,7 @@ function Signup() {
                     </select>
                 </div>
 
+                {/* Show group name input only for admins */}
                 {signupInfo.role === 'admin' && (
                     <div>
                         <label htmlFor='groupName'>Group Name</label>
@@ -117,6 +122,7 @@ function Signup() {
                             name='groupName'
                             placeholder='Enter your group name...'
                             value={signupInfo.groupName}
+                            required
                         />
                     </div>
                 )}
