@@ -1,15 +1,42 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db'); // ✅ Ensure correct import
+const Group = require('./group'); // Import Group model
 
-const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, enum: ['admin', 'user'], default: 'user' },  // Role added
-    group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },     // Reference to Group
-}, { timestamps: true });
+const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    role: {
+        type: DataTypes.ENUM('admin', 'user'),
+        allowNull: false,
+        defaultValue: 'user'
+    },
+    groupId: {
+        type: DataTypes.UUID,
+        references: {
+            model: 'Groups', // ✅ Ensure correct table name
+            key: 'id'
+        },
+        allowNull: true,
+        defaultValue: null
+    }
+}, {
+    timestamps: true,
+});
 
-
-
-const User = mongoose.model('User', userSchema);
 module.exports = User;
