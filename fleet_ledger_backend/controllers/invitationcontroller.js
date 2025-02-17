@@ -1,4 +1,4 @@
-const Invitation = require('../models/Invitation');
+const Invitation = require('../models/invitation');
 const User = require('../models/User');
 const sendMail = require('../config/mailer');
 const bcrypt = require('bcrypt');
@@ -9,13 +9,14 @@ exports.sendInvitation = async (req, res) => {
 
     try {
         // Find the admin user by matching email
-        const admin = await User.findOne({ email: adminemail });
+        const admin = await User.findOne({ where: { email: adminemail } });
+        console.log("Admin:", admin); // Debugging
 
         if (!admin) {
             return res.status(404).json({ error: 'Admin user not found' });
         }
 
-        const adminId = admin._id; // Extract the admin's ID
+        const adminId = admin.id; // Extract the admin's ID
         console.log("Admin ID:", adminId); // Debugging
 
         // Check if the user already exists
@@ -30,15 +31,15 @@ exports.sendInvitation = async (req, res) => {
         }
 
         // Generate invitation link
-        const inviteLink = `http://localhost:3000/accept-invite/${invitation._id}`;
+        // const inviteLink = `http://localhost:3000/accept-invite/${invitation._id}`;
 
         // If the user already exists, send a reminder email instead
-        if (existingUser) {
-            sendMail(email, 'Invitation to Join Fleet Ledger', 
-                `You are already registered. Click here to accept the invitation: ${inviteLink}`
-            );
-            return res.status(200).json({ message: 'User already exists. Invitation sent to accept.' });
-        }
+        // if (existingUser) {
+        //     sendMail(email, 'Invitation to Join Fleet Ledger', 
+        //         `You are already registered. Click here to accept the invitation: ${inviteLink}`
+        //     );
+        //     return res.status(200).json({ message: 'User already exists. Invitation sent to accept.' });
+        // }
 
         // Send new invitation email
         // sendMail(email, 'Join Fleet Ledger', `Click here to accept: ${inviteLink}`);
@@ -49,6 +50,7 @@ exports.sendInvitation = async (req, res) => {
         res.status(500).json({ error: 'Error sending invitation' });
     }
 };
+
 
 // Accept Invitation
 // exports.acceptInvitation = async (req, res) => {
