@@ -4,12 +4,20 @@ const sendMail = require('../config/mailer');
 const bcrypt = require('bcrypt');
 
 // Send Invitation
-// Send Invitation
 exports.sendInvitation = async (req, res) => {
-    const { email } = req.body;
-    // const adminId = req.user.id;
+    const { adminemail, email } = req.body;
 
     try {
+        // Find the admin user by matching email
+        const admin = await User.findOne({ email: adminemail });
+
+        if (!admin) {
+            return res.status(404).json({ error: 'Admin user not found' });
+        }
+
+        const adminId = admin._id; // Extract the admin's ID
+        console.log("Admin ID:", adminId); // Debugging
+
         // Check if the user already exists
         const existingUser = await User.findOne({ email });
 
@@ -41,6 +49,7 @@ exports.sendInvitation = async (req, res) => {
         res.status(500).json({ error: 'Error sending invitation' });
     }
 };
+
 // Accept Invitation
 // exports.acceptInvitation = async (req, res) => {
 //     try {
