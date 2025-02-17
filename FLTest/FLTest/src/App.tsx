@@ -5,22 +5,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "./components/ui/breadcrumb";
-import { Separator } from "./components/ui/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
-import { AppSidebar } from "./components/app-sidebar";
-import { ThemeToggle } from "./components/theme-toggle";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Dashboard from "./components/ui/dashboard";
-import  LoginPage  from "./login/page";
+} from "./components/ui/breadcrumb"
+import { Separator } from "./components/ui/separator"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "./components/ui/sidebar"
+import { AppSidebar } from "./components/app-sidebar"
+import { ThemeToggle } from "./components/theme-toggle"
 
-function Layout({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
-  const isLoginPage = location.pathname === "/";
-
-  return isLoginPage ? (
-    <main className="flex items-center justify-center h-screen">{children}</main>
-  ) : (
+export default function App() {
+  return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
@@ -31,33 +23,30 @@ function Layout({ children }: { children: React.ReactNode }) {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                  <BreadcrumbLink href="#">Building Your Application</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Current Page</BreadcrumbPage>
+                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+            
           </div>
-          <ThemeToggle />
+          <ThemeToggle/>
         </header>
-        <main className="p-4">{children}</main>
+        {/* <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="aspect-video rounded-xl bg-muted/50" />
+          </div>
+          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+        </div> */}
+        
       </SidebarInset>
+      
     </SidebarProvider>
-  );
-}
-
-export default function App() {
-  return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<LoginPage />} /> {/* Default login page */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/loginform" element={<LoginPage />} />
-        </Routes>
-      </Layout>
-    </Router>
-  );
+    
+  )
 }

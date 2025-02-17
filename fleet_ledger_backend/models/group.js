@@ -1,18 +1,9 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+const mongoose = require('mongoose');
 
-const Group = sequelize.define('Group', {
-    id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
-    },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
-}, {
-    timestamps: true,
+const groupSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
 });
 
+const Group = mongoose.model('Group', groupSchema);
 module.exports = Group;

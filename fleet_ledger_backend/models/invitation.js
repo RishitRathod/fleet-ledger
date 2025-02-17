@@ -1,31 +1,10 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db'); // ✅ Ensure correct import
-const User = require('./User'); // Import User model
+const mongoose = require('mongoose');
 
-const Invitation = sequelize.define('Invitation', {
-    id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
-    },
-    adminId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-            model: 'Users', // ✅ Ensure correct table name
-            key: 'id'
-        }
-    },
-    email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    status: {
-        type: DataTypes.ENUM('pending', 'accepted', 'rejected'),
-        defaultValue: 'pending',
-    }
-}, {
-    timestamps: true,
-});
+const invitationSchema = new mongoose.Schema({
+    adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    email: { type: String, required: true },
+    status: { type: String, enum: ['pending', 'accepted'], default: 'pending' }
+}, { timestamps: true });
 
+const Invitation = mongoose.model('Invitation', invitationSchema);
 module.exports = Invitation;

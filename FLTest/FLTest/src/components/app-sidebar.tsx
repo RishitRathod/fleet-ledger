@@ -62,10 +62,6 @@ const data = {
           url: "#",
         },
         {
-          title: "Dashboard",
-          url: "/dashboard",
-        },
-        {
           title: "Starred",
           url: "#",
         },
@@ -81,8 +77,8 @@ const data = {
       icon: Bot,
       items: [
         {
-          title: "Dashboard",
-          url: "/dashboard",
+          title: "Genesis",
+          url: "#",
         },
         {
           title: "Explorer",

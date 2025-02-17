@@ -1,24 +1,18 @@
 // const jwt = require('jsonwebtoken');
-// require('dotenv').config();
+// const User = require('../models/User');
 
-// const verifyToken = (req, res, next) => {
+// module.exports = async (req, res, next) => {
 //     const token = req.header('Authorization');
-//     if (!token) return res.status(401).json({ message: 'Access Denied' });
+//     if (!token) return res.status(401).json({ error: 'Access denied' });
 
 //     try {
-//         const verified = jwt.verify(token, process.env.JWT_SECRET);
-//         req.user = verified;
+//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//         const user = await User.findById(decoded.id);
+//         if (!user || user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+
+//         req.user = user;  // Attach user to request
 //         next();
-//     } catch (error) {
-//         res.status(400).json({ message: 'Invalid Token' });
+//     } catch (err) {
+//         res.status(400).json({ error: 'Invalid token' });
 //     }
 // };
-
-// const isAdmin = (req, res, next) => {
-//     if (req.user.role !== 'admin') {
-//         return res.status(403).json({ message: 'Forbidden: Admins only' });
-//     }
-//     next();
-// };
-
-// module.exports = { verifyToken, isAdmin };
