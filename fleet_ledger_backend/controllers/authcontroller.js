@@ -1,124 +1,72 @@
-const User = require('../models/User');
-const Group = require('../models/Group');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const { sequelize } = require('../config/db');
+const Group = require('../models/group');
 require('dotenv').config();
-// const bcrypt = require('bcrypt');
 
-// Import bcrypt helper functions
-const { hashPassword, comparePassword } = require('../config/bcryptHelper');
 
-// Generate JWT Token
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-};
-
-// Admin Signup
-exports.adminSignup = async (req, res) => {
+const signup = async (req, res) => {
+    const transaction = await sequelize.transaction(); // Start transaction
     try {
-        const { name, email, password, groupName } = req.body;
+        const { name, email, password, role } = req.body;
 
-        console.log(`Admin Signup Attempt: ${email}`);
+        if (role && !['admin', 'user'].includes(role)) {
+            return res.status(400).json({ message: "Invalid role. Choose 'admin' or 'user'." });
+        }
 
-        // Check if user already exists
-        let user = await User.findOne({ email });
-        if (user) return res.status(400).json({ success: false, message: "Email already exists" });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        let groupId = null;
 
-        // Create a new group
-        const group = new Group({ name: groupName });
-        await group.save();
+        // If the user is an admin, create a group
+        if (role === 'admin') {
+            const newGroup = await Group.create({ name: `${name}'s Group` }, { transaction });
+            console.log("New Group Created:", newGroup); // Debugging
+            groupId = newGroup.id; // Assign groupId from created group
+        }
 
-        console.log(`Group Created: ${groupName}, ID: ${group._id}`);
+        console.log("groupId before user creation:", groupId);
 
-        // Hash password using helper function
-        const hashedPassword = await hashPassword(password);
+        // Create the user with the assigned groupId
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            role: role || 'user',
+            groupId: groupId || null, // Ensure null if not admin
+        }, { transaction });
 
-        // Create admin user linked to the group
-        user = new User({ name, email, password: hashedPassword, role: 'admin', group: group._id });
-        await user.save();
+        console.log("New User Created:", newUser); // Debugging
 
-        console.log(`Admin User Created: ${email}, Group: ${group._id}`);
-
-        res.status(201).json({ success: true, message: "Admin registered successfully", groupId: group._id });
+        await transaction.commit(); // Commit transaction
+        res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (error) {
-        console.error('Admin Signup Error:', error);
-        res.status(500).json({ success: false, message: "Admin signup failed", error: error.message });
+        await transaction.rollback(); // Rollback on failure
+        console.error("Signup Error:", error); // Debugging
+        res.status(500).json({ message: 'Signup failed', error: error.message });
     }
 };
 
-// User Signup (by Admin)
-exports.userSignup = async (req, res) => {
-    try {
-        const { name, email, password, groupId } = req.body;
+module.exports = { signup };
 
-        console.log(`User Signup Attempt: ${email}`);
 
-        // Check if user already exists
-        let user = await User.findOne({ email });
-        if (user) return res.status(400).json({ success: false, message: "Email already exists" });
 
-        // Verify that the group exists
-        // const group = await Group.findById(groupId);
-        // if (!group) return res.status(400).json({ success: false, message: "Invalid group ID" });
-
-        // console.log(`Group Verified: ${group.name}, ID: ${groupId}`);
-
-        // Hash password using helper function
-        
-        const hashedPassword = await hashPassword(password);
-        console.log("Hashed Password:", hashedPassword);
-        // Create new user linked to the group
-        user = new User({ name, email, password: hashedPassword, role: 'user'});
-        await user.save();
-
-        // console.log(`User Created: ${email}, Group: ${group._id}`);
-
-        res.status(201).json({ success: true, message: "User registered successfully" });
-    } catch (error) {
-        console.error('User Signup Error:', error);
-        res.status(500).json({ success: false, message: "User signup failed", error: error.message });
-    }
-};
-exports.login = async (req, res) => {
+const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log("#######Email:", email);
-        console.log("##########Password:", password);
 
-        // Normalize email to lowercase
-        const normalizedEmail = email.toLowerCase();
-        console.log("Normalized Email:", normalizedEmail);
+        const user = await User.findOne({ where: { email } });
+        if (!user) return res.status(404).json({ message: 'User not found' });
 
-        // Find user in database
-        const user = await User.findOne({ email: normalizedEmail });
-        console.log("User Retrieved from DB:", user);
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-        if (!user) {
-            console.warn(`Login failed: User with email ${normalizedEmail} not found.`);
-            return res.status(400).json({ success: false, message: "Invalid email or password" });
-        }
+        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        // Validate password by comparing plain password to the hashed password in the database
-        const isMatch = await comparePassword(password, user.password);
-        console.log("Password Match Result:", isMatch);
-
-        if (!isMatch) {
-            console.warn(`Login failed: Incorrect password for email ${normalizedEmail}`);
-            return res.status(400).json({ success: false, message: "Invalid email or password" });
-        }
-
-        // Generate JWT token
-        const token = generateToken(user._id);
-
-        console.log(`Login successful: User ${user.email} logged in.`);
-        res.status(200).json({
-            success: true,
-            message: "Login successful",
-            jwtToken: token,
-            name: user.name || '',
-            role: user.role || 'user',
-        });
+        res.status(200).json({ message: 'Login successful', token, role: user.role });
     } catch (error) {
-        console.error("Login Error:", error);
-        res.status(500).json({ success: false, message: "Login failed", error: error.message });
+        res.status(500).json({ message: 'Login failed', error: error.message });
     }
 };
+
+module.exports = { signup, login };
