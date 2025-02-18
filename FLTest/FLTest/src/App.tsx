@@ -1,56 +1,53 @@
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "./components/ui/breadcrumb";
+import { Separator } from "./components/ui/separator";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
+import { AppSidebar } from "./components/app-sidebar";
+import { ThemeToggle } from "./components/theme-toggle";
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Dashboard from "./components/ui/dashboard";
-import LoginPage from "./login/page";
+import  LoginPage  from "./login/page";
 import Signup from "./signup";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [showSidebar, setShowSidebar] = useState(false);
+  const isLoginPage = location.pathname === "/" || location.pathname === "/loginform" || location.pathname === "/signup";
 
-  useEffect(() => {
-    // Hide sidebar on login and signup pages
-    const noSidebarPaths = ['/', '/loginform', '/signup'];
-    setShowSidebar(!noSidebarPaths.includes(location.pathname));
-  }, [location]);
-
-  if (!showSidebar) {
-    return <main className="w-full h-screen">{children}</main>;
-  }
-
-  return (
-    <div className="flex h-screen">
-      <div className="w-64 bg-gray-800 text-white p-4">
-        <h2 className="text-2xl font-bold mb-4">Fleet Ledger</h2>
-        <nav>
-          <ul className="space-y-2">
-            <li>
-              <a href="/dashboard" className="block py-2 px-4 hover:bg-gray-700 rounded">
-                Dashboard
-              </a>
-            </li>
-            <li>
-              <a href="/transactions" className="block py-2 px-4 hover:bg-gray-700 rounded">
-                Transactions
-              </a>
-            </li>
-            <li>
-              <a href="/vehicles" className="block py-2 px-4 hover:bg-gray-700 rounded">
-                Vehicles
-              </a>
-            </li>
-            <li>
-              <a href="/settings" className="block py-2 px-4 hover:bg-gray-700 rounded">
-                Settings
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-      <div className="flex-1">
+  return isLoginPage ? (
+    <main className="flex items-center justify-center h-screen">{children}</main>
+  ) : (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Current Page</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+          <ThemeToggle />
+        </header>
         <main className="p-4">{children}</main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const portfinder = require('portfinder');
 const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -10,9 +11,12 @@ const invitationRoutes = require('./routes/invitationRoutes');
 dotenv.config();
 const app = express();
 
+// Configure portfinder
+portfinder.basePort = 5000;  // start searching from port 5000
+
 // CORS Configuration
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://your-production-url.com'],
+    origin: ['http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
@@ -27,14 +31,24 @@ app.use('/api/invitations', invitationRoutes);
 // app.use('/api/admin', adminRoutes);
 
 // Connect to PostgreSQL using Sequelize
-// connectDB()
-//     .then(() => {
-//         const PORT = process.env.PORT || 5000;
-//         app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
-//     })
-//     .catch(err => {
-//         console.error('❌ Database connection failed:', err);
-//         process.exit(1);
-//     });
+const startServer = async () => {
+    try {
+        await connectDB();
+        const port = await portfinder.getPortPromise();
+        const server = app.listen(port, () => {
+            console.log(`✅ Server running on port ${port}`);
+        });
+
+        server.on('error', (error) => {
+            console.error('❌ Server error:', error);
+            process.exit(1);
+        });
+    } catch (err) {
+        console.error('❌ Error:', err);
+        process.exit(1);
+    }
+};
+
+startServer();
 
 module.exports = app; // Export for testing purposes
