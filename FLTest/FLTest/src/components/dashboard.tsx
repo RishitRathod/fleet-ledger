@@ -13,7 +13,7 @@ import {
   Cell,
 } from "recharts";
 import { useToast } from "@/hooks/use-toast";
-
+import { UserPiDash } from "./user_pi_dash";
 // Card Components
 const Card = React.forwardRef<
   HTMLDivElement,
@@ -180,7 +180,7 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* User Expense Distribution */}
-          <Card className="p-4 md:p-6 ">
+          {/* <Card className="p-4 md:p-6 ">
             <h3 className="text-sm font-medium text-muted-foreground mb-4">User Expense Distribution</h3>
             <div className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -203,7 +203,8 @@ const Dashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          </Card>
+          </Card> */}
+          <UserPiDash/>
 
           {/* Vehicle-wise Expenses */}
           <Card className="p-4 md:p-6 ">

@@ -12,7 +12,7 @@ import { AppSidebar } from "./components/app-sidebar";
 import { ThemeToggle } from "./components/theme-toggle";
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Dashboard from "./components/ui/dashboard";
+import Dashboard from "./components/dashboard";
 import  LoginPage  from "./login/page";
 import Signup from "./signup";
 import Users from "./components/users";
