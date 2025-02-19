@@ -15,6 +15,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Dashboard from "./components/ui/dashboard";
 import  LoginPage  from "./login/page";
 import Signup from "./signup";
+import Users from "./components/users";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/loginform" element={<LoginPage />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/users" element={<Users />} />
         </Routes>
       </Layout>
     </Router>
