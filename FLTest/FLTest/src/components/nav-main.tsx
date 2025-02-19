@@ -1,6 +1,7 @@
 "use client"
 
-import { ChartArea, FileText, CarFront, PlusCircle , ChevronRight, type LucideIcon } from "lucide-react"
+import { ChartArea, FileText, CarFront, PlusCircle, ChevronRight, type LucideIcon } from "lucide-react"
+import { useExpenseModal } from "./expenses/expense-modals";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
 import {
@@ -23,6 +24,7 @@ interface NavMainProps {
     items?: {
       title: string
       url: string
+      icon?: LucideIcon
     }[]
   }[],
   vehicleitems: {
@@ -38,6 +40,13 @@ interface NavMainProps {
 }
 
 export function NavMain({ items, vehicleitems }: NavMainProps) {
+  const { onOpen } = useExpenseModal();
+
+  const handleExpenseClick = (e: React.MouseEvent<HTMLAnchorElement>, type: string) => {
+    e.preventDefault();
+    onOpen(type.toLowerCase() as 'accessories' | 'fuel' | 'service' | 'tax');
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Actions</SidebarGroupLabel>
@@ -73,9 +82,9 @@ export function NavMain({ items, vehicleitems }: NavMainProps) {
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
-                          <a href={subItem.url} className="text-foreground">
+                          <a href={subItem.url} className="text-foreground" onClick={(e) => handleExpenseClick(e, subItem.title)}>
+                            {subItem.icon && <subItem.icon className="mr-2" />}
                             <span>{subItem.title}</span>
-                            {/* <subItem.icon className="text-foreground" /> */}
                           </a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>

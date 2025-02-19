@@ -16,6 +16,12 @@ import Dashboard from "./components/dashboard";
 import  LoginPage  from "./login/page";
 import Signup from "./signup";
 import Users from "./components/users";
+// import AccessoriesExpense from "./components/expenses/accessories-expense";
+// import FuelExpense from "./components/expenses/fuel-expense";
+// import ServiceExpense from "./components/expenses/service-expense";
+// import TaxExpense from "./components/expenses/tax-expense";
+import { ExpenseModals } from "./components/expenses/expense-modals";
+import { Toaster } from "@/components/ui/toaster";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -55,15 +61,30 @@ function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/loginform" element={<LoginPage />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/users" element={<Users />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/loginform" element={<LoginPage />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/dashboard"
+          element={
+            <Layout>
+              <Dashboard />
+            </Layout>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <Layout>
+              <Users />
+            </Layout>
+          }
+        />
+        
+      </Routes>
+      <ExpenseModals />
+      <Toaster />
     </Router>
   );
 }

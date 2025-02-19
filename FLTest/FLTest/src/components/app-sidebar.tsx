@@ -15,6 +15,12 @@ import {
   SquareTerminal,
   HandCoins,
   Bolt,
+  Fuel,
+  Wrench,
+  IndianRupee,
+  ReceiptIndianRupee,
+  UsersRound,
+  Import
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
@@ -57,38 +63,40 @@ const data = {
     {
       title: "Add Expenses",
       url: "#",
-      icon: HandCoins,
+      icon: IndianRupee,
       isActive: true,
       items: [
         {
-          title: "Accesories",
+          title: "Accessories",
           url: "#",
           icon: Bolt,
         },
         {
           title: "Fuel",
-          url: "/dashboard",
-          icon: Bolt,
+          url: "#",
+          icon: Fuel,
         },
         {
-          title: "Services",
+          title: "Service",
           url: "#",
+          icon: Wrench,
         },
         {
-          title: "Taxes",
+          title: "Tax",
           url: "#",
+          icon: ReceiptIndianRupee,
         },
       ],
     },
     {
       title: "Users",
       url: "/users",
-      icon: Frame,
+      icon: UsersRound,
     },
     {
       title: "Import/Export",
       url: "#",
-      icon: BookOpen,
+      icon: Import,
       items: [
         {
           title: "Introduction",
