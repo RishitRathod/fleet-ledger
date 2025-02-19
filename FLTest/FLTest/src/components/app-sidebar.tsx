@@ -5,6 +5,7 @@ import {
   AudioWaveform,
   BookOpen,
   Bot,
+  Car,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -12,6 +13,8 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
+  HandCoins,
+  Bolt,
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
@@ -52,50 +55,38 @@ const data = {
   ],
   navMain: [
     {
-      title: "Playground",
+      title: "Add Expenses",
       url: "#",
-      icon: SquareTerminal,
+      icon: HandCoins,
       isActive: true,
       items: [
         {
-          title: "History",
+          title: "Accesories",
           url: "#",
+          icon: Bolt,
         },
         {
-          title: "Dashboard",
+          title: "Fuel",
           url: "/dashboard",
+          icon: Bolt,
         },
         {
-          title: "Starred",
+          title: "Services",
           url: "#",
         },
         {
-          title: "Settings",
+          title: "Taxes",
           url: "#",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Dashboard",
-          url: "/dashboard",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
+      title: "Users",
+      url: "/users",
+      icon: Frame,
     },
     {
-      title: "Documentation",
+      title: "Import/Export",
       url: "#",
       icon: BookOpen,
       items: [
@@ -117,29 +108,17 @@ const data = {
         },
       ],
     },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
+    // {
+    //   title: "My Fleet",
+    //   url: "/fleet",
+    //   icon: Car,
+    // },
+    // {
+    //   title: "Add Vehicle",
+    //   url: "/users",
+    //   icon: Frame,
+    // },
+   
   ],
   projects: [
     {
@@ -168,7 +147,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

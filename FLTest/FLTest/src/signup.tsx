@@ -144,7 +144,17 @@ export default function SignupFormDemo() {
         >
           {loading ? "Signing up..." : "Sign up →"}
         </button>
+{/* 
+        <LabelInputContainer className="items-center">
+        <Label htmlFor="role">Already have an account?  <a href="/loginform" className="text-blue-500">Login</a></Label> 
+      </LabelInputContainer> */}
       </form>
+      <p className="text-center text-sm">
+          Already have an account?{" "}
+                <a href="/loginform" className="text-blue-500 hover:underline">
+                  Sign in
+                </a>
+              </p>
     </div>
   )
 }

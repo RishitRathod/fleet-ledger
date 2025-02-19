@@ -254,7 +254,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-balance text-muted-foreground">
-                  Login to your Acme Inc account
+                  Login to your account
                 </p>
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -273,7 +273,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
-                    Forgot your password?
+                    {/* Forgot your password? */}
                   </a>
                 </div>
                 <Input
@@ -287,6 +287,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               <Button type="submit" className="w-full">
                 Login
               </Button>
+              <p className="text-center text-sm">
+                Don’t have an account?{" "}
+                <a href="/signup" className="text-blue-500 hover:underline">
+                  Sign up
+                </a>
+              </p>
             </div>
           </form>
         </CardContent>
