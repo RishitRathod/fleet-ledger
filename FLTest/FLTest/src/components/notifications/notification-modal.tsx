@@ -24,12 +24,12 @@ interface Notification {
 export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const email = localStorage.getItem("email");
 
   useEffect(() => {
     const fetchNotifications = async () => {
       setLoading(true);
       try {
-        const email = localStorage.getItem("email");
         if (!email) return;
 
         const response = await fetch("http://localhost:5000/api/invitations/user/notifications", {
@@ -59,7 +59,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
       const response = await fetch(`http://localhost:5000/api/invitations/${action}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ email }),
       });
 
       if (response.ok) {

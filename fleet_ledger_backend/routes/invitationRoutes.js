@@ -1,11 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const { sendInvitation, acceptInvitation, fetchNotifications, rejectInvitation } = require('../controllers/invitationcontroller.js');
-// const authMiddleware = require('../middlewares/authMiddleware.js');  // Ensure admin authentication
+const {
+  sendInvitation,
+  acceptInvitation,
+  rejectInvitation,
+  fetchNotifications,
+} = require('../controllers/invitationcontroller.js');
 
+// Route for admin to send an invitation
 router.post('/admin/invite', sendInvitation);
-router.post('/user/accept-invite', acceptInvitation);
-router.post('/user/reject-invite', rejectInvitation);
+
+// Route for user to accept an invitation
+router.post('/accept', acceptInvitation);
+
+// Route for user to reject an invitation
+router.post('/reject', rejectInvitation);
+
+// Route for user to fetch notifications
 router.post('/user/notifications', fetchNotifications);
 
 module.exports = router;
