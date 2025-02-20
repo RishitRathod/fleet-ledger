@@ -82,11 +82,7 @@ export function NavUser({
                 <DropdownMenuItem onClick={notifications.onOpen}>
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
-                  {notifications.notifications.filter(n => n.status === 'pending').length > 0 && (
-                    <span className="ml-auto bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-                      {notifications.notifications.filter(n => n.status === 'pending').length}
-                    </span>
-                  )}
+                  
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
