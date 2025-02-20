@@ -8,24 +8,22 @@ import {
 } from "./components/ui/breadcrumb";
 import { Separator } from "./components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
-import { AppSidebar } from "./components/app-sidebar";
+import { AppSidebar } from "./components/admin/app-sidebar";
+import { AppSidebarUser } from "./components/user/app-sidebar";
 import { ThemeToggle } from "./components/theme-toggle";
+// import { Breadcrumbs } from "./components/breadcrumbs";
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Dashboard from "./components/dashboard";
+import Dashboard from "./components/admin/dashboard";
+import DashboardUser from "./components/user/dashboard";
 import  LoginPage  from "./login/page";
 import Signup from "./signup";
-import Users from "./components/users";
-// import AccessoriesExpense from "./components/expenses/accessories-expense";
-// import FuelExpense from "./components/expenses/fuel-expense";
-// import ServiceExpense from "./components/expenses/service-expense";
-// import TaxExpense from "./components/expenses/tax-expense";
+import Users from "./components/admin/users";
 import { ExpenseModals } from "./components/expenses/expense-modals";
 import { Toaster } from "@/components/ui/toaster";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const [showSidebar, setShowSidebar] = useState(false);
   const isLoginPage = location.pathname === "/" || location.pathname === "/loginform" || location.pathname === "/signup";
 
   return isLoginPage ? (
@@ -54,6 +52,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </header>
         <main className="p-4">{children}</main>
       </SidebarInset>
+      {/* <Breadcrumbs/> */}
     </SidebarProvider>
   );
 }
@@ -79,6 +78,37 @@ export default function App() {
             <Layout>
               <Users />
             </Layout>
+          }
+        />
+        <Route
+          path="/user-dash"
+          element={
+            <SidebarProvider>
+              <AppSidebarUser />
+              <SidebarInset>
+                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+                  <div className="flex items-center gap-2 px-4">
+                    <SidebarTrigger className="-ml-1" />
+                    <Separator orientation="vertical" className="mr-2 h-4" />
+                    <Breadcrumb>
+                      <BreadcrumbList>
+                        <BreadcrumbItem className="hidden md:block">
+                          <BreadcrumbLink href="/user-dash">Home</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator className="hidden md:block" />
+                        <BreadcrumbItem>
+                          <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                        </BreadcrumbItem>
+                      </BreadcrumbList>
+                    </Breadcrumb>
+                  </div>
+                  <ThemeToggle />
+                </header>
+                <main className="p-4">
+                  <DashboardUser />
+                </main>
+              </SidebarInset>
+            </SidebarProvider>
           }
         />
         
