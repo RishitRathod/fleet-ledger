@@ -38,8 +38,8 @@ import {
 // Sample data
 const data = {
   user: {
-    name: "Admin",
-    email: "admin@example.com",
+    name: "User",
+    email: "user@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
   teams: [

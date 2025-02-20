@@ -36,7 +36,7 @@ export function NavUser({
         onAccept={notifications.onAccept}
         onReject={notifications.onReject}
       />
-      <SidebarMenu className="flex items-center gap-2 px-2">
+      <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -79,10 +79,9 @@ export function NavUser({
                   <BadgeCheck className="mr-2 h-4 w-4" />
                   Account
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={notifications.onOpen}>
+                <DropdownMenuItem>
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
-                  
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
