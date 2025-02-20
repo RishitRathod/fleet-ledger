@@ -26,14 +26,14 @@ import {
 import { NavMain } from "./nav-main";
 import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
-import { TeamSwitcher } from "./team-switcher";
+import { TeamSwitcher } from "../team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
 
 // Sample data
 const data = {
@@ -88,44 +88,13 @@ const data = {
         },
       ],
     },
-    {
-      title: "Users",
-      url: "/users",
-      icon: UsersRound,
-    },
+    
     {
       title: "Import/Export",
       url: "#",
       icon: Import,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      
     },
-    // {
-    //   title: "My Fleet",
-    //   url: "/fleet",
-    //   icon: Car,
-    // },
-    // {
-    //   title: "Add Vehicle",
-    //   url: "/users",
-    //   icon: Frame,
-    // },
    
   ],
   projects: [
@@ -147,14 +116,14 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebarUser({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} vehicleitems={[]} />
         {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
