@@ -1,6 +1,6 @@
 "use client"
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react"
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -14,7 +14,6 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 import { useNotifications } from "@/hooks/use-notifications"
 import { NotificationModal } from "@/components/notifications/notification-modal"
-import { Button } from "@/components/ui/button"
 
 export function NavUser({
   user,
@@ -38,19 +37,6 @@ export function NavUser({
         onReject={notifications.onReject}
       />
       <SidebarMenu className="flex items-center gap-2 px-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          
-        >
-          <Bell className="h-5 w-5" />
-          {notifications.notifications.filter(n => n.status === 'pending').length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">
-              {notifications.notifications.filter(n => n.status === 'pending').length}
-            </span>
-          )}
-        </Button>
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -87,31 +73,25 @@ export function NavUser({
                   </div>
                 </div>
               </DropdownMenuLabel>
-              {/* <DropdownMenuSeparator />
+              <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>
-                  <Sparkles />
-                  Upgrade to Pro
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator /> */}
-              <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <BadgeCheck />
+                  <BadgeCheck className="mr-2 h-4 w-4" />
                   Account
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem>
-                  <CreditCard />
-                  Billing
-                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={notifications.onOpen}>
-                  <Bell />
+                  <Bell className="mr-2 h-4 w-4" />
                   Notifications
+                  {notifications.notifications.filter(n => n.status === 'pending').length > 0 && (
+                    <span className="ml-auto bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                      {notifications.notifications.filter(n => n.status === 'pending').length}
+                    </span>
+                  )}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <LogOut />
+                <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

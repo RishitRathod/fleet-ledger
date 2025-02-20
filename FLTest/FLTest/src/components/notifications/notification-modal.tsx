@@ -11,9 +11,8 @@ import {
 
 interface Notification {
   id: string
-  title: string
-  message: string
-  type: string
+  senderName: string
+  vehicleName: string
   status: 'pending' | 'accepted' | 'rejected'
 }
 
@@ -32,58 +31,56 @@ export function NotificationModal({
   onAccept,
   onReject
 }: NotificationModalProps) {
+  const pendingNotifications = notifications.filter(n => n.status === 'pending')
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-center">Notifications</DialogTitle>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="text-xl font-semibold text-center">Vehicle Invitations</DialogTitle>
           <Button
             variant="ghost"
             className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100"
             onClick={onClose}
           >
-            <X className="h-4 w-4" />
+            {/* <X className="h-4 w-4" /> */}
           </Button>
         </DialogHeader>
         <div className="space-y-4 max-h-[60vh] overflow-y-auto py-4">
-          {notifications.length === 0 ? (
-            <p className="text-center text-muted-foreground">No notifications</p>
+          {pendingNotifications.length === 0 ? (
+            <p className="text-center text-muted-foreground">No pending invitations</p>
           ) : (
-            notifications.map((notification) => (
+            pendingNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className="bg-card rounded-lg p-4 shadow-sm border"
+                className="bg-card rounded-lg p-4 shadow-sm border hover:border-blue-200 transition-colors"
               >
-                <h3 className="font-medium mb-2">{notification.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {notification.message}
-                </p>
-                {notification.status === 'pending' && (
-                  <div className="flex gap-2 justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onReject(notification.id)}
-                      className="hover:bg-destructive hover:text-destructive-foreground"
-                    >
-                      Reject
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => onAccept(notification.id)}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      Accept
-                    </Button>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-lg mb-1">New Vehicle Invitation</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      <span className="font-medium text-foreground">{notification.senderName}</span> has invited you to join their vehicle{' '}
+                      <span className="font-medium text-foreground">{notification.vehicleName}</span>
+                    </p>
                   </div>
-                )}
-                {notification.status !== 'pending' && (
-                  <p className={`text-sm text-right ${
-                    notification.status === 'accepted' ? 'text-green-600' : 'text-destructive'
-                  }`}>
-                    {notification.status.charAt(0).toUpperCase() + notification.status.slice(1)}
-                  </p>
-                )}
+                </div>
+                <div className="flex gap-2 justify-end mt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onReject(notification.id)}
+                    className="hover:bg-destructive hover:text-destructive-foreground"
+                  >
+                    Decline
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => onAccept(notification.id)}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Accept Invitation
+                  </Button>
+                </div>
               </div>
             ))
           )}

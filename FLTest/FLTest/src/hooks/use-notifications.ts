@@ -2,9 +2,8 @@ import { create } from 'zustand'
 
 interface Notification {
   id: string
-  title: string
-  message: string
-  type: string
+  senderName: string
+  vehicleName: string
   status: 'pending' | 'accepted' | 'rejected'
 }
 
@@ -15,12 +14,28 @@ interface NotificationStore {
   onClose: () => void
   onAccept: (id: string) => void
   onReject: (id: string) => void
-  addNotification: (notification: Omit<Notification, 'id' | 'status'>) => void
+  addInvitation: (senderName: string, vehicleName: string) => void
 }
+
+// Demo notification data
+const demoNotifications: Notification[] = [
+  {
+    id: '1',
+    senderName: 'John Smith',
+    vehicleName: 'Toyota Camry 2024',
+    status: 'pending'
+  },
+  {
+    id: '2',
+    senderName: 'Sarah Wilson',
+    vehicleName: 'Honda Civic 2023',
+    status: 'pending'
+  }
+];
 
 export const useNotifications = create<NotificationStore>((set) => ({
   isOpen: false,
-  notifications: [],
+  notifications: demoNotifications, // Using demo data
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),
   onAccept: (id: string) => set((state) => ({
@@ -33,12 +48,13 @@ export const useNotifications = create<NotificationStore>((set) => ({
       notification.id === id ? { ...notification, status: 'rejected' } : notification
     ),
   })),
-  addNotification: (notification) => set((state) => ({
+  addInvitation: (senderName: string, vehicleName: string) => set((state) => ({
     notifications: [
       ...state.notifications,
       {
-        ...notification,
         id: Math.random().toString(36).substr(2, 9),
+        senderName,
+        vehicleName,
         status: 'pending'
       }
     ],
