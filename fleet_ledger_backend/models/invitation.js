@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db'); // ✅ Ensure correct import
+const { sequelize } = require('../config/db'); 
 const User = require('./User'); // Import User model
 
 const Invitation = sequelize.define('Invitation', {
@@ -12,11 +12,13 @@ const Invitation = sequelize.define('Invitation', {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-            model: 'Users', // ✅ Ensure correct table name
+            model: User, // Use direct model reference
             key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
-    email: {
+    name: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -26,6 +28,7 @@ const Invitation = sequelize.define('Invitation', {
     }
 }, {
     timestamps: true,
+    tableName: 'Invitations' // Ensure correct table name
 });
 
 module.exports = Invitation;

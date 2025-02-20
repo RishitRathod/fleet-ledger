@@ -13,6 +13,7 @@ const Group = sequelize.define('Group', {
     }
 }, {
     timestamps: true,
+    tableName: 'Groups' // Ensure correct table name
 });
 
 module.exports = Group;

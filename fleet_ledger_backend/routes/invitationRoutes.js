@@ -4,6 +4,6 @@ const { sendInvitation, acceptInvitation } = require('../controllers/invitationc
 // const authMiddleware = require('../middlewares/authMiddleware.js');  // Ensure admin authentication
 
 router.post('/admin/invite', sendInvitation);
-// router.post('/user/accept-invite/:inviteId', acceptInvitation);
+router.post('/user/accept-invite', acceptInvitation);
 
 module.exports = router;

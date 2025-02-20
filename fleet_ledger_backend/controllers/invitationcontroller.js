@@ -2,10 +2,11 @@ const Invitation = require('../models/invitation');
 const User = require('../models/User');
 const sendMail = require('../config/mailer');
 const bcrypt = require('bcrypt');
+const { where } = require('sequelize');
 
 // Send Invitation
 exports.sendInvitation = async (req, res) => {
-    const { adminemail, email } = req.body;
+    const { adminemail, name } = req.body;
 
     try {
         // Find the admin user by matching email
@@ -20,29 +21,15 @@ exports.sendInvitation = async (req, res) => {
         console.log("Admin ID:", adminId); // Debugging
 
         // Check if the user already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await Invitation.findOne({ name });
 
         // Check if an invitation already exists for this email
-        let invitation = await Invitation.findOne({ email });
+        let invitation = await Invitation.findOne({where: { name: name }});
 
         if (!invitation) {
-            invitation = new Invitation({ adminId, email, status: 'pending' });
+            invitation = new Invitation({ adminId, name, status: 'pending' });
             await invitation.save();
         }
-
-        // Generate invitation link
-        // const inviteLink = `http://localhost:3000/accept-invite/${invitation._id}`;
-
-        // If the user already exists, send a reminder email instead
-        // if (existingUser) {
-        //     sendMail(email, 'Invitation to Join Fleet Ledger', 
-        //         `You are already registered. Click here to accept the invitation: ${inviteLink}`
-        //     );
-        //     return res.status(200).json({ message: 'User already exists. Invitation sent to accept.' });
-        // }
-
-        // Send new invitation email
-        // sendMail(email, 'Join Fleet Ledger', `Click here to accept: ${inviteLink}`);
 
         res.status(200).json({ message: 'Invitation sent successfully.' });
     } catch (err) {
@@ -52,50 +39,29 @@ exports.sendInvitation = async (req, res) => {
 };
 
 
-// Accept Invitation
-// exports.acceptInvitation = async (req, res) => {
-//     try {
-//         const { inviteId } = req.params;
-//         const invite = await Invitation.findById(inviteId);
-        
-//         if (!invite || invite.status !== 'pending') {
-//             return res.status(400).json({ error: 'Invalid or expired invitation' });
-//         }
+exports.acceptInvitation = async (req, res) => {
+    try {
+        const { email } = req.body;  // Extract email correctly
 
-//         // Check if the user already exists
-//         const existingUser = await User.findOne({ email: invite.email });
+        // Find the user by email
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
-//         if (existingUser) {
-//             // Send an email notifying the user to accept the invitation
-//             sendMail(invite.email, 'Invitation to Fleet Ledger', 
-//                 `You have already registered. Click here to accept: http://localhost:3000/accept-invite/${inviteId}`
-//             );
-//             return res.status(200).json({ message: 'Invitation sent. Check your email to accept.' });
-//         }
+        // Find the invitation by user's name
+        const invite = await Invitation.findOne({ where: { name: user.name } });
+        if (!invite || invite.status !== 'pending') {
+            return res.status(400).json({ error: 'Invalid or expired invitation' });
+        }
 
-//         // Generate a random password for the new user
-//         const randomPassword = Math.random().toString(36).slice(-8); // Generates an 8-character password
-//         const hashedPassword = await bcrypt.hash(randomPassword, 10);
+        // Mark invitation as accepted
+        invite.status = 'accepted';
+        await invite.save();
 
-//         // Create new user
-//         const newUser = new User({
-//             email: invite.email,
-//             password: hashedPassword,
-//             role: 'user',
-//             group: invite.adminId
-//         });
-//         await newUser.save();
-
-//         // Mark invitation as accepted
-//         invite.status = 'accepted';
-//         await invite.save();
-
-//         // Send Confirmation Email with Login Credentials
-//         sendMail(invite.email, 'Your Fleet Ledger Account', `Your password: ${randomPassword}`);
-
-//         res.status(200).json({ message: 'User added successfully. Check email for login details.' });
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).json({ error: 'Error accepting invitation' });
-//     }
-// };
+        res.status(200).json({ message: 'User added successfully. Check email for login details.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error accepting invitation' });
+    }
+};

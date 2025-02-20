@@ -50,7 +50,6 @@ const signup = async (req, res) => {
 module.exports = { signup };
 
 
-
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -61,12 +60,22 @@ const login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: user.id, role: user.role }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '1h' }
+        );
 
-        res.status(200).json({ message: 'Login successful', token, role: user.role });
+        // ✅ Send role along with token
+        res.status(200).json({ 
+            message: 'Login successful', 
+            token, 
+            role: user.role 
+        });
     } catch (error) {
         res.status(500).json({ message: 'Login failed', error: error.message });
     }
 };
+
 
 module.exports = { signup, login };

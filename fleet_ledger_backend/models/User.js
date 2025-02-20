@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db'); // ✅ Ensure correct import
+const { sequelize } = require('../config/db'); 
 const Group = require('./group'); // Import Group model
 
 const User = sequelize.define('User', {
@@ -28,15 +28,17 @@ const User = sequelize.define('User', {
     },
     groupId: {
         type: DataTypes.UUID,
+        allowNull: true,
         references: {
-            model: 'Groups', // ✅ Ensure correct table name
+            model: Group,  // Use direct model reference
             key: 'id'
         },
-        allowNull: true,
-        defaultValue: null
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
     }
 }, {
     timestamps: true,
+    tableName: 'Users' // Ensure correct table name
 });
 
 module.exports = User;

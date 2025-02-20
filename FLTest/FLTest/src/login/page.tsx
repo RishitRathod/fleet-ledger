@@ -1,3 +1,4 @@
+import React from 'react';
 import { LoginForm } from "../login";
 export default function LoginPage() {
   return (
