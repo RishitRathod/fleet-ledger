@@ -3,6 +3,6 @@ const { getUsersUnderAdmin } = require('../controllers/usercontroller.js');
 // const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.get('/admin/users', getUsersUnderAdmin);
+router.post('/admin/users', getUsersUnderAdmin);
 
 module.exports = router;

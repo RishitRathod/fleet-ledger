@@ -16,25 +16,13 @@ const signup = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        let groupId = null;
 
-        // If the user is an admin, create a group
-        if (role === 'admin') {
-            const newGroup = await Group.create({ name: `${name}'s Group` }, { transaction });
-            console.log("New Group Created:", newGroup); // Debugging
-            groupId = newGroup.id; // Assign groupId from created group
-        }
-
-        console.log("groupId before user creation:", groupId);
-
-        // Create the user with the assigned groupId
         const newUser = await User.create({
             name,
             email,
             password: hashedPassword,
             role: role || 'user',
-            groupId: groupId || null, // Ensure null if not admin
-        }, { transaction });
+        });
 
         console.log("New User Created:", newUser); // Debugging
 

@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db'); 
-const Group = require('./group'); // Import Group model
 
 const User = sequelize.define('User', {
     id: {
@@ -25,16 +24,6 @@ const User = sequelize.define('User', {
         type: DataTypes.ENUM('admin', 'user'),
         allowNull: false,
         defaultValue: 'user'
-    },
-    groupId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-            model: Group,  // Use direct model reference
-            key: 'id'
-        },
-        onDelete: 'SET NULL',
-        onUpdate: 'CASCADE'
     }
 }, {
     timestamps: true,

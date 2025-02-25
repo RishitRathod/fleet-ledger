@@ -21,6 +21,7 @@ import Signup from "./signup";
 import Users from "./components/admin/users";
 import { ExpenseModals } from "./components/expenses/expense-modals";
 import { Toaster } from "@/components/ui/toaster";
+import  FleetExpenses  from "./components/admin/myfleet";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -64,6 +65,15 @@ export default function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/loginform" element={<LoginPage />} />
         <Route path="/signup" element={<Signup />} />
+        {/* <Route path="/my-fleet" element={<FleetExpenses />} /> */}
+        <Route
+          path="/my-fleet"
+          element={
+            <Layout>
+              <FleetExpenses />
+            </Layout>
+          }
+        />
         <Route
           path="/dashboard"
           element={

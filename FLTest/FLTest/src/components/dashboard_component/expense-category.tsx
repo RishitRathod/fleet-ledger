@@ -26,7 +26,7 @@ export function ExpenseCategory() {
         {/* Header */}
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-muted-foreground">Expense Categories</h3>
-          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+          <HelpCircle className="h-2 w-4 text-muted-foreground cursor-help" />
         </div>
 
         {/* Progress Bar with Multiple Colors & White Lines */}

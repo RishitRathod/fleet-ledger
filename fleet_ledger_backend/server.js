@@ -6,6 +6,8 @@ const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const invitationRoutes = require('./routes/invitationRoutes');
+const vehicleRoutes = require('./routes/vehicleroutes');
+const groupRoutes = require('./routes/grouproutes');
 
 dotenv.config();
 const app = express();
@@ -27,6 +29,8 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/invitations', invitationRoutes);
+app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/groups', groupRoutes);
 
 // Start Server
 const startServer = async () => {
