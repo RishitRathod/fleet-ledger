@@ -83,7 +83,7 @@ export function MonthlyContribution() {
           display: none;
         }
       `}</style>
-      <Card className="p-4 h-[160px] flex flex-col">
+      <Card className="p-4 h-[180px] flex flex-col">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <div className="flex items-center gap-1">
             <h3 className="text-xs font-medium text-muted-foreground">
@@ -134,7 +134,7 @@ export function MonthlyContribution() {
                 {contributionData[user].map((data) => (
                   <div
                     key={`${user}-${data.day}`}
-                    className={`w-5 h-5 flex items-center justify-center text-[6px] text-white ${getExpenseShade(
+                    className={`w-6 h-6 flex items-center justify-center text-[6px] text-white ${getExpenseShade(
                       data.amount
                     )} rounded-[2px] transition-all cursor-pointer hover:ring-[0.5px] hover:ring-primary group relative`}
                   >
