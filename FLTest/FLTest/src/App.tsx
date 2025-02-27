@@ -22,6 +22,7 @@ import Users from "./components/admin/users";
 import { ExpenseModals } from "./components/expenses/expense-modals";
 import { Toaster } from "@/components/ui/toaster";
 import  FleetExpenses  from "./components/admin/myfleet";
+import FileUpload  from "./components/admin/refuelingimport";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -79,6 +80,14 @@ export default function App() {
           element={
             <Layout>
               <Dashboard />
+            </Layout>
+          }
+        />
+            <Route
+          path="/refuelimport"
+          element={
+            <Layout>
+              <FileUpload />
             </Layout>
           }
         />

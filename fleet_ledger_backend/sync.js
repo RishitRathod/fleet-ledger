@@ -2,6 +2,8 @@ const { sequelize, connectDB } = require('./config/db'); // Import database
 require('./models/User'); // Ensure models are imported before syncing
 require('./models/group');
 require('./models/invitation');
+require('./models/vehicle');
+require('./models/refueling');
 
 async function syncDB() {
     try {

@@ -39,22 +39,23 @@ const Dashboard = () => {
     <div className="min-h-screen w-full p-4 md:p-6 bg-gradient-to-br">
       <div className="max-w-[1800px] mx-auto space-y-4 md:space-y-6 animate-fade-in">
         {/* Expense Categories Card - Full Width */}
-        <div className="w-full">
-          <ExpenseCategory />
-        </div>
 
         {/* Monthly Contribution and Total Vehicle Expenses - Side by Side */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-          {/* Monthly Contribution taking 75% */}
-          <div className="md:col-span-3">
-            <MonthlyContribution />
-          </div>
           {/* Total Vehicle Expenses taking 25% */}
           <div className="md:col-span-1">
             <Totalvehicleexpense />
           </div>
+          {/* Monthly Contribution taking 75% */}
+          
+          <div className="md:col-span-3">
+          <ExpenseCategory />
         </div>
-
+        </div>  
+        {/* <div className="w-full">
+            <MonthlyContribution />
+          </div> */}
+        
         {/* User Pi Dash and Vehicle-wise Expenses */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <UserPiDash />
