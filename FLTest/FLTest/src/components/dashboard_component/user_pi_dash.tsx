@@ -92,7 +92,7 @@ export function UserPiDash() {
         <CardDescription>Total expenses by user</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
-        <div className="h-[300px] w-full">
+        <div className="h-[250px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <ChartTooltip
