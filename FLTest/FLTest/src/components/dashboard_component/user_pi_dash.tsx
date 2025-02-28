@@ -87,7 +87,7 @@ export function UserPiDash() {
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="items-center pb-2">
+      <CardHeader className=" pb-0">
         <CardTitle>User Expense Distribution</CardTitle>
         <CardDescription>Total expenses by user</CardDescription>
       </CardHeader>
@@ -123,9 +123,10 @@ export function UserPiDash() {
                 data={chartData}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={2}
+                innerRadius={80}
+                outerRadius={120}
+                paddingAngle={0}
+                strokeWidth={0}
               >
                 <Label content={<CustomLabel />} position="center" />
               </Pie>
@@ -133,6 +134,14 @@ export function UserPiDash() {
           </ResponsiveContainer>
         </div>
       </CardContent>
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 font-medium leading-none">
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+        </div>
+        <div className="leading-none text-muted-foreground">
+          Showing total expenses for the last 6 months
+        </div>
+      </CardFooter>
     </Card>
   );
 }

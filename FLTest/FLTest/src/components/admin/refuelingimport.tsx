@@ -4,7 +4,7 @@ const FileUpload = () => {
     const [file, setFile] = useState<File | null>(null);
     const [message, setMessage] = useState('');
     const [isUploading, setIsUploading] = useState(false);
-    const groupId = '295098f8-daa2-41ea-91a1-267e6118ba2e';
+    const groupId = '7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6';
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
