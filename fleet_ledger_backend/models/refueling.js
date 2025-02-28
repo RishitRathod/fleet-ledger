@@ -9,10 +9,6 @@ const Refueling = sequelize.define('Refueling', {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
-    date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
     pricePerLiter: {
         type: DataTypes.FLOAT,
         allowNull: false,

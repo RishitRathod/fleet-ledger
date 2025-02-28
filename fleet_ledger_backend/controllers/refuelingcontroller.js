@@ -18,7 +18,7 @@ exports.uploadExcel = async (req, res) => {
         const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
 
         // Ensure "i10 Petrol" sheet exists
-        const sheetName = "i10 Petrol";
+        const sheetName = "Rapid Diesel";
         if (!workbook.SheetNames.includes(sheetName)) {
             return res.status(400).json({ message: "❌ 'i10 Petrol' sheet not found in Excel file." });
         }

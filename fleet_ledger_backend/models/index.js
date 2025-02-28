@@ -11,9 +11,9 @@ const Refueling = require('./refueling'); // Import Refueling model
 Vehicle.hasMany(Group, { foreignKey: 'vehicleId', onDelete: 'CASCADE' });
 Group.belongsTo(Vehicle, { foreignKey: 'vehicleId', onDelete: 'CASCADE' });
 
-// 👥 User & Group Relationship (Each User belongs to a Group)
-// User.belongsTo(Group, { foreignKey: 'groupId', onDelete: 'SET NULL' });
-// Group.hasMany(User, { foreignKey: 'groupId', onDelete: 'CASCADE' });
+// 👥 User & Group Relationship (Each User can have multiple Groups)
+User.hasMany(Group, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Group.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
 
 // ✉️ User & Invitation Relationship (Admin sends Invitations)
 User.hasMany(Invitation, { foreignKey: 'adminId', onDelete: 'CASCADE' });
