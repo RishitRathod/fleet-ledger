@@ -82,5 +82,56 @@ exports.uploadExcel = async (req, res) => {
     } catch (error) {
         console.error("❌ Error processing file:", error);
         return res.status(500).json({ message: "❌ Error processing file.", error: error.message });
+    }  
+};
+
+
+
+exports.addFuelEntry = async (req, res) => {
+    try {
+        const { groupId, fuelType, liters, pricePerLiter, kmStart, kmEnd, location, days } = req.body;
+        
+        // Validate required fields
+        if (!groupId || !fuelType || !liters || !pricePerLiter) {
+            return res.status(400).json({ message: "❌ Missing required fields." });
+        }
+
+        // Ensure groupId is valid
+        const groupExists = await sequelize.models.Group.findByPk(groupId);
+        if (!groupExists) {
+            return res.status(400).json({ message: "❌ Invalid groupId. Group does not exist." });
+        }
+
+        // Calculate derived values
+        const amount = liters * pricePerLiter;
+        const totalRun = kmEnd && kmStart ? kmEnd - kmStart : 0;
+        const average = totalRun > 0 ? (liters / totalRun) * 100 : 0;
+        const avgCostPerKm = totalRun > 0 ? amount / totalRun : 0;
+        const avgDailyExpense = days > 0 ? amount / days : 0;
+        const fuelUtilization = totalRun > 0 ? (liters / totalRun) * 100 : 0;
+
+        // Create fuel entry
+        const fuelEntry = await Refueling.create({
+            groupId,
+            fuelType,
+            liters,
+            pricePerLiter,
+            amount,
+            kmStart: kmStart || 0,
+            kmEnd: kmEnd || 0,
+            totalRun,
+            average,
+            avgCostPerKm,
+            location: location || "Unknown",
+            days: days || 0,
+            avgDailyExpense,
+            fuelUtilization,
+        });
+
+        console.log("✅ Fuel entry recorded:", fuelEntry);
+        return res.status(200).json({ message: "✅ Fuel entry added successfully!", data: fuelEntry });
+    } catch (error) {
+        console.error("❌ Error processing fuel entry:", error);
+        return res.status(500).json({ message: "❌ Error processing fuel entry.", error: error.message });
     }
 };
