@@ -1,8 +1,7 @@
 "use client"
 
-import { ChartArea, FileText, CarFront, PlusCircle, ChevronRight, type LucideIcon } from "lucide-react"
+import { ChartArea, FileText, CarFront, PlusCircle, ChevronRight, LayoutDashboard, type LucideIcon } from "lucide-react"
 import { useExpenseModal } from "../expenses/expense-modals";
-
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
 import {
   SidebarGroup,
@@ -14,7 +13,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "../ui/sidebar"
-
+import { useLocation } from "react-router-dom";
 interface NavMainProps {
   items: {
     title: string
@@ -41,6 +40,8 @@ interface NavMainProps {
 
 export function NavMain({ items, vehicleitems }: NavMainProps) {
   const { onOpen } = useExpenseModal();
+  const location = useLocation();
+  const isOnDashboard = location.pathname === "/dashboard";
 
   const handleExpenseClick = (e: React.MouseEvent<HTMLAnchorElement>, type: string) => {
     e.preventDefault();
@@ -51,7 +52,19 @@ export function NavMain({ items, vehicleitems }: NavMainProps) {
     <SidebarGroup>
       <SidebarGroupLabel>Actions</SidebarGroupLabel>
       <SidebarMenu>
+        {!isOnDashboard && (
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Dashboard" asChild>
+              <a href="/dashboard" className="text-foreground">
+                <LayoutDashboard className="text-foreground" />
+                <span>Dashboard</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
         {items.map((item) => {
+          // Skip the dashboard item if it exists in the array since we're handling it separately
+          if (item.title === "Dashboard") return null;
           // For specific items that shouldn't have dropdowns
           if (item.title === "Import/Export" || item.title === "Users") {
             return (
