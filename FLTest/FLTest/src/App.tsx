@@ -19,7 +19,7 @@ import DashboardUser from "./components/user/dashboard";
 import  LoginPage  from "./login/page";
 import Signup from "./signup";
 import Users from "./components/admin/users";
-import { ExpenseModals } from "./components/expenses/expense-modals";
+import { ExpenseModals } from "./components/expenses";
 import { Toaster } from "@/components/ui/toaster";
 import  FleetExpenses  from "./components/admin/myfleet";
 import FileUpload  from "./components/admin/refuelingimport";

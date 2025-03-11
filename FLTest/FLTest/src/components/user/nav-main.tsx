@@ -1,7 +1,7 @@
 "use client"
 
 import { ChartArea, FileText, CarFront, PlusCircle, ChevronRight, type LucideIcon } from "lucide-react"
-import { useExpenseModal } from "../expenses/expense-modals";
+import { useExpenseModal } from "../expenses";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
 import {
