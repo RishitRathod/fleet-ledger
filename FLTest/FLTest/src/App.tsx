@@ -11,7 +11,6 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "./components/ui/s
 import { AppSidebar } from "./components/admin/app-sidebar";
 import { AppSidebarUser } from "./components/user/app-sidebar";
 import { ThemeToggle } from "./components/theme-toggle";
-// import { Breadcrumbs } from "./components/breadcrumbs";
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Dashboard from "./components/admin/dashboard";
@@ -22,10 +21,10 @@ import Users from "./components/admin/users";
 import { AccessoriesExpenseModal } from "./components/expenses/accessories-expense";
 import { FuelExpenseModal } from "./components/expenses/fuel-expense";
 import { ServiceExpenseModal } from "./components/expenses/service-expense";
-import { TaxExpenseModal } from "./components/expenses/tax-expense";
 import { Toaster } from "@/components/ui/toaster";
 import  FleetExpenses  from "./components/admin/myfleet";
 import FileUpload  from "./components/admin/refuelingimport";
+import  FuelDataTable  from './components/DataTable';
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -69,12 +68,11 @@ export default function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/loginform" element={<LoginPage />} />
         <Route path="/signup" element={<Signup />} />
-        {/* <Route path="/my-fleet" element={<FleetExpenses />} /> */}
         <Route
-          path="/my-fleet"
+          path="/data"
           element={
             <Layout>
-              <FleetExpenses />
+              <FuelDataTable />
             </Layout>
           }
         />
@@ -133,12 +131,11 @@ export default function App() {
             </SidebarProvider>
           }
         />
-        
+       
       </Routes>
       <AccessoriesExpenseModal />
       <FuelExpenseModal />
       <ServiceExpenseModal />
-      <TaxExpenseModal />
       <Toaster />
     </Router>
   );

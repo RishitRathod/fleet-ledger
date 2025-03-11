@@ -1,30 +1,21 @@
-"use client";
-
 import type * as React from "react";
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
-  Car,
   Command,
   Frame,
   GalleryVerticalEnd,
   Map,
   PieChart,
-  Settings2,
-  SquareTerminal,
-  HandCoins,
+  Import,
+  IndianRupee,
   Bolt,
   Fuel,
   Wrench,
-  IndianRupee,
   ReceiptIndianRupee,
   UsersRound,
-  Import
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
-import { NavProjects } from "./nav-projects";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "../team-switcher";
 import {
@@ -89,6 +80,11 @@ const data = {
       ],
     },
     {
+      title: "Data Records",
+      url: "/data",
+      icon: PieChart,
+    },
+    {
       title: "Users",
       url: "/users",
       icon: UsersRound,
@@ -116,17 +112,6 @@ const data = {
         },
       ],
     },
-    // {
-    //   title: "My Fleet",
-    //   url: "/fleet",
-    //   icon: Car,
-    // },
-    // {
-    //   title: "Add Vehicle",
-    //   url: "/users",
-    //   icon: Frame,
-    // },
-   
   ],
   projects: [
     {
@@ -145,6 +130,7 @@ const data = {
       icon: Map,
     },
   ],
+  vehicleitems: [], // Added to fix the NavMainProps requirement
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -154,8 +140,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
+        <NavMain items={data.navMain} vehicleitems={data.vehicleitems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

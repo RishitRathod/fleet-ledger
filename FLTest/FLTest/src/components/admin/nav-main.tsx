@@ -113,7 +113,7 @@ export function NavMain({ items, vehicleitems }: NavMainProps) {
       <SidebarMenu>
       <SidebarMenuItem>
     <SidebarMenuButton tooltip="My Fleet" asChild>
-      <a href="/my-fleet" className="text-foreground">
+      <a href="/data" className="text-foreground">
       <FileText className="text-foreground" />
         <span>Data</span>
       </a>
