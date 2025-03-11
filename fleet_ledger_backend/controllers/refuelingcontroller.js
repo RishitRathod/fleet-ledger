@@ -85,32 +85,49 @@ exports.uploadExcel = async (req, res) => {
     }  
 };
 
-
-
 exports.addFuelEntry = async (req, res) => {
     try {
+        console.log("📥 Received request body:", req.body); // Log the incoming request data
+
         const { groupId, fuelType, liters, pricePerLiter, kmStart, kmEnd, location, days } = req.body;
         
-        // Validate required fields
+        // 1️⃣ Validate required fields
         if (!groupId || !fuelType || !liters || !pricePerLiter) {
+            console.log("❌ Missing required fields:", { groupId, fuelType, liters, pricePerLiter });
             return res.status(400).json({ message: "❌ Missing required fields." });
         }
 
-        // Ensure groupId is valid
+        // 2️⃣ Check if groupId exists
+        console.log("🔍 Checking if group exists for groupId:", groupId);
         const groupExists = await sequelize.models.Group.findByPk(groupId);
         if (!groupExists) {
+            console.log("❌ Invalid groupId. Group does not exist.");
             return res.status(400).json({ message: "❌ Invalid groupId. Group does not exist." });
         }
+        console.log("✅ Group exists:", groupExists.dataValues);
 
-        // Calculate derived values
+        // 3️⃣ Calculate derived values
+        console.log("🧮 Calculating derived values...");
         const amount = liters * pricePerLiter;
-        const totalRun = kmEnd && kmStart ? kmEnd - kmStart : 0;
-        const average = totalRun > 0 ? (liters / totalRun) * 100 : 0;
-        const avgCostPerKm = totalRun > 0 ? amount / totalRun : 0;
-        const avgDailyExpense = days > 0 ? amount / days : 0;
-        const fuelUtilization = totalRun > 0 ? (liters / totalRun) * 100 : 0;
+        console.log("💰 Total amount:", amount);
 
-        // Create fuel entry
+        const totalRun = kmEnd && kmStart ? kmEnd - kmStart : 0;
+        console.log("🚗 Total run:", totalRun);
+
+        const average = totalRun > 0 ? (liters / totalRun) * 100 : 0;
+        console.log("⛽ Average fuel consumption per 100km:", average);
+
+        const avgCostPerKm = totalRun > 0 ? amount / totalRun : 0;
+        console.log("💸 Average cost per km:", avgCostPerKm);
+
+        const avgDailyExpense = days > 0 ? amount / days : 0;
+        console.log("📅 Average daily expense:", avgDailyExpense);
+
+        const fuelUtilization = totalRun > 0 ? (liters / totalRun) * 100 : 0;
+        console.log("⚡ Fuel utilization:", fuelUtilization);
+
+        // 4️⃣ Create fuel entry
+        console.log("📝 Creating fuel entry in the database...");
         const fuelEntry = await Refueling.create({
             groupId,
             fuelType,
@@ -128,8 +145,9 @@ exports.addFuelEntry = async (req, res) => {
             fuelUtilization,
         });
 
-        console.log("✅ Fuel entry recorded:", fuelEntry);
+        console.log("✅ Fuel entry recorded successfully:", fuelEntry.dataValues);
         return res.status(200).json({ message: "✅ Fuel entry added successfully!", data: fuelEntry });
+
     } catch (error) {
         console.error("❌ Error processing fuel entry:", error);
         return res.status(500).json({ message: "❌ Error processing fuel entry.", error: error.message });

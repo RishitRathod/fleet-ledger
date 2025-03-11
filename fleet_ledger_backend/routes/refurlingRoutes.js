@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const refuelingController = require('../controllers/refuelingcontroller');
 
+
 const router = express.Router();
 
 // Ensure 'uploads' directory exists
@@ -30,5 +31,6 @@ const upload = multer({
 
 // File upload route
 router.post('/upload', upload.single('file'), refuelingController.uploadExcel);
+router.post('/addFuelEntry', refuelingController.addFuelEntry);
 
 module.exports = router;

@@ -1,3 +1,7 @@
+/* The commented code block you provided is a JavaScript function named `getUsersWithTotalAmount`. This
+function is designed to fetch users along with their associated groups and refuelings from a
+database, calculate the total amount of refuelings for each user, and then return a JSON response
+containing the processed user data. */
 const { User, Refueling, Group } = require('../models');
 const { Op, Sequelize } = require('sequelize');
 

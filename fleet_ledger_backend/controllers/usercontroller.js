@@ -27,7 +27,7 @@ exports.getUsersUnderAdmin = async (req, res) => {
 
         // Find users under the admin where status is 'accepted'
         const invitations = await Invitation.findAll({
-            where: { adminId: adminId, status: 'accepted' }
+            where: { adminId: adminId}
         });
 
         if (!invitations.length) {
