@@ -11,12 +11,11 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "./components/ui/s
 import { AppSidebar } from "./components/admin/app-sidebar";
 import { AppSidebarUser } from "./components/user/app-sidebar";
 import { ThemeToggle } from "./components/theme-toggle";
-// import { Breadcrumbs } from "./components/breadcrumbs";
-import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Dashboard from "./components/admin/dashboard";
 import DashboardUser from "./components/user/dashboard";
-import  LoginPage  from "./login/page";
+import LoginPage from "./login/page";
 import Signup from "./signup";
 import Users from "./components/admin/users";
 import { AccessoriesExpenseModal } from "./components/expenses/accessories-expense";
@@ -24,8 +23,9 @@ import { FuelExpenseModal } from "./components/expenses/fuel-expense";
 import { ServiceExpenseModal } from "./components/expenses/service-expense";
 import { TaxExpenseModal } from "./components/expenses/tax-expense";
 import { Toaster } from "@/components/ui/toaster";
-import  FleetExpenses  from "./components/admin/myfleet";
-import FileUpload  from "./components/admin/refuelingimport";
+import FleetExpenses from "./components/admin/myfleet";
+import FileUpload from "./components/admin/refuelingimport";
+import TableDemoPage from "./pages/TableDemoPage";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -86,7 +86,7 @@ export default function App() {
             </Layout>
           }
         />
-            <Route
+        <Route
           path="/refuelimport"
           element={
             <Layout>
@@ -99,6 +99,14 @@ export default function App() {
           element={
             <Layout>
               <Users />
+            </Layout>
+          }
+        />
+        <Route
+          path="/data-table"
+          element={
+            <Layout>
+              <TableDemoPage />
             </Layout>
           }
         />
