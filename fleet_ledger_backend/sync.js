@@ -4,6 +4,8 @@ require('./models/group');
 require('./models/invitation');
 require('./models/vehicle');
 require('./models/refueling');
+require('./models/service');
+require('./models/accessories');
 
 async function syncDB() {
     try {

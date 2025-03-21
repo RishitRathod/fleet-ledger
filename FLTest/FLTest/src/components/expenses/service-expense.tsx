@@ -29,63 +29,76 @@ export function ServiceExpenseModal() {
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedVehicle, setSelectedVehicle] = useState<string>("")
   const [selectedServiceType, setSelectedServiceType] = useState<string>("")
+  const [amount, setAmount] = useState<number | "">("")
+  const [description, setDescription] = useState<string>("")
+  const groupId = '7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6';
 
   if (type !== 'service') return null
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    setAmount(isNaN(value) ? "" : value);
+  };
+
   const validateForm = () => {
     if (!selectedVehicle) {
-      toast({
-        title: "Error",
-        description: "Please select a vehicle",
-        variant: "destructive",
-      })
-      return false
+      toast({ title: "Error", description: "Please select a vehicle", variant: "destructive" });
+      return false;
     }
-
-    if (!selectedDate) {
-      toast({
-        title: "Error",
-        description: "Please select a date",
-        variant: "destructive",
-      })
-      return false
-    }
-
+    // if (!selectedDate) {
+    //   toast({ title: "Error", description: "Please select a date", variant: "destructive" });
+    //   return false;
+    // }
     if (!selectedServiceType) {
-      toast({
-        title: "Error",
-        description: "Please select service type",
-        variant: "destructive",
-      })
-      return false
+      toast({ title: "Error", description: "Please select service type", variant: "destructive" });
+      return false;
     }
-
-    return true
-  }
+    if (amount === "" || amount <= 0) {
+      toast({ title: "Error", description: "Please enter a valid amount", variant: "destructive" });
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
-
-    setLoading(true)
+    e.preventDefault();
+    if (!validateForm()) return;
+    setLoading(true);
+  
+    const requestBody = {
+      service_type: selectedServiceType, // Make sure this matches the backend field name
+      amount: amount,
+      description: description,
+      groupId,
+    };
+  
+    console.log("Request Body:", requestBody); // Debugging: Check what's being sent
+  
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast({
-        title: "Success",
-        description: "Service expense added successfully",
-      })
-      onClose()
+      const response = await fetch("http://localhost:5000/api/services/createService", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+  
+      const responseData = await response.json();
+      console.log("Response:", responseData); // Debugging: Check server response
+  
+      if (!response.ok) throw new Error(responseData.error || "Failed to add expense");
+  
+      toast({ title: "Success", description: "Service expense added successfully" });
+      onClose();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add expense",
-        variant: "destructive",
-      })
+      toast({ 
+        title: "Error", 
+        description: error instanceof Error ? error.message : "An unknown error occurred", 
+        variant: "destructive" 
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+  
 
   return (
     <Dialog open={isOpen && type === 'service'} onOpenChange={onClose}>
@@ -112,20 +125,20 @@ export function ServiceExpenseModal() {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label className="text-sm font-medium">Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="h-4 w-4 mr-2" />
                     {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="p-0 w-auto" align="start">
                   <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
                 </PopoverContent>
               </Popover>
-            </div>
+            </div> */}
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Service Type</Label>
@@ -135,7 +148,7 @@ export function ServiceExpenseModal() {
                 </SelectTrigger>
                 <SelectContent>
                   {serviceTypes.map((service) => (
-                    <SelectItem key={service.id} value={service.id.toString()}>
+                    <SelectItem key={service.id} value={service.name}>
                       {service.name}
                     </SelectItem>
                   ))}
@@ -145,21 +158,34 @@ export function ServiceExpenseModal() {
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Amount</Label>
-              <Input type="number" placeholder="Enter amount" className="w-full" min={0} required />
+              <Input
+                type="number"
+                placeholder="Enter amount"
+                className="w-full"
+                min={0}
+                value={amount}
+                onChange={handleAmountChange}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Description</Label>
-              <Textarea placeholder="Enter service details" className="min-h-[100px]" />
+              <Textarea
+                placeholder="Enter service details"
+                className="min-h-[100px]"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Add Expense
           </Button>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

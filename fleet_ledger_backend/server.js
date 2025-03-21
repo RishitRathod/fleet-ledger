@@ -39,6 +39,8 @@ app.use('/api/invitations', require('./routes/invitationRoutes'));
 app.use('/api/vehicles', require('./routes/vehicleroutes'));
 app.use('/api/groups', require('./routes/grouproutes'));
 app.use('/api/refuelings', require('./routes/refurlingRoutes')); 
+app.use('/api/services', require('./routes/serviceRoutes'));
+app.use('/api/Accessories', require('./routes/accessoryRoutes'));
 
 
 

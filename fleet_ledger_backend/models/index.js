@@ -4,7 +4,8 @@ const Group = require('./group'); // Ensure correct capitalization
 const Vehicle = require('./vehicle');
 const Invitation = require('./invitation');
 const Refueling = require('./refueling'); // Import Refueling model
-
+const Service = require('./service'); // Import Service model
+const Accessories = require('./accessories'); // Import Accessories model
 // ✅ Define associations after all models are imported
 
 // 🚗 Vehicle & Group Relationship (Each Group is linked to a Vehicle)
@@ -22,7 +23,15 @@ Invitation.belongsTo(User, { foreignKey: 'adminId', onDelete: 'CASCADE' });
 // ⛽ Vehicle & Refueling Relationship (Each refueling entry belongs to a Vehicle & Group)
 // Vehicle.hasMany(Refueling, { foreignKey: 'vehicleId', onDelete: 'CASCADE' });
 Group.hasMany(Refueling, { foreignKey: 'groupId', onDelete: 'CASCADE' });
-// Refueling.belongsTo(Vehicle, { foreignKey: 'vehicleId', onDelete: 'CASCADE' });
 Refueling.belongsTo(Group, { foreignKey: 'groupId', onDelete: 'CASCADE' });
 
-module.exports = { sequelize, User, Group, Vehicle, Invitation, Refueling };
+
+Group.hasMany(Service, { foreignKey: 'groupId', onDelete: 'CASCADE' });
+Service.belongsTo(Group, { foreignKey: 'groupId', onDelete: 'CASCADE' });
+
+
+Group.hasMany(Accessories, { foreignKey: 'groupId', onDelete: 'CASCADE' });
+Accessories.belongsTo(Group, { foreignKey: 'groupId', onDelete: 'CASCADE' });
+
+
+module.exports = { sequelize, User, Group, Vehicle, Invitation, Refueling, Service, Accessories }; // Export Service model

@@ -44,3 +44,34 @@ exports.getUsersUnderAdmin = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
 };
+
+exports.getUserdata = async (req, res) => {
+    try {
+        const { name } = req.body;
+
+        // Find vehicle by name
+        const vehicle = await Vehicle.findOne({ where: { name } });
+        if (!vehicle) {
+            return res.status(404).json({ success: false, message: "Vehicle not found" });
+        }
+
+        // Find groups associated with the vehicle
+        const groups = await Group.findAll({ where: { vehicleId: vehicle.id } });
+        if (!groups || groups.length === 0) {
+            return res.status(404).json({ success: false, message: "Group not found" });
+        }
+
+        // Extract group IDs
+        const groupIds = groups.map(g => g.id);
+
+        // Find refueling data for these groups
+        const refueling = await Refueling.findAll({ where: { groupId: groupIds } });
+        if (!refueling || refueling.length === 0) {
+            return res.status(404).json({ success: false, message: "Refueling not found" });
+        }
+
+        res.status(200).json({ success: true, data: { vehicle, refueling } });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

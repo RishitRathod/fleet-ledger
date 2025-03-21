@@ -18,6 +18,10 @@ import { ExpenseCategory } from "../dashboard_component/expense-category";
 import { Totalvehicleexpense } from "../dashboard_component/total-vehicle-expense";
 import { MonthlyContribution } from "../dashboard_component/monthlycontribution";
 import { VehiclewiseExpense } from "../dashboard_component/vehicle-wise-expense";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import "@/styles/slider.css";
 
 // Card Components
 const Card = React.forwardRef<
@@ -26,7 +30,7 @@ const Card = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}
+    className={`rounded-lg border bg-card text-card-foreground shadow-sm flex justify-center items-center ${className}`}
     {...props}
   />
 ));
@@ -34,6 +38,34 @@ Card.displayName = "Card";
 
 const Dashboard = () => {
   const { toast } = useToast();
+  const costSliderRef = React.useRef<any>(null);
+  const consumptionSliderRef = React.useRef<any>(null);
+
+  const vehicleCosts = [
+    { vehicle: "Car A", cost: "Rs. 5/km" },
+    { vehicle: "Car B", cost: "Rs. 6/km" },
+    { vehicle: "Car C", cost: "Rs. 4.5/km" },
+    { vehicle: "Car D", cost: "Rs. 5.2/km" },
+  ];
+
+  const vehicleConsumption = [
+    { vehicle: "Car A", consumption: "5 Liters" },
+    { vehicle: "Car B", consumption: "6 Liters" },
+    { vehicle: "Car C", consumption: "4.5 Liters" },
+    { vehicle: "Car D", consumption: "5.2 Liters" },
+  ];
+
+  const sliderSettings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    pauseOnHover: true,
+    arrows: false,
+  };
 
   return (
     <div className="min-h-screen w-full p-4 md:p-6 bg-gradient-to-br">
@@ -60,17 +92,44 @@ const Dashboard = () => {
           </div>
 
           {/* Right Section - Stats Cards Vertical Layout - 25% width */}
-          <div className="md:col-span-2 space-y-4">
-            {['Avg. Daily Expenses', 'Cost per Km', 'Avg. Daily Consumption'].map((stat, index) => (
-              <Card key={index} className="p-4 md:p-6 h-[calc(33.33%-1rem)] flex flex-col justify-center items-center">
-                <div className="space-y-2 text-center w-full">
-                  <h4 className="text-sm font-medium text-muted-foreground">{stat}</h4>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                    {index === 0 ? 'Rs. 200' : index === 1 ? 'Rs. 5' : '5 Liters'}
-                  </p>
-                </div>
-              </Card>
-            ))}
+          <div className="md:col-span-2 space-y-4 flex flex-col h-full">
+            {/* Slider for Cost per Km */}
+            <div className="flex-1 h-[100px]">
+              <Slider ref={costSliderRef} {...sliderSettings} className="h-full">
+                {vehicleCosts.map((item, index) => (
+                  <Card key={index} className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                    <h4 className="text-sm font-medium text-muted-foreground">{item.vehicle} - Cost per Km</h4>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      {item.cost}
+                    </p>
+                  </Card>
+                ))}
+              </Slider>
+            </div>
+
+            {/* Card for Avg. Daily Expenses */}
+            <Card className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+              <h4 className="text-sm font-medium text-muted-foreground">Avg. Daily Expenses</h4>
+              <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                Rs. 200
+              </p>
+            </Card>
+
+            {/* Slider for Avg. Daily Consumption */}
+            <div className="flex-1">
+              <Slider ref={consumptionSliderRef} {...sliderSettings} className="h-full">
+                {vehicleConsumption.map((item, index) => (
+                  <Card key={index} className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                    <h4 className="text-sm font-medium text-muted-foreground">{item.vehicle} - Avg. Daily Consumption</h4>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      {item.consumption}
+                    </p>
+                  </Card>
+                ))}
+              </Slider>
+            </div>
+
+           
           </div>
         </div>
       </div>

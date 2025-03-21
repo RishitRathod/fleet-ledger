@@ -79,11 +79,7 @@ const data = {
         },
       ],
     },
-    {
-      title: "Data Records",
-      url: "/data",
-      icon: PieChart,
-    },
+ 
     {
       title: "Users",
       url: "/users",
