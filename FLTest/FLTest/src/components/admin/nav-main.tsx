@@ -112,16 +112,16 @@ export function NavMain({ items, vehicleitems }: NavMainProps) {
       <SidebarGroupLabel>Statistics</SidebarGroupLabel>
       <SidebarMenu>
       <SidebarMenuItem>
-    <SidebarMenuButton tooltip="My Fleet" asChild>
-      <a href="/data" className="text-foreground">
+    <SidebarMenuButton tooltip="Data Table" asChild>
+      <a href="/data-table" className="text-foreground">
       <FileText className="text-foreground" />
-        <span>Data</span>
+        <span>Data Table</span>
       </a>
     </SidebarMenuButton>
   </SidebarMenuItem>
   <SidebarMenuItem>
-    <SidebarMenuButton tooltip="Add Vehicle" asChild>
-      <a href="/add-vehicle" className="text-foreground">
+    <SidebarMenuButton tooltip="Charts" asChild>
+      <a href="/charts" className="text-foreground">
       <ChartArea className="text-foreground" />
         <span>Charts</span>
       </a>

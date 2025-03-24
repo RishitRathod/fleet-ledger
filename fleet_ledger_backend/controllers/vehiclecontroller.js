@@ -132,8 +132,9 @@ exports.deleteVehicle = async (req, res) => {
 
 exports.getVehicledata = async (req, res) => {
     try {
+        console.log("dsdssdsd");
         const { name } = req.body;
-
+        console.log("dsdssdsd",name);
         // Find vehicle by name
         const vehicle = await Vehicle.findOne({ where: { name } });
         if (!vehicle) {

@@ -153,3 +153,31 @@ exports.addFuelEntry = async (req, res) => {
         return res.status(500).json({ message: "❌ Error processing fuel entry.", error: error.message });
     }
 };
+
+// Get all refueling entries
+exports.getAllRefuelingEntries = async (req, res) => {
+    try {
+        const { groupId } = req.query;
+        console.log(groupId);
+        if (!groupId) {
+            return res.status(400).json({ message: "❌ Missing groupId in request." });
+        }
+
+        const entries = await Refueling.findAll({
+            where: { groupId },
+            // order: [['date', 'DESC']]
+        });
+
+        return res.status(200).json({
+            success: true,
+            data: entries
+        });
+    } catch (error) {
+        console.error("Error fetching refueling entries:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching refueling entries",
+            error: error.message
+        });
+    }
+};
