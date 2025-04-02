@@ -33,9 +33,9 @@ const chartConfig = vehicleExpenseData.reduce((acc, item, index) => {
   return acc
 }, {} as ChartConfig)
 
-export function VehiclewiseExpense() {
+export function VehiclewiseExpense({ className }: { className?: string }) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Vehicle-wise Expenses</CardTitle>
         <CardDescription>January - June 2024</CardDescription>

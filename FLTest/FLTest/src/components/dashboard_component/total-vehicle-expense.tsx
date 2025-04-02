@@ -4,9 +4,9 @@ import { Card } from "@/components/ui/card";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff79c6", "#ff9f55"];
 
-export function Totalvehicleexpense() {
+export function Totalvehicleexpense({ className }: { className?: string }) {
   return (
-    <Card className="p-4 h-[170px] flex flex-col justify-center">
+    <Card className={`p-4 h-[170px] flex flex-col justify-center ${className}`}>
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-muted-foreground">Total Vehicle Expenses</h3>

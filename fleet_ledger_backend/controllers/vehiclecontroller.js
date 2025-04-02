@@ -129,72 +129,47 @@ exports.deleteVehicle = async (req, res) => {
     }
 };
 
-
+/**
+ * @desc Get vehicle data by name
+ * @route POST /api/vehicles/data
+ */
 exports.getVehicledata = async (req, res) => {
     try {
         const { name } = req.body;
+        console.log("Fetching data for vehicle:", name);
 
         // Find vehicle by name
         const vehicle = await Vehicle.findOne({ where: { name } });
         if (!vehicle) {
             return res.status(404).json({ success: false, message: "Vehicle not found" });
         }
+        console.log("Vehicle found:", vehicle.id);
 
         // Find groups associated with the vehicle
         const groups = await Group.findAll({ where: { vehicleId: vehicle.id } });
         if (!groups || groups.length === 0) {
-            return res.status(404).json({ success: false, message: "Group not found" });
+            return res.status(404).json({ success: false, message: "No group found for this vehicle" });
         }
+        console.log("Groups found:", groups.map(g => g.id));
 
         // Extract group IDs
         const groupIds = groups.map(g => g.id);
 
         // Find refueling data for these groups
-        const refueling = await Refueling.findAll({ where: { groupId: groupIds } });
-        if (!refueling || refueling.length === 0) {
-            return res.status(404).json({ success: false, message: "Refueling not found" });
-        }
+        const refueling = await Refueling.findAll({ 
+            where: { groupId: groupIds },
+            order: [['createdAt', 'DESC']] // Order by creation date, newest first
+        });
 
-        res.status(200).json({ success: true, data: { vehicle, refueling } });
+        // Don't return an error if no refueling data is found
+        const data = {
+            vehicle,
+            refueling: refueling || []
+        };
+
+        res.status(200).json({ success: true, data });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("Error in getVehicledata:", error);
+        res.status(500).json({ success: false, message: "Error fetching vehicle data" });
     }
 };
-
-
-
-
-exports.getVehicledata = async (req, res) => {
-    try {
-        const { name } = req.body;
-
-        // Find vehicle by name
-        const vehicle = await Vehicle.findOne({ where: { name } });
-        if (!vehicle) {
-            return res.status(404).json({ success: false, message: "Vehicle not found" });
-        }
-
-        // Find groups associated with the vehicle
-        const groups = await Group.findAll({ where: { vehicleId: vehicle.id } });
-        if (!groups || groups.length === 0) {
-            return res.status(404).json({ success: false, message: "Group not found" });
-        }
-
-        // Extract group IDs
-        const groupIds = groups.map(g => g.id);
-
-        // Find refueling data for these groups
-        const refueling = await Refueling.findAll({ where: { groupId: groupIds } });
-        if (!refueling || refueling.length === 0) {
-            return res.status(404).json({ success: false, message: "Refueling not found" });
-        }
-
-        res.status(200).json({ success: true, data: { vehicle, refueling } });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-
-
-

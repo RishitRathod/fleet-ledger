@@ -6,6 +6,7 @@ router.post('/createVehicle', vehicleController.createVehicle);
 router.get('/getUsersWithTotalAmount', getUsersWithTotalAmount.getUsersWithTotalAmount)
 router.post('/getVehicleunderadmin', vehicleController.getVehicleunderadmin);
 router.post('/getVehicledata', vehicleController.getVehicledata);
+router.get('/getVehicles', vehicleController.getVehicles);
 // router.put('/:id', vehicleController.updateVehicle);
 // router.delete('/:id', vehicleController.deleteVehicle);
 

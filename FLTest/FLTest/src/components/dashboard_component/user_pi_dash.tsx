@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface UserData {
-  id: string;
   name: string;
   email: string;
   role: string;
@@ -41,7 +40,7 @@ const fetchUserData = async (): Promise<UserData[]> => {
   }
 };
 
-export function UserPiDash() {
+export function UserPiDash({ className }: { className?: string }) {
   const [chartData, setChartData] = React.useState<ChartDataItem[]>([]);
   const [totalExpense, setTotalExpense] = React.useState(0);
 
@@ -86,7 +85,7 @@ export function UserPiDash() {
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className={className}>
       <CardHeader className=" pb-0">
         <CardTitle>User Expense Distribution</CardTitle>
         <CardDescription>Total expenses by user</CardDescription>
