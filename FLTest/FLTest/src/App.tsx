@@ -27,6 +27,10 @@ import FleetExpenses from "./components/admin/myfleet";
 import FileUpload from "./components/admin/refuelingimport";
 import TableDemoPage from "./pages/TableDemoPage";
 import FuelDataTable from "./components/DataTable";
+import { AddVehicleModal } from "./pages/AddVehicleModal";
+import { AssignVehicleModal } from "./pages/AssignVeghicleModal"; // corrected import path
+import ExpenseCharts from "./components/admin/expensecharts";
+import ExpenseComparison from "./pages/ExpenseComparison";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -103,10 +107,26 @@ export default function App() {
           }
         />
         <Route
+          path="/charts"
+          element={
+            <Layout>
+              <ExpenseCharts />
+            </Layout>
+          }
+        />
+        <Route
           path="/data-table"
           element={
             <Layout>
               <TableDemoPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/comparison"
+          element={
+            <Layout>
+              <ExpenseComparison />
             </Layout>
           }
         />

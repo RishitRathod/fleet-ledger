@@ -54,7 +54,7 @@ const TableDemoPage = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log(data);
+        console.log("vehicle", data);
         if (data.success) {
           setVehicles(data.data);
           if (data.data.length > 0) {
@@ -71,8 +71,11 @@ const TableDemoPage = () => {
   }, []);
 
 const fetchRefuelingData = async () => {
-  if (!selectedVehicle) return;
-  console.log("selectedVehicle", selectedVehicle);
+  if (!selectedVehicle) {
+    console.log("No vehicle selected");
+    return;
+  }
+  console.log("Fetching data for vehicle:", selectedVehicle);
   try {
     setLoading(true);
     setError(null);
@@ -84,40 +87,47 @@ const fetchRefuelingData = async () => {
       body: JSON.stringify({ name: selectedVehicle }),
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
     const data = await response.json();
-    console.log("Fetched data:", data);
+    console.log("API Response:", data);
 
-    if (data.success) {
-      // Ensure refueling data exists and is an array before mapping
-      const refuelingData = data.data?.refueling || [];
-      if (!Array.isArray(refuelingData)) {
-        throw new Error("Invalid refueling data format");
-      }
-
-      const transformedData = refuelingData.map((item: any) => ({
-        date: item.date || '',
-        pricePerLiter: Number(item.pricePerLiter) || 0,
-        amount: Number(item.amount) || 0,
-        liters: Number(item.liters) || 0,
-        kmStart: Number(item.kmStart) || 0,
-        kmEnd: Number(item.kmEnd) || 0,
-        totalRun: Number(item.totalRun) || 0,
-        // average: Number(item.average) || 0,
-        // avgCostPerKm: Number(item.avgCostPerKm) || 0,
-        days: Number(item.days) || 0,
-        avgDailyRs: Number(item.avgDailyExpense) || 0, // Correct field name
-      }));
-
-      console.log("Transformed data:", transformedData);
-      setTableData(transformedData);
+    if (!response.ok) {
+      throw new Error(data.message || `HTTP error! Status: ${response.status}`);
     }
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to fetch vehicle data');
+    }
+
+    // Ensure refueling data exists and is an array before mapping
+    const refuelingData = data.data?.refueling || [];
+    if (!Array.isArray(refuelingData)) {
+      throw new Error("Invalid refueling data format");
+    }
+
+    const transformedData = refuelingData.map((item: any) => ({
+      date: item.date || '',
+      pricePerLiter: Number(item.pricePerLiter) || 0,
+      amount: Number(item.amount) || 0,
+      liters: Number(item.liters) || 0,
+      kmStart: Number(item.kmStart) || 0,
+      kmEnd: Number(item.kmEnd) || 0,
+      totalRun: Number(item.totalRun) || 0,
+      average: (item.kmEnd && item.kmStart && item.liters) 
+        ? Number(((item.kmEnd - item.kmStart) / item.liters).toFixed(2)) 
+        : 0,
+      avgCostPerKm: (item.kmEnd && item.kmStart && item.amount) 
+        ? Number((item.amount / (item.kmEnd - item.kmStart)).toFixed(2)) 
+        : 0,
+      days: Number(item.days) || 0,
+      avgDailyRs: Number(item.avgDailyExpense) || 0,
+    }));
+
+    console.log("Transformed data:", transformedData);
+    setTableData(transformedData);
   } catch (error) {
     console.error('Error fetching refueling data:', error);
-    setError('Error fetching refueling data');
+    setError(error instanceof Error ? error.message : 'Error fetching refueling data');
+    setTableData([]); // Clear table data on error
   } finally {
     setLoading(false);
   }
@@ -626,8 +636,9 @@ useEffect(() => {
                   value={selectedVehicle}
                   onChange={handleVehicleChange}
                 >
+                  <option value="">Select a vehicle</option>
                   {vehicles.map(vehicle => (
-                    <option key={vehicle.id} value={vehicle.id}>{vehicle.name}</option>
+                    <option key={vehicle.id} value={vehicle.name}>{vehicle.name}</option>
                   ))}
                 </select>
               </div>

@@ -19,9 +19,9 @@ const expenseCategories = [
   { name: "Insurance", value: 8.0, color: "#FFC107" }, // Yellow
 ];
 
-export function ExpenseCategory() {
+export function ExpenseCategory({ className }: { className?: string }) {
   return (
-    <Card className="p-4 md:p-6 transition-all duration-300">
+    <Card className={`p-4 md:p-6 h-[170px] flex flex-col justify-center ${className}`}>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center gap-2">
