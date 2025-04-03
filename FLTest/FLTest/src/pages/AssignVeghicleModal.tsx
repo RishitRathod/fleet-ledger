@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import Select from 'react-select';
+import Select from "react-select";
 import { Label } from "recharts";
 
 interface UserOption {
@@ -15,15 +20,23 @@ interface VehicleOption {
   label: string;
 }
 
-export function AssignVehicleModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function AssignVehicleModal({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserOption[]>([]);
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserOption | null>(null);
-  const [selectedVehicle, setSelectedVehicle] = useState<VehicleOption | null>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<VehicleOption | null>(
+    null
+  );
 
   // Get user email from localStorage
-  const userEmail = localStorage.getItem('email');
+  const userEmail = localStorage.getItem("email");
 
   useEffect(() => {
     if (userEmail) {
@@ -34,22 +47,25 @@ export function AssignVehicleModal({ open, onOpenChange }: { open: boolean; onOp
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/admin/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: userEmail }),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/users/admin/users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: userEmail }),
+        }
+      );
 
       const data = await response.json();
-      
+
       if (data.success && data.users) {
         const userOptions = data.users.map((user: any) => ({
           value: user.id,
-          label: user.name
+          label: user.name,
         }));
-        
+
         setUsers(userOptions);
         console.log("Users fetched:", userOptions);
       } else {
@@ -62,25 +78,28 @@ export function AssignVehicleModal({ open, onOpenChange }: { open: boolean; onOp
 
   const fetchVehicles = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/vehicles/getVehicleunderadmin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: userEmail }),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/vehicles/getVehicleunderadmin`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: userEmail }),
+        }
+      );
 
       const data = await response.json();
       console.log("Vehicle response:", data);
-      
+
       if (data.success && data.vehicles) {
         const vehicleOptions = data.vehicles.map((vehicle: any) => ({
           value: vehicle.id,
-          label: vehicle.name
+          label: vehicle.name,
         }));
-        
+
         setVehicles(vehicleOptions);
-        console.log("Vehicles fetched:", vehicleOptions);
+        console.log("Vehicles fetched1:", vehicleOptions);
       } else {
         console.error("Invalid response format:", data);
       }
@@ -98,16 +117,19 @@ export function AssignVehicleModal({ open, onOpenChange }: { open: boolean; onOp
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/groups/assignUserToVehicle", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: selectedUser.label, // Send the user's name
-          vehicleName: selectedVehicle.label // Send the vehicle's name
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/groups/assignUserToVehicle",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: selectedUser.label, // Send the user's name
+            vehicleName: selectedVehicle.label, // Send the vehicle's name
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to assign vehicle to user");
@@ -132,7 +154,9 @@ export function AssignVehicleModal({ open, onOpenChange }: { open: boolean; onOp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold">Assign Vehicle to User</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">
+            Assign Vehicle to User
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -147,16 +171,18 @@ export function AssignVehicleModal({ open, onOpenChange }: { open: boolean; onOp
               isClearable
               isLoading={!users.length}
               styles={{
-                control: (styles) => ({ ...styles, color: 'black' }),
-                option: (styles) => ({ ...styles, color: 'black' }),
-                menu: (styles) => ({ ...styles, color: 'black' }),
-                singleValue: (styles) => ({ ...styles, color: 'black' })
+                control: (styles) => ({ ...styles, color: "black" }),
+                option: (styles) => ({ ...styles, color: "black" }),
+                menu: (styles) => ({ ...styles, color: "black" }),
+                singleValue: (styles) => ({ ...styles, color: "black" }),
               }}
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-black">Vehicle Name</Label>
+            <Label className="text-sm font-medium text-black">
+              Vehicle Name
+            </Label>
             <Select
               options={vehicles}
               value={selectedVehicle}
@@ -165,10 +191,10 @@ export function AssignVehicleModal({ open, onOpenChange }: { open: boolean; onOp
               className="w-full"
               isClearable
               styles={{
-                control: (styles) => ({ ...styles, color: 'black' }),
-                option: (styles) => ({ ...styles, color: 'black' }),
-                menu: (styles) => ({ ...styles, color: 'black' }),
-                singleValue: (styles) => ({ ...styles, color: 'black' })
+                control: (styles) => ({ ...styles, color: "black" }),
+                option: (styles) => ({ ...styles, color: "black" }),
+                menu: (styles) => ({ ...styles, color: "black" }),
+                singleValue: (styles) => ({ ...styles, color: "black" }),
               }}
             />
           </div>
