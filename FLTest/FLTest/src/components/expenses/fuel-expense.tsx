@@ -16,7 +16,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -41,7 +47,7 @@ export function FuelExpenseModal() {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
-  const userEmail = localStorage.getItem('email');
+  const userEmail = localStorage.getItem("email");
   const [selectedFuelType, setSelectedFuelType] = useState<string>("");
   const [fuelQuantity, setFuelQuantity] = useState<number>(0);
   const [pricePerLiter, setPricePerLiter] = useState<number>(0);
@@ -56,24 +62,27 @@ export function FuelExpenseModal() {
 
   const fetchVehicles = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/vehicles/getVehicleunderadmin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: userEmail }),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/vehicles/getVehicleunderadmin`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: userEmail }),
+        }
+      );
 
       const data = await response.json();
-      
+
       if (data.success && data.vehicles) {
         const vehicleOptions = data.vehicles.map((vehicle: any) => ({
           value: vehicle.id,
-          label: vehicle.name
+          label: vehicle.name,
         }));
-        
+
         setVehicles(vehicleOptions);
-        console.log("Vehicles fetched:", vehicleOptions);
+        console.log("Vehicles fetched2:", vehicleOptions);
       } else {
         console.error("Invalid response format:", data);
       }
@@ -82,7 +91,7 @@ export function FuelExpenseModal() {
       toast({
         title: "Error",
         description: "Failed to fetch vehicles",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
