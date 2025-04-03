@@ -1,201 +1,255 @@
-import React, { useState, useEffect } from 'react';
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { useRefuelingModal } from "./refueling-store";
 import * as XLSX from 'xlsx';
 
-interface Vehicle {
-    id: string;
-    name: string;
+interface VehicleOption {
+  id: string;
+  name: string;
 }
 
-const FileUpload = () => {
-    const [file, setFile] = useState<File | null>(null);
-    const [message, setMessage] = useState('');
-    const [isUploading, setIsUploading] = useState(false);
-    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-    const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-    const [sheetNames, setSheetNames] = useState<string[]>([]);
-    const [selectedSheet, setSelectedSheet] = useState<string>('');
-    const [groupId, setGroupId] = useState<string>('');
+export function RefuelingImportModal() {
+  const { isOpen, onClose, type } = useRefuelingModal();
+  const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
+  const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
+  const [selectedVehicle, setSelectedVehicle] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
+  const [sheetNames, setSheetNames] = useState<string[]>([]);
+  const [selectedSheet, setSelectedSheet] = useState<string>("");
+  const [groupId, setGroupId] = useState<string>("");
+  const userEmail = localStorage.getItem("email");
 
-    useEffect(() => {
-        const fetchVehicles = async () => {
-            try {
-                const email = localStorage.getItem('email');
-                if (!email) {
-                    setMessage('❌ User not authenticated');
-                    return;
-                }
+  useEffect(() => {
+    if (userEmail) {
+      fetchVehicles();
+    }
+  }, [userEmail]);
 
-                const response = await fetch('http://localhost:5000/api/vehicles/getVehicleunderadmin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
+  const fetchVehicles = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/vehicles/getVehicleunderadmin`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: userEmail }),
+        }
+      );
 
-                const data = await response.json();
-                if (data.success && data.vehicles) {
-                    const vehicleOptions = data.vehicles.map((vehicle: any) => ({
-                        id: vehicle.id,
-                        name: vehicle.name
-                    }));
-                    setVehicles(vehicleOptions);
-                } else {
-                    console.error('Invalid response format:', data);
-                    setMessage('❌ Error loading vehicles');
-                }
-            } catch (error) {
-                console.error('Error fetching vehicles:', error);
-                setMessage('❌ Error loading vehicles');
-            }
-        };
+      const data = await response.json();
 
-        fetchVehicles();
-    }, []);
+      if (data.success && data.vehicles) {
+        const vehicleOptions = data.vehicles.map((vehicle: any) => ({
+          id: vehicle.id,
+          name: vehicle.name,
+        }));
 
-    const handleVehicleChange = async (vehicle: Vehicle) => {
-        setSelectedVehicle(vehicle);
+        setVehicles(vehicleOptions);
+      } else {
+        console.error("Invalid response format:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch vehicles",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleVehicleChange = async (vehicleId: string) => {
+    setSelectedVehicle(vehicleId);
+    try {
+      const response = await fetch('http://localhost:5000/api/groups/getGroupByVehicle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vehicleId, email: userEmail })
+      });
+      const data = await response.json();
+      setGroupId(data.groupId);
+    } catch (error) {
+      console.error('Error fetching group ID:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch group information",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
         try {
-            const response = await fetch('http://localhost:5000/api/groups/getGroupByVehicle', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ vehicleId: vehicle.id, email: localStorage.getItem('email') })
-            });
-            const data = await response.json();
-            setGroupId(data.groupId);
+          const data = new Uint8Array(event.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          setSheetNames(workbook.SheetNames);
         } catch (error) {
-            console.error('Error fetching group ID:', error);
-            setMessage('❌ Error fetching group information');
+          console.error('Error reading Excel file:', error);
+          toast({
+            title: "Error",
+            description: "Failed to read Excel file",
+            variant: "destructive",
+          });
         }
-    };
+      };
+      reader.readAsArrayBuffer(selectedFile);
+    }
+  };
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            const selectedFile = e.target.files[0];
-            setFile(selectedFile);
-            setMessage('');
+  const handleUpload = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (!file || !selectedVehicle || !selectedSheet || !groupId) {
+      toast({
+        title: "Error",
+        description: "Please select a file, vehicle, and sheet name first.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-            // Read Excel sheet names
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const data = new Uint8Array(event.target?.result as ArrayBuffer);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    setSheetNames(workbook.SheetNames);
-                } catch (error) {
-                    console.error('Error reading Excel file:', error);
-                    setMessage('❌ Error reading Excel file');
-                }
-            };
-            reader.readAsArrayBuffer(selectedFile);
-        }
-    };
+    setIsUploading(true);
 
-    const handleUpload = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        if (!file || !selectedVehicle || !selectedSheet || !groupId) {
-            setMessage('❌ Please select a file, vehicle, and sheet name first.');
-            return;
-        }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('groupId', groupId);
+    formData.append('sheetName', selectedSheet);
 
-        setIsUploading(true);
-        setMessage('⏳ Uploading...');
+    try {
+      const response = await fetch('http://localhost:5000/api/refuelings/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('groupId', groupId);
-        formData.append('sheetName', selectedSheet);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+      }
 
-        try {
-            const response = await fetch('http://localhost:5000/api/refuelings/upload', {
-                method: 'POST',
-                body: formData,
-            });
+      const result = await response.json();
+      toast({
+        title: "Success",
+        description: "Refueling data uploaded successfully!",
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload refueling data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
-            }
+  if (type !== "refueling") return null;
 
-            const result = await response.json();
-            setMessage('✅ Upload successful!');
-            console.log('Upload successful:', result);
-        } catch (error) {
-            console.error('❌ Error uploading file:', error);
-            setMessage('❌ Upload failed. Please try again.');
-        } finally {
-            setIsUploading(false);
-        }
-    };
+  return (
+    <Dialog open={isOpen && type === "refueling"} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-semibold">
+            Import Refueling Data
+          </DialogTitle>
+        </DialogHeader>
 
-    return (
-        <div className="card p-4">
-            <h2>Upload Refueling Data</h2>
-
-            <div className="mb-3">
-                <label className="block mb-2">Select Vehicle:</label>
-                <select
-                    value={selectedVehicle?.id}
-                    onChange={(e) => {
-                        const selectedId = e.target.value;
-                        const vehicle = vehicles.find(v => v.id === selectedId);
-                        handleVehicleChange(vehicle as Vehicle);
-                    }}
-                    className="w-full p-2 border rounded"
-                    disabled={isUploading}
-                >
-                    <option value="">Select a vehicle</option>
-                    {vehicles.map((vehicle) => (
-                        <option key={vehicle.id} value={vehicle.id}>
-                            {vehicle.name}
-                        </option>
-                    ))}
-                </select>
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Select Vehicle</Label>
+              <Select
+                value={selectedVehicle}
+                onValueChange={handleVehicleChange}
+                disabled={isUploading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select vehicle" />
+                </SelectTrigger>
+                <SelectContent>
+                  {vehicles.map((vehicle) => (
+                    <SelectItem key={vehicle.id} value={vehicle.id}>
+                      {vehicle.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="mb-3">
-                <label className="block mb-2">Upload Excel File:</label>
-                <input 
-                    type="file" 
-                    accept=".xlsx, .xls" 
-                    onChange={handleFileChange} 
-                    disabled={isUploading} 
-                    className="w-full p-2 border rounded"
-                />
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Upload Excel File</Label>
+              <Input
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={handleFileChange}
+                disabled={isUploading}
+                className="w-full"
+              />
             </div>
 
             {sheetNames.length > 0 && (
-                <div className="mb-3">
-                    <label className="block mb-2">Select Sheet:</label>
-                    <select
-                        value={selectedSheet}
-                        onChange={(e) => setSelectedSheet(e.target.value)}
-                        className="w-full p-2 border rounded"
-                        disabled={isUploading}
-                    >
-                        <option value="">Select a sheet</option>
-                        {sheetNames.map((sheet) => (
-                            <option key={sheet} value={sheet}>
-                                {sheet}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Select Sheet</Label>
+                <Select
+                  value={selectedSheet}
+                  onValueChange={setSelectedSheet}
+                  disabled={isUploading}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select sheet" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sheetNames.map((sheet) => (
+                      <SelectItem key={sheet} value={sheet}>
+                        {sheet}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
+          </div>
 
-            <button 
-                onClick={handleUpload} 
-                disabled={isUploading || !selectedVehicle || !file || !selectedSheet}
-                className="bg-blue-500 text-white px-4 py-2 rounded mt-3 hover:bg-blue-600"
-            >
-                {isUploading ? 'Uploading...' : 'Upload'}
-            </button>
+          <Button
+            type="button"
+            onClick={handleUpload}
+            className="w-full"
+            disabled={isUploading || !selectedVehicle || !file || !selectedSheet}
+          >
+            {isUploading ? "Uploading..." : "Import Data"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-            {message && (
-                <div className={`mt-3 p-3 ${message.includes('❌') ? 'bg-red-100' : 'bg-green-100'}`}>
-                    {message}
-                </div>
-            )}
-        </div>
-    );
-};
-
-export default FileUpload;
+export default RefuelingImportModal;

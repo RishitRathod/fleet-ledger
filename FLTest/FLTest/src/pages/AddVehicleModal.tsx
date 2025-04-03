@@ -56,7 +56,7 @@ export function AddVehicleModal({ open, onOpenChange }: { open: boolean; onOpenC
             <Input
               type="text"
               placeholder="Enter vehicle name"
-              className="w-full"
+              className="w-full border border-gray-300 rounded-lg py-2 px-4"
               value={vehicleName}
               onChange={(e) => setVehicleName(e.target.value)}
               required

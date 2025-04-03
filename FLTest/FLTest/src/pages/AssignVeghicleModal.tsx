@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import Select from "react-select";
-import { Label } from "recharts";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface UserOption {
   value: string;
@@ -30,10 +30,8 @@ export function AssignVehicleModal({
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserOption[]>([]);
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
-  const [selectedUser, setSelectedUser] = useState<UserOption | null>(null);
-  const [selectedVehicle, setSelectedVehicle] = useState<VehicleOption | null>(
-    null
-  );
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [selectedVehicle, setSelectedVehicle] = useState<string>("");
 
   // Get user email from localStorage
   const userEmail = localStorage.getItem("email");
@@ -67,7 +65,6 @@ export function AssignVehicleModal({
         }));
 
         setUsers(userOptions);
-        console.log("Users fetched:", userOptions);
       } else {
         console.error("Invalid response format:", data);
       }
@@ -90,7 +87,6 @@ export function AssignVehicleModal({
       );
 
       const data = await response.json();
-      console.log("Vehicle response:", data);
 
       if (data.success && data.vehicles) {
         const vehicleOptions = data.vehicles.map((vehicle: any) => ({
@@ -99,7 +95,6 @@ export function AssignVehicleModal({
         }));
 
         setVehicles(vehicleOptions);
-        console.log("Vehicles fetched1:", vehicleOptions);
       } else {
         console.error("Invalid response format:", data);
       }
@@ -125,8 +120,8 @@ export function AssignVehicleModal({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: selectedUser.label, // Send the user's name
-            vehicleName: selectedVehicle.label, // Send the vehicle's name
+            username: selectedUser,
+            vehicleName: selectedVehicle,
           }),
         }
       );
@@ -140,8 +135,8 @@ export function AssignVehicleModal({
 
       alert("Success: Vehicle assigned to user successfully");
 
-      setSelectedUser(null);
-      setSelectedVehicle(null);
+      setSelectedUser("");
+      setSelectedVehicle("");
       onOpenChange(false);
     } catch (error) {
       alert("Error: " + (error as Error).message);
@@ -161,42 +156,37 @@ export function AssignVehicleModal({
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-black">Username</Label>
-            <Select
-              options={users}
+            <Label className="text-sm font-medium">Username</Label>
+            <select
               value={selectedUser}
-              onChange={setSelectedUser}
-              placeholder="Select username"
-              className="w-full"
-              isClearable
-              isLoading={!users.length}
-              styles={{
-                control: (styles) => ({ ...styles, color: "black" }),
-                option: (styles) => ({ ...styles, color: "black" }),
-                menu: (styles) => ({ ...styles, color: "black" }),
-                singleValue: (styles) => ({ ...styles, color: "black" }),
-              }}
-            />
+              onChange={(e) => setSelectedUser(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg py-2 px-4"
+              required
+            >
+              <option value="">Select username</option>
+              {users.map((user) => (
+                <option key={user.value} value={user.value}>
+                  {user.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-black">
-              Vehicle Name
-            </Label>
-            <Select
-              options={vehicles}
+            <Label className="text-sm font-medium">Vehicle Name</Label>
+            <select
               value={selectedVehicle}
-              onChange={setSelectedVehicle}
-              placeholder="Select vehicle"
-              className="w-full"
-              isClearable
-              styles={{
-                control: (styles) => ({ ...styles, color: "black" }),
-                option: (styles) => ({ ...styles, color: "black" }),
-                menu: (styles) => ({ ...styles, color: "black" }),
-                singleValue: (styles) => ({ ...styles, color: "black" }),
-              }}
-            />
+              onChange={(e) => setSelectedVehicle(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg py-2 px-4"
+              required
+            >
+              <option value="">Select vehicle</option>
+              {vehicles.map((vehicle) => (
+                <option key={vehicle.value} value={vehicle.value}>
+                  {vehicle.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>

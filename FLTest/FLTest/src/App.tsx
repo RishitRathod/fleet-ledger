@@ -33,11 +33,10 @@ import { ServiceExpenseModal } from "./components/expenses/service-expense";
 import { TaxExpenseModal } from "./components/expenses/tax-expense";
 import { Toaster } from "@/components/ui/toaster";
 import FleetExpenses from "./components/admin/myfleet";
-import FileUpload from "./components/admin/refuelingimport";
 import TableDemoPage from "./pages/TableDemoPage";
 import FuelDataTable from "./components/DataTable";
 import { AddVehicleModal } from "./pages/AddVehicleModal";
-import { AssignVehicleModal } from "./pages/AssignVeghicleModal"; // corrected import path
+import { AssignVehicleModal } from "./pages/AssignVeghicleModal"; 
 import ExpenseCharts from "./components/admin/expensecharts";
 import ExpenseComparison from "./pages/ExpenseComparison";
 import MyFleet from "./pages/MyFleet";
@@ -110,14 +109,6 @@ export default function App() {
           element={
             <Layout>
               <MyFleet />
-            </Layout>
-          }
-        />
-        <Route
-          path="/refuelimport"
-          element={
-            <Layout>
-              <FileUpload />
             </Layout>
           }
         />

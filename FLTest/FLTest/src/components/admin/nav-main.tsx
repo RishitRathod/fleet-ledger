@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useExpenseModal } from "../expenses/expense-store";
+import { useRefuelingModal } from "./refueling-store";
 import {
   Collapsible,
   CollapsibleContent,
@@ -30,6 +31,7 @@ import { useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AddVehicleModal } from "@/pages/AddVehicleModal";
 import { AssignVehicleModal } from "@/pages/AssignVeghicleModal";
+import { RefuelingImportModal } from "./refuelingimport";
 
 interface NavMainProps {
   items: {
@@ -47,6 +49,7 @@ interface NavMainProps {
 
 export function NavMain({ items }: NavMainProps) {
   const { onOpen } = useExpenseModal();
+  const { openFromSidebar } = useRefuelingModal();
   const location = useLocation();
   const isOnDashboard = location.pathname === "/dashboard";
 
@@ -79,7 +82,17 @@ export function NavMain({ items }: NavMainProps) {
           // Skip the dashboard item if it exists in the array since we're handling it separately
           if (item.title === "Dashboard") return null;
           // For specific items that shouldn't have dropdowns
-          if (item.title === "Import/Export" || item.title === "Users") {
+          if (item.title === "Import/Export") {
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton tooltip={item.title} onClick={openFromSidebar}>
+                  {item.icon && <item.icon className="text-foreground" />}
+                  <span>{item.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          }
+          if (item.title === "Users") {
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton tooltip={item.title} asChild>
@@ -195,6 +208,9 @@ export function NavMain({ items }: NavMainProps) {
           </SidebarMenuButton>
         </SidebarMenuItem> */}
       </SidebarMenu>
+
+      {/* Refueling Import Modal */}
+      <RefuelingImportModal />
 
       {/* Add Vehicle Modal */}
       <AddVehicleModal open={addVehicleOpen} onOpenChange={setAddVehicleOpen} />
