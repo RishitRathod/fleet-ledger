@@ -59,7 +59,7 @@ const TableDemoPage = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log(data);
+        console.log("vehicle", data);
         if (data.success) {
           setVehicles(data.data);
           if (data.data.length > 0) {
@@ -829,6 +829,7 @@ const TableDemoPage = () => {
                     <option key={vehicle.id} value={vehicle.id}>
                       {vehicle.name}
                     </option>
+
                   ))}
                 </select>
               </div>

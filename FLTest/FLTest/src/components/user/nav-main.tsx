@@ -125,14 +125,7 @@ export function NavMain({ items, vehicleitems }: NavMainProps) {
       </a>
     </SidebarMenuButton>
   </SidebarMenuItem>
-  <SidebarMenuItem>
-    <SidebarMenuButton tooltip="Add Vehicle" asChild>
-      <a href="/add-vehicle" className="text-foreground">
-      <PlusCircle className="text-foreground" />
-        <span>Add Vehicle</span>
-      </a>
-    </SidebarMenuButton>
-  </SidebarMenuItem>
+
       </SidebarMenu>
     </SidebarGroup>
   );
