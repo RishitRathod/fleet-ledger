@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 
 // Configure portfinder
-portfinder.basePort = process.env.PORT || 5000;
+portfinder.basePort = process.env.PORT || 5001;
 
 // Database Connection
 const initializeDatabase = async () => {
@@ -23,7 +23,7 @@ const initializeDatabase = async () => {
 
 // CORS Configuration
 app.use(cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5174',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));

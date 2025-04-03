@@ -26,13 +26,16 @@ const Users = ({ className }: UsersProps) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/users/admin/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: adminemail }),
-      });
+      const response = await fetch(
+        "http://localhost:5001/api/users/admin/users",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: adminemail }),
+        }
+      );
 
       const data = await response.json();
       console.log(data);
@@ -52,13 +55,16 @@ const Users = ({ className }: UsersProps) => {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/api/invitations/admin/invite", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ adminemail, name: username }),
-      });
+      const response = await fetch(
+        "http://localhost:5001/api/invitations/admin/invite",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ adminemail, name: username }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -116,7 +122,10 @@ const Users = ({ className }: UsersProps) => {
                       />
                     </div>
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setShowAddUser(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowAddUser(false)}
+                      >
                         Cancel
                       </Button>
                       <Button variant="outline" onClick={handleAddUser}>

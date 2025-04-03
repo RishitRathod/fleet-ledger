@@ -3,8 +3,19 @@
 import * as React from "react";
 import { TrendingUp } from "lucide-react";
 import { Label, Pie, PieChart, ResponsiveContainer } from "recharts";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 interface UserData {
   id: string;
@@ -30,7 +41,9 @@ interface TooltipProps {
 
 const fetchUserData = async (): Promise<UserData[]> => {
   try {
-    const response = await fetch("http://localhost:5000/api/vehicles/getUsersWithTotalAmount");
+    const response = await fetch(
+      "http://localhost:5001/api/users/getUsersWithTotalAmount"
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch data");
     }
@@ -48,13 +61,13 @@ export function UserPiDash() {
   React.useEffect(() => {
     fetchUserData().then((data) => {
       const colors = [
-        'hsl(var(--chart-1))',
-        'hsl(var(--chart-2))',
-        'hsl(var(--chart-3))',
-        'hsl(var(--chart-4))',
-        'hsl(var(--chart-5))'
+        "hsl(var(--chart-1))",
+        "hsl(var(--chart-2))",
+        "hsl(var(--chart-3))",
+        "hsl(var(--chart-4))",
+        "hsl(var(--chart-5))",
       ];
-      
+
       const formattedData = data
         .filter((user) => user.totalAmount > 0)
         .map((user, index) => ({
@@ -64,13 +77,17 @@ export function UserPiDash() {
         }));
 
       const total = formattedData.reduce((sum, item) => sum + item.value, 0);
-      
+
       setChartData(formattedData);
       setTotalExpense(total);
     });
   }, []);
 
-  const CustomLabel = ({ viewBox }: { viewBox?: { cx: number; cy: number } }) => {
+  const CustomLabel = ({
+    viewBox,
+  }: {
+    viewBox?: { cx: number; cy: number };
+  }) => {
     if (!viewBox) return null;
     const { cx, cy } = viewBox;
     return (
@@ -78,7 +95,13 @@ export function UserPiDash() {
         <tspan x={cx} dy="-1em" fontSize="14" fill="hsl(var(--foreground))">
           Total Expense
         </tspan>
-        <tspan x={cx} dy="1.5em" fontSize="16" fontWeight="bold" fill="hsl(var(--foreground))">
+        <tspan
+          x={cx}
+          dy="1.5em"
+          fontSize="16"
+          fontWeight="bold"
+          fill="hsl(var(--foreground))"
+        >
           ₹{totalExpense.toLocaleString()}
         </tspan>
       </text>
@@ -112,7 +135,9 @@ export function UserPiDash() {
                           <span className="text-[0.70rem] uppercase text-muted-foreground">
                             Amount
                           </span>
-                          <span className="font-bold">₹{data.value.toLocaleString()}</span>
+                          <span className="font-bold">
+                            ₹{data.value.toLocaleString()}
+                          </span>
                         </div>
                       </div>
                     </div>
