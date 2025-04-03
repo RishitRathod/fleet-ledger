@@ -31,7 +31,7 @@ const vehicleExpenseData = [
   { vehicle: "Car A", expense: 52000, fill: "hsl(var(--chart-1))" },
   { vehicle: "Car B", expense: 78000, fill: "hsl(var(--chart-2))" },
   { vehicle: "Truck C", expense: 120000, fill: "hsl(var(--chart-3))" },
-  { vehicle: "Van D", expense: 65001, fill: "hsl(var(--chart-4))" },
+  { vehicle: "Van D", expense: 65000, fill: "hsl(var(--chart-4))" },
   { vehicle: "Bike E", expense: 30000, fill: "hsl(var(--chart-5))" },
 ];
 

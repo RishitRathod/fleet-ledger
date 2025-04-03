@@ -51,7 +51,7 @@ const generateContributionData = (year: string, month: string) => {
   return users.reduce((acc, user) => {
     acc[user] = Array.from({ length: days }, (_, i) => ({
       day: i + 1,
-      amount: Math.floor(Math.random() * 300000) + 50010, // Expense between 50,000 and 350,000
+      amount: Math.floor(Math.random() * 300000) + 50000, // Expense between 50,000 and 350,000
     }));
     return acc;
   }, {} as Record<string, { day: number; amount: number }[]>);
@@ -60,9 +60,9 @@ const generateContributionData = (year: string, month: string) => {
 // Determine Box Darkness Based on Expense
 const getExpenseShade = (amount: number) => {
   if (amount > 300000) return "bg-green-900";
-  if (amount > 250010) return "bg-green-700";
+  if (amount > 250000) return "bg-green-700";
   if (amount > 200000) return "bg-green-500";
-  if (amount > 150010) return "bg-green-300";
+  if (amount > 150000) return "bg-green-300";
   return "bg-green-100";
 };
 

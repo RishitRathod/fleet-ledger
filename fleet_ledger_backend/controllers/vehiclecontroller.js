@@ -46,14 +46,14 @@ exports.getVehicles = async (req, res) => {
 };
 
 /**
- * @desc Get vehicle by ID
- * @route GET /api/vehicles/:id
+ * @desc Get vehicles under admin
+ * @route POST /api/vehicles/getVehicleunderadmin
  */
 exports.getVehicleunderadmin = async (req, res) => {
     try {
         // Extract email from request body
         const { email } = req.body;
-        console.log(`Fetching vehicle for user with email: ${email}`);
+        console.log(`Fetching vehicles for user with email: ${email}`);
         if (!email) {
             return res.status(400).json({ error: 'Email is required' });
         }
@@ -69,29 +69,40 @@ exports.getVehicleunderadmin = async (req, res) => {
 
         console.log(`User found: ${user.id}`);
 
-        // Step 2: Find group by user ID
-        const group = await Group.findOne({ where: { userId: user.id } });
-        if (!group) {
-            console.log(`Group not found for user ID: ${user.id}`);
-            return res.status(404).json({ error: 'Group not found' });
+        // Step 2: Find all groups associated with the user
+        const groups = await Group.findAll({ where: { userId: user.id } });
+        if (!groups || groups.length === 0) {
+            console.log(`No groups found for user ID: ${user.id}`);
+            return res.status(404).json({ error: 'No vehicles found under this admin' });
         }
 
-        console.log(`Group found: ${group.id} with vehicle ID: ${group.vehicleId}`);
+        console.log(`Found ${groups.length} groups for user`);
 
-        // Step 3: Find vehicle by vehicle ID
-        const vehicle = await Vehicle.findOne({ where: { id: group.vehicleId } });
-        if (!vehicle) {
-            console.log(`Vehicle not found for ID: ${group.vehicleId}`);
-            return res.status(404).json({ error: 'Vehicle not found' });
+        // Step 3: Find all vehicles associated with these groups
+        const vehicleIds = groups.map(group => group.vehicleId);
+        const vehicles = await Vehicle.findAll({ where: { id: vehicleIds } });
+        
+        if (!vehicles || vehicles.length === 0) {
+            console.log(`No vehicles found for IDs: ${vehicleIds}`);
+            return res.status(404).json({ error: 'No vehicles found' });
         }
 
-        console.log(`Vehicle found: ${vehicle.id} - ${vehicle.name}`);
+        console.log(`Found ${vehicles.length} vehicles`);
 
-        // Step 4: Respond with the vehicle data
-        res.status(200).json({ success: true, data: vehicle });
+        // Return success response with vehicles array
+        res.status(200).json({
+            success: true,
+            vehicles: vehicles.map(vehicle => ({
+                id: vehicle.id,
+                name: vehicle.name,
+                createdAt: vehicle.createdAt,
+                updatedAt: vehicle.updatedAt
+            }))
+        });
+
     } catch (error) {
-        console.error('Error fetching vehicle:', error.message);
-        res.status(500).json({ success: false, message: 'Internal Server Error' });
+        console.error('Error in getVehicleunderadmin:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 

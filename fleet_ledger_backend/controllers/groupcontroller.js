@@ -8,7 +8,7 @@ const { User, Vehicle, Group } = require('../models'); // Ensure correct imports
 exports.assignUserToVehicle = async (req, res) => {
     try {
         const { username, vehicleName } = req.body;
-
+console.log("Assigning user to vehicle:", username, vehicleName);
         // Find user by username
         const user = await User.findOne({ where: { name: username } });
         if (!user) {

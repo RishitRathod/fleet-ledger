@@ -103,7 +103,7 @@ export function ServiceExpenseModal() {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/api/services/createService",
+        "http://localhost:5000/api/services/createService",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

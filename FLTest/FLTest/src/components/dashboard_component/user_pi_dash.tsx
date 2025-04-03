@@ -41,7 +41,7 @@ interface TooltipProps {
 const fetchUserData = async (): Promise<UserData[]> => {
   try {
     const response = await fetch(
-      "http://localhost:5001/api/users/getUsersWithTotalAmount"
+      "http://localhost:5000/api/users/getUsersWithTotalAmount"
     );
     if (!response.ok) {
       throw new Error("Failed to fetch data");
