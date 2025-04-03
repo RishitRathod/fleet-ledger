@@ -9,18 +9,17 @@ exports.uploadExcel = async (req, res) => {
 
         console.log("✅ File received:", req.file.originalname);
 
-        const { groupId } = req.body;
-        if (!groupId) {
-            return res.status(400).json({ message: "❌ Missing groupId in request." });
+        const { groupId, sheetName } = req.body;
+        if (!groupId || !sheetName) {
+            return res.status(400).json({ message: "❌ Missing groupId or sheetName in request." });
         }
 
         // Read Excel file from buffer
         const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
 
-        // Ensure "i10 Petrol" sheet exists
-        const sheetName = "Rapid Diesel";
+        // Ensure the selected sheet exists
         if (!workbook.SheetNames.includes(sheetName)) {
-            return res.status(400).json({ message: "❌ 'i10 Petrol' sheet not found in Excel file." });
+            return res.status(400).json({ message: `❌ Sheet '${sheetName}' not found in Excel file.` });
         }
 
         const worksheet = workbook.Sheets[sheetName];
