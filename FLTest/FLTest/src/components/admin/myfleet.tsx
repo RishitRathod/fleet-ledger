@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
@@ -30,7 +25,7 @@ import {
 
 const expenseData = {
   car: {
-    totalExpense: 5000,
+    totalExpense: 5001,
     totalFuel: 200,
     userExpenses: [
       { name: "User1", value: 2000 },
@@ -80,10 +75,16 @@ const FleetExpenses = () => {
     <div className="container mx-auto p-6 space-y-6">
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">Vehicle Expenses Overview</CardTitle>
+          <CardTitle className="text-xl font-semibold">
+            Vehicle Expenses Overview
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="car" className="w-full" onValueChange={setSelectedVehicle}>
+          <Tabs
+            defaultValue="car"
+            className="w-full"
+            onValueChange={setSelectedVehicle}
+          >
             <TabsList className="mb-6">
               <TabsTrigger value="car">Car</TabsTrigger>
               <TabsTrigger value="scooter">Scooter</TabsTrigger>
@@ -93,7 +94,10 @@ const FleetExpenses = () => {
             {Object.keys(expenseData).map((vehicle) => (
               <TabsContent key={vehicle} value={vehicle} className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <Select defaultValue={expenseType} onValueChange={setExpenseType}>
+                  <Select
+                    defaultValue={expenseType}
+                    onValueChange={setExpenseType}
+                  >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Select expense type" />
                     </SelectTrigger>
@@ -115,18 +119,27 @@ const FleetExpenses = () => {
                     </CardHeader>
                     <CardContent>
                       <p className="text-3xl font-bold text-primary">
-                        Rs. {expenseData[vehicle as keyof typeof expenseData].totalExpense.toLocaleString()}
+                        Rs.{" "}
+                        {expenseData[
+                          vehicle as keyof typeof expenseData
+                        ].totalExpense.toLocaleString()}
                       </p>
                     </CardContent>
                   </Card>
 
                   <Card className="shadow-md hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle className="text-lg">Total Fuel Consumption</CardTitle>
+                      <CardTitle className="text-lg">
+                        Total Fuel Consumption
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-3xl font-bold text-primary">
-                        {expenseData[vehicle as keyof typeof expenseData].totalFuel} Ltr.
+                        {
+                          expenseData[vehicle as keyof typeof expenseData]
+                            .totalFuel
+                        }{" "}
+                        Ltr.
                       </p>
                     </CardContent>
                   </Card>
@@ -135,13 +148,18 @@ const FleetExpenses = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card className="shadow-md hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle className="text-lg">User-wise Expense Distribution</CardTitle>
+                      <CardTitle className="text-lg">
+                        User-wise Expense Distribution
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
-                            data={expenseData[vehicle as keyof typeof expenseData].userExpenses}
+                            data={
+                              expenseData[vehicle as keyof typeof expenseData]
+                                .userExpenses
+                            }
                             cx="50%"
                             cy="50%"
                             innerRadius={70}
@@ -150,8 +168,13 @@ const FleetExpenses = () => {
                             paddingAngle={5}
                             dataKey="value"
                           >
-                            {expenseData[vehicle as keyof typeof expenseData].userExpenses.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            {expenseData[
+                              vehicle as keyof typeof expenseData
+                            ].userExpenses.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={COLORS[index % COLORS.length]}
+                              />
                             ))}
                           </Pie>
                           <Tooltip />
@@ -162,15 +185,23 @@ const FleetExpenses = () => {
 
                   <Card className="shadow-md hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle className="text-lg">Monthly Expense Trend</CardTitle>
+                      <CardTitle className="text-lg">
+                        Monthly Expense Trend
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart
-                          data={expenseData[vehicle as keyof typeof expenseData].timelyData}
+                          data={
+                            expenseData[vehicle as keyof typeof expenseData]
+                              .timelyData
+                          }
                           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                         >
-                          <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            className="opacity-50"
+                          />
                           <XAxis
                             dataKey="date"
                             tickFormatter={(str) => {

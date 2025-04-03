@@ -32,11 +32,14 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
       try {
         if (!email) return;
 
-        const response = await fetch("http://localhost:5000/api/invitations/user/notifications", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
+        const response = await fetch(
+          "http://localhost:5001/api/invitations/user/notifications",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          }
+        );
 
         const data = await response.json();
         if (response.ok && Array.isArray(data.invitations)) {
@@ -56,11 +59,14 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
 
   const handleAction = async (id: string, action: "accept" | "reject") => {
     try {
-      const response = await fetch(`http://localhost:5000/api/invitations/${action}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        `http://localhost:5001/api/invitations/${action}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       if (response.ok) {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -90,7 +96,9 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
           {loading ? (
             <p className="text-center text-muted-foreground">Loading...</p>
           ) : notifications.length === 0 ? (
-            <p className="text-center text-muted-foreground">No pending invitations</p>
+            <p className="text-center text-muted-foreground">
+              No pending invitations
+            </p>
           ) : (
             notifications.map((notification) => (
               <div
@@ -101,8 +109,14 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
                   <div className="flex-1">
                     <h3 className="font-medium text-lg mb-1">New Invitation</h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      <span className="font-medium text-foreground">{notification.adminName}</span> has invited{" "}
-                      <span className="font-medium text-foreground">{notification.name}</span> to join.
+                      <span className="font-medium text-foreground">
+                        {notification.adminName}
+                      </span>{" "}
+                      has invited{" "}
+                      <span className="font-medium text-foreground">
+                        {notification.name}
+                      </span>{" "}
+                      to join.
                     </p>
                   </div>
                 </div>

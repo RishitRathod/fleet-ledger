@@ -5,9 +5,57 @@ containing the processed user data. */
 const { User, Refueling, Group, Service, Accessories } = require('../models');
 const { Op, Sequelize } = require('sequelize');
 
+// const getUsersWithTotalAmount = async (req, res) => {
+//     try {
+//         // First, let's get all users with their groups and refuelings
+//         const users = await User.findAll({
+//             include: [{
+//                 model: Group,
+//                 include: [{
+//                     model: Refueling,
+//                     attributes: ['amount']
+//                 }]
+//             }],
+//             order: [['name', 'ASC']]
+//         });
+
+//         // Transform the data to calculate totals
+//         const userData = users.map(user => {
+//             const totalAmount = user.Groups.reduce((sum, group) => {
+//                 const groupTotal = group.Refuelings.reduce((groupSum, refueling) => {
+//                     return groupSum + (refueling.amount || 0);
+//                 }, 0);
+//                 return sum + groupTotal;
+//             }, 0);
+
+//             return {
+//                 id: user.id,
+//                 name: user.name,
+//                 email: user.email,
+//                 role: user.role,
+//                 totalAmount: totalAmount || 0,
+//                 // Debug info
+//                 groupCount: user.Groups.length,
+//                 groups: user.Groups.map(g => ({
+//                     id: g.id,
+//                     refuelingCount: g.Refuelings.length,
+//                     refuelingTotal: g.Refuelings.reduce((sum, r) => sum + (r.amount || 0), 0)
+//                 }))
+//             };
+//         });
+
+//         res.json(userData);
+//     } catch (error) {
+//         console.error('Error fetching users with total amount:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
+
+
 const getUsersWithTotalAmount = async (req, res) => {
     try {
-        // First, let's get all users with their groups and all expense types
+        // Fetch users and their related groups and refuelings in a single query
+
         const users = await User.findAll({
             include: [{
                 model: Group,
@@ -29,6 +77,7 @@ const getUsersWithTotalAmount = async (req, res) => {
             order: [['name', 'ASC']]
         });
 
+
         // Process the data to calculate totals
         const userData = users.map(user => {
             // Calculate totals for each expense type
@@ -47,9 +96,11 @@ const getUsersWithTotalAmount = async (req, res) => {
             // Calculate grand total
             const totalAmount = refuelingTotal + serviceTotal + accessoryTotal;
 
+
             return {
                 // id: user.id,
                 name: user.name,
+
                 // totalAmount,
                 totalAmount,
                 // serviceTotal,
@@ -75,4 +126,19 @@ const getUsersWithTotalAmount = async (req, res) => {
     }
 };
 
+
 module.exports = { getUsersWithTotalAmount };
+
+
+// fetch all uniqe vehicles from vehicel table
+// find all grouid from group table and group them vehicle wise
+// find all the enteries from refueling table and group them vehicle wise where groupid is present
+// calculate the total amount of refueling for each vehicle
+// return the data in a json format
+
+
+
+
+
+
+

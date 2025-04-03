@@ -13,7 +13,7 @@
 //     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
 //       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">Welcome to FleetLedger</h2>
 //       <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300">
-//         Sign-in to FleetLedger 
+//         Sign-in to FleetLedger
 //       </p>
 
 //       <form className="my-8" onSubmit={handleSubmit}>
@@ -75,64 +75,104 @@
 // }) => {
 //   return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>
 // }
-"use client"
-import type React from "react"
-import { useState } from "react"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+"use client";
+import type React from "react";
+import { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export default function SignupFormDemo() {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "" })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+    e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
-      const response = await fetch("http://localhost:5000/auth/signup", {
+      const response = await fetch("http://localhost:5001/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.message || "Signup failed")
-      console.log("Signup Success:", data)
-      alert("Signup successful!")
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Signup failed");
+      console.log("Signup Success:", data);
+      alert("Signup successful!");
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black flex flex-col items-center">
-      <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">Welcome to FleetLedger</h2>
-      <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300 text-center">Sign-in to FleetLedger</p>
+      <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
+        Welcome to FleetLedger
+      </h2>
+      <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300 text-center">
+        Sign-in to FleetLedger
+      </p>
 
-      <form className="my-8 w-full flex flex-col space-y-4" onSubmit={handleSubmit}>
+      <form
+        className="my-8 w-full flex flex-col space-y-4"
+        onSubmit={handleSubmit}
+      >
         <LabelInputContainer>
           <Label htmlFor="name">Name</Label>
-          <Input id="name" placeholder="Enter your name" type="text" value={formData.name} onChange={handleChange} required />
+          <Input
+            id="name"
+            placeholder="Enter your name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
         </LabelInputContainer>
         <LabelInputContainer>
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="Enter your email" type="email" value={formData.email} onChange={handleChange} required />
+          <Input
+            id="email"
+            placeholder="Enter your email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
         </LabelInputContainer>
         <LabelInputContainer>
           <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="" type="password" value={formData.password} onChange={handleChange} required />
+          <Input
+            id="password"
+            placeholder=""
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
         </LabelInputContainer>
         <LabelInputContainer>
           <Label htmlFor="role">Your role</Label>
-          <Input id="role" placeholder="admin/user" type="text" value={formData.role} onChange={handleChange} required />
+          <Input
+            id="role"
+            placeholder="admin/user"
+            type="text"
+            value={formData.role}
+            onChange={handleChange}
+            required
+          />
         </LabelInputContainer>
 
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
@@ -144,21 +184,31 @@ export default function SignupFormDemo() {
         >
           {loading ? "Signing up..." : "Sign up →"}
         </button>
-{/* 
+        {/* 
         <LabelInputContainer className="items-center">
         <Label htmlFor="role">Already have an account?  <a href="/loginform" className="text-blue-500">Login</a></Label> 
       </LabelInputContainer> */}
       </form>
       <p className="text-center text-sm">
-          Already have an account?{" "}
-                <a href="/loginform" className="text-blue-500 hover:underline">
-                  Sign in
-                </a>
-              </p>
+        Already have an account?{" "}
+        <a href="/loginform" className="text-blue-500 hover:underline">
+          Sign in
+        </a>
+      </p>
     </div>
-  )
+  );
 }
 
-const LabelInputContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => {
-  return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>
-}
+const LabelInputContainer = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div className={cn("flex flex-col space-y-2 w-full", className)}>
+      {children}
+    </div>
+  );
+};

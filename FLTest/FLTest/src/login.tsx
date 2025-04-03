@@ -6,7 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,7 +20,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     setError(""); // Clear previous errors
 
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
+      const response = await fetch("http://localhost:5001/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,10 +45,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       console.log("User logged in:", email);
 
       // Navigate to dashboard after successful login
-      if(data.role === "admin"){
+      if (data.role === "admin") {
         navigate("/dashboard");
-      }
-      else if(data.role === "user"){
+      } else if (data.role === "user") {
         navigate("/user-dash");
       }
     } catch (error: any) {
