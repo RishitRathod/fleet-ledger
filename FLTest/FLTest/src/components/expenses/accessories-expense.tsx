@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -13,7 +13,12 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { CalendarIcon, Loader2 } from "lucide-react"
-import { useExpenseModal, vehicles } from "./expense-store"
+import { useExpenseModal } from "./expense-store"
+
+interface VehicleOption {
+  value: string;
+  label: string;
+}
 
 export function AccessoriesExpenseModal() {
   const { isOpen, onClose, type } = useExpenseModal()
@@ -21,6 +26,47 @@ export function AccessoriesExpenseModal() {
   const [loading, setLoading] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedVehicle, setSelectedVehicle] = useState<string>("")
+  const [vehicles, setVehicles] = useState<VehicleOption[]>([])
+  const userEmail = localStorage.getItem('email')
+
+  useEffect(() => {
+    if (userEmail) {
+      fetchVehicles();
+    }
+  }, [userEmail]);
+
+  const fetchVehicles = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/vehicles/getVehicleunderadmin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: userEmail }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.vehicles) {
+        const vehicleOptions = data.vehicles.map((vehicle: any) => ({
+          value: vehicle.id,
+          label: vehicle.name
+        }));
+        
+        setVehicles(vehicleOptions);
+        console.log("Vehicles fetched:", vehicleOptions);
+      } else {
+        console.error("Invalid response format:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch vehicles",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (type !== 'accessories') return null
 
@@ -87,8 +133,8 @@ export function AccessoriesExpenseModal() {
                 </SelectTrigger>
                 <SelectContent>
                   {vehicles.map((vehicle) => (
-                    <SelectItem key={vehicle.id} value={vehicle.id.toString()}>
-                      {vehicle.name}
+                    <SelectItem key={vehicle.value} value={vehicle.value}>
+                      {vehicle.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

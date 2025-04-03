@@ -46,7 +46,7 @@ export function ServiceExpenseModal() {
   const [selectedServiceType, setSelectedServiceType] = useState<string>("");
   const [amount, setAmount] = useState<number | "">("");
   const [description, setDescription] = useState<string>("");
-  const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
+  // const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
 
   if (type !== "service") return null;
 
@@ -96,7 +96,6 @@ export function ServiceExpenseModal() {
       service_type: selectedServiceType, // Make sure this matches the backend field name
       amount: amount,
       description: description,
-      groupId,
     };
 
     console.log("Request Body:", requestBody); // Debugging: Check what's being sent

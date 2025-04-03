@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -16,18 +16,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { useExpenseModal, vehicles } from "./expense-store";
+import { useExpenseModal } from "./expense-store";
+
+interface VehicleOption {
+  value: string;
+  label: string;
+}
 
 const fuelTypes = [
   { id: 1, name: "Petrol" },
@@ -41,11 +40,52 @@ export function FuelExpenseModal() {
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
+  const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
+  const userEmail = localStorage.getItem('email');
   const [selectedFuelType, setSelectedFuelType] = useState<string>("");
   const [fuelQuantity, setFuelQuantity] = useState<number>(0);
   const [pricePerLiter, setPricePerLiter] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
+
+  useEffect(() => {
+    if (userEmail) {
+      fetchVehicles();
+    }
+  }, [userEmail]);
+
+  const fetchVehicles = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/vehicles/getVehicleunderadmin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: userEmail }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.vehicles) {
+        const vehicleOptions = data.vehicles.map((vehicle: any) => ({
+          value: vehicle.id,
+          label: vehicle.name
+        }));
+        
+        setVehicles(vehicleOptions);
+        console.log("Vehicles fetched:", vehicleOptions);
+      } else {
+        console.error("Invalid response format:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch vehicles",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (type !== "fuel") return null;
 
@@ -155,8 +195,8 @@ export function FuelExpenseModal() {
                 </SelectTrigger>
                 <SelectContent>
                   {vehicles.map((vehicle) => (
-                    <SelectItem key={vehicle.id} value={vehicle.id.toString()}>
-                      {vehicle.name}
+                    <SelectItem key={vehicle.value} value={vehicle.value}>
+                      {vehicle.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
