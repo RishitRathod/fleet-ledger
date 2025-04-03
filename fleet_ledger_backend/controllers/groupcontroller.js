@@ -39,6 +39,36 @@ console.log("Assigning user to vehicle:", username, vehicleName);
  * @desc Get all assigned users with their vehicles
  * @route GET /api/groups
  */
+exports.getGroupByVehicle = async (req, res) => {
+    try {
+        const { vehicleId, email } = req.body;
+
+        console.log("Fetching group by vehicle:", vehicleId, email);
+
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        if (!vehicleId) {
+            return res.status(400).json({ error: "Vehicle ID is required" });
+        }
+
+        const group = await Group.findOne({
+            where: { vehicleId, userId: user.id }
+        });
+
+        if (!group) {
+            return res.status(404).json({ error: "Group not found for this vehicle" });
+        }
+
+        res.status(200).json({ groupId: group.id });
+    } catch (error) {
+        console.error("Error fetching group by vehicle:", error);
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
+    }
+};
+
 exports.getUserVehicles = async (req, res) => {
     try {
         const { email } = req.body;
