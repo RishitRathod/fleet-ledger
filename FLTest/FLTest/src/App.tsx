@@ -7,11 +7,20 @@ import {
   BreadcrumbSeparator,
 } from "./components/ui/breadcrumb";
 import { Separator } from "./components/ui/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "./components/ui/sidebar";
 import { AppSidebar } from "./components/admin/app-sidebar";
 import { AppSidebarUser } from "./components/user/app-sidebar";
 import { ThemeToggle } from "./components/theme-toggle";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import { useState, useEffect } from "react";
 import Dashboard from "./components/admin/dashboard";
 import DashboardUser from "./components/user/dashboard";
@@ -31,13 +40,19 @@ import { AddVehicleModal } from "./pages/AddVehicleModal";
 import { AssignVehicleModal } from "./pages/AssignVeghicleModal"; // corrected import path
 import ExpenseCharts from "./components/admin/expensecharts";
 import ExpenseComparison from "./pages/ExpenseComparison";
+import MyFleet from "./pages/MyFleet";
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const isLoginPage = location.pathname === "/" || location.pathname === "/loginform" || location.pathname === "/signup";
+  const isLoginPage =
+    location.pathname === "/" ||
+    location.pathname === "/loginform" ||
+    location.pathname === "/signup";
 
   return isLoginPage ? (
-    <main className="flex items-center justify-center h-screen">{children}</main>
+    <main className="flex items-center justify-center h-screen">
+      {children}
+    </main>
   ) : (
     <SidebarProvider>
       <AppSidebar />
@@ -87,6 +102,14 @@ export default function App() {
           element={
             <Layout>
               <Dashboard />
+            </Layout>
+          }
+        />
+        <Route
+          path="/myfleet"
+          element={
+            <Layout>
+              <MyFleet />
             </Layout>
           }
         />
@@ -143,7 +166,9 @@ export default function App() {
                     <Breadcrumb>
                       <BreadcrumbList>
                         <BreadcrumbItem className="hidden md:block">
-                          <BreadcrumbLink href="/user-dash">Home</BreadcrumbLink>
+                          <BreadcrumbLink href="/user-dash">
+                            Home
+                          </BreadcrumbLink>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator className="hidden md:block" />
                         <BreadcrumbItem>
@@ -161,7 +186,6 @@ export default function App() {
             </SidebarProvider>
           }
         />
-       
       </Routes>
       <AccessoriesExpenseModal />
       <FuelExpenseModal />
