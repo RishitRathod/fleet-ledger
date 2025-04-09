@@ -20,7 +20,7 @@ export function LoginForm({
     setError(""); // Clear previous errors
 
     try {
-      const response = await fetch("http://localhost:5001/auth/login", {
+      const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -53,7 +53,7 @@ const fetchUserData = async (): Promise<UserData[]> => {
   }
 };
 
-export function UserPiDash({ className }: { className?: string }) {
+function ExpensePieChart({ className }: { className?: string }) {
   const [chartData, setChartData] = React.useState<ChartDataItem[]>([]);
   const [totalExpense, setTotalExpense] = React.useState(0);
 
@@ -169,3 +169,6 @@ export function UserPiDash({ className }: { className?: string }) {
     </Card>
   );
 }
+
+
+export default ExpensePieChart;

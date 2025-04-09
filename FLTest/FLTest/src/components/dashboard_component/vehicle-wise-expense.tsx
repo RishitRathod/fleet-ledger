@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { TrendingUp } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -26,31 +25,74 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-// Dummy vehicle expense data
-const vehicleExpenseData = [
-  { vehicle: "Car A", expense: 52000, fill: "hsl(var(--chart-1))" },
-  { vehicle: "Car B", expense: 78000, fill: "hsl(var(--chart-2))" },
-  { vehicle: "Truck C", expense: 120000, fill: "hsl(var(--chart-3))" },
-  { vehicle: "Van D", expense: 65001, fill: "hsl(var(--chart-4))" },
-  { vehicle: "Bike E", expense: 30000, fill: "hsl(var(--chart-5))" },
-];
+interface VehicleData {
+  name: string;
+  totalAmount: number;
+}
 
-const chartConfig = vehicleExpenseData.reduce((acc, item, index) => {
-  acc[item.vehicle] = { label: item.vehicle, color: item.fill };
-  return acc;
-}, {} as ChartConfig);
+interface ChartDataItem {
+  vehicle: string;
+  expense: number;
+  fill: string;
+}
 
-export function VehiclewiseExpense({ className }: { className?: string }) {
+const fetchVehicleData = async (): Promise<VehicleData[]> => {
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/vehicles/getVehiclesWithTotalAmount"
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching vehicle data:", error);
+    return [];
+  }
+};
+
+export function VehiclewiseExpense() {
+  const [chartData, setChartData] = React.useState<ChartDataItem[]>([]);
+  const [totalExpense, setTotalExpense] = React.useState(0);
+
+  React.useEffect(() => {
+    fetchVehicleData().then((data) => {
+      const colors = [
+        "hsl(var(--chart-1))",
+        "hsl(var(--chart-2))",
+        "hsl(var(--chart-3))",
+        "hsl(var(--chart-4))",
+        "hsl(var(--chart-5))",
+      ];
+      const formattedData = data
+        .filter((vehicle) => vehicle.totalAmount > 0)
+        .map((vehicle, index) => ({
+          vehicle: vehicle.name,
+          expense: parseFloat(vehicle.totalAmount.toString()),
+          fill: colors[index % colors.length],
+        }));
+
+      const total = formattedData.reduce((sum, item) => sum + item.expense, 0);
+      setChartData(formattedData);
+      setTotalExpense(total);
+    });
+  }, []);
+
+  const chartConfig = chartData.reduce((acc, item) => {
+    acc[item.vehicle] = { label: item.vehicle, color: item.fill };
+    return acc;
+  }, {} as ChartConfig);
+
   return (
-    <Card className={className}>
+    <Card>
       <CardHeader>
         <CardTitle>Vehicle-wise Expenses</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardDescription>Total expenses by vehicle</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
-            data={vehicleExpenseData}
+            data={chartData}
             width={400}
             height={250}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
@@ -62,7 +104,7 @@ export function VehiclewiseExpense({ className }: { className?: string }) {
               tickMargin={10}
               axisLine={false}
             />
-            <YAxis tickFormatter={(value) => `$${value.toLocaleString()}`} />
+            <YAxis tickFormatter={(value) => `₹${value.toLocaleString()}`} />
             <ChartTooltip
               cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
               content={<ChartTooltipContent hideLabel />}
@@ -71,11 +113,17 @@ export function VehiclewiseExpense({ className }: { className?: string }) {
               dataKey="expense"
               fill="hsl(var(--primary))"
               radius={[8, 8, 0, 0]}
-              shape={(props: any) => (
+              shape={(props: unknown) => (
                 <Rectangle
-                  {...props}
-                  fill={props.fill}
-                  stroke={props.fill}
+                  {...(props as {
+                    fill: string;
+                    x: number;
+                    y: number;
+                    width: number;
+                    height: number;
+                  })}
+                  fill={(props as { fill: string }).fill}
+                  stroke={(props as { fill: string }).fill}
                   strokeWidth={2}
                 />
               )}
@@ -85,10 +133,10 @@ export function VehiclewiseExpense({ className }: { className?: string }) {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Total Expense: ₹{totalExpense.toLocaleString()}
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total expenses for the last 6 months
+          Showing total expenses for all vehicles
         </div>
       </CardFooter>
     </Card>

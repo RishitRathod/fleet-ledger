@@ -45,6 +45,26 @@ exports.getUsersUnderAdmin = async (req, res) => {
     }
 };
 
+exports.getUserByEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.status(200).json({ id: user.id, email: user.email });
+    } catch (error) {
+        console.error("Error fetching user by email:", error);
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
+    }
+};
+
 exports.getUserdata = async (req, res) => {
     try {
         const { name } = req.body;

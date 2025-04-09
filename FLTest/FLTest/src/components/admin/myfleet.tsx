@@ -25,7 +25,7 @@ import {
 
 const expenseData = {
   car: {
-    totalExpense: 5001,
+    totalExpense: 5000,
     totalFuel: 200,
     userExpenses: [
       { name: "User1", value: 2000 },

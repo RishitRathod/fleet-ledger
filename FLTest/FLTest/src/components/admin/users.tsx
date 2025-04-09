@@ -27,7 +27,7 @@ const Users = ({ className }: UsersProps) => {
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5001/api/users/admin/users",
+        "http://localhost:5000/api/users/admin/users",
         {
           method: "POST",
           headers: {
@@ -56,7 +56,7 @@ const Users = ({ className }: UsersProps) => {
     }
     try {
       const response = await fetch(
-        "http://localhost:5001/api/invitations/admin/invite",
+        "http://localhost:5000/api/invitations/admin/invite",
         {
           method: "POST",
           headers: {
