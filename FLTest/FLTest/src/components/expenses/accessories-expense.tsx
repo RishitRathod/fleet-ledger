@@ -183,7 +183,7 @@ export function AccessoriesExpenseModal() {
                   <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={setSelectedDate}
+                    onSelect={(date) => setSelectedDate(date)}
                     initialFocus
                   />
                 </PopoverContent>

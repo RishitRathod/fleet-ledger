@@ -55,10 +55,12 @@ function AreaChart() {
           <RechartsAreaChart
             accessibilityLayer
             data={chartData}
+            height={350}
             margin={{
-              left: 12,
-              right: 12,
-              top: 12,
+              top: 24,
+              right: 24,
+              bottom: 24,
+              left: 24,
             }}
             stackOffset="expand"
           >

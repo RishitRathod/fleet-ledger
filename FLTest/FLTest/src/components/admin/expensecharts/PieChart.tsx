@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { TrendingUp } from "lucide-react"
-import { Label, Pie, PieChart as RechartsPieChart } from "recharts"
+import { PieChart as RechartsPieChart, Pie, Cell, Label, ResponsiveContainer } from "recharts";
 
 import {
   Card,
@@ -11,118 +10,154 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 190, fill: "var(--color-other)" },
-]
+} from "@/components/ui/chart";
 
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig
+interface ChartData {
+  name: string;
+  amount: number;
+}
 
-function PieChart() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
-  }, [])
+interface PieChartProps {
+  chartData: ChartData[];
+}
+
+import { TooltipProps as RechartsTooltipProps } from "recharts";
+
+type CustomTooltipProps = RechartsTooltipProps<number, string>;
+
+function PieChart({ chartData }: PieChartProps) {
+  const total = React.useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.amount, 0)
+  }, [chartData]);
+
+  const CustomLabel = ({
+    viewBox,
+  }: {
+    viewBox?: { cx: number; cy: number };
+  }) => {
+    if (!viewBox) return null;
+    const { cx, cy } = viewBox;
+    return (
+      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
+        <tspan x={cx} dy="-1em" fontSize="14" fill="hsl(var(--foreground))">
+          Total Expense
+        </tspan>
+        <tspan
+          x={cx}
+          dy="1.5em"
+          fontSize="16"
+          fontWeight="bold"
+          fill="hsl(var(--foreground))"
+        >
+          ₹{total.toLocaleString()}
+        </tspan>
+      </text>
+    );
+  };
+
+  const chartConfig = React.useMemo(() => {
+    return chartData.reduce((acc, item, index) => {
+      const colors = [
+        "hsl(var(--chart-1))",
+        "hsl(var(--chart-2))",
+        "hsl(var(--chart-3))",
+        "hsl(var(--chart-4))",
+        "hsl(var(--chart-5))",
+      ];
+      acc[item.name] = {
+        label: item.name,
+        color: colors[index % colors.length],
+      };
+      return acc;
+    }, {} as ChartConfig);
+  }, [chartData])
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+    <Card >
+      <CardHeader >
+        <CardTitle>Expense Distribution</CardTitle>
+        <CardDescription>Total expenses by category</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
-          <RechartsPieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
-              innerRadius={60}
-              strokeWidth={5}
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {totalVisitors.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          Visitors
-                        </tspan>
-                      </text>
-                    )
-                  }
+        <ChartContainer config={chartConfig}>
+          <div className="h-[280px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsPieChart
+                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+              >
+              <ChartTooltip
+                content={({ active, payload }: CustomTooltipProps) => {
+                  if (!active || !payload || payload.length === 0) return null;
+                  const data = payload[0];
+                  return (
+                    <div className="rounded-lg border bg-background p-2 shadow-sm">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-col">
+                          <span className="text-[0.70rem] uppercase text-muted-foreground">
+                            Category
+                          </span>
+                          <span className="font-bold">{data.name}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[0.70rem] uppercase text-muted-foreground">
+                            Amount
+                          </span>
+                          <span className="font-bold">
+                            ₹{data.value?.toLocaleString() ?? 0}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
                 }}
               />
-            </Pie>
-          </RechartsPieChart>
+              <Pie
+                data={chartData}
+                dataKey="amount"
+                nameKey="name"
+                innerRadius={70}
+                outerRadius={100}
+                paddingAngle={0}
+                strokeWidth={0}
+              >
+                <Label content={<CustomLabel />} position="center" />
+                {chartData.map((entry, index) => {
+                  const colors = [
+                    "hsl(var(--chart-1))",
+                    "hsl(var(--chart-2))",
+                    "hsl(var(--chart-3))",
+                    "hsl(var(--chart-4))",
+                    "hsl(var(--chart-5))",
+                  ];
+                  return (
+                    <Cell
+                      key={entry.name}
+                      fill={colors[index % colors.length]}
+                      stroke="transparent"
+                    />
+                  );
+                })}
+              </Pie>
+              </RechartsPieChart>
+            </ResponsiveContainer>
+          </div>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 font-medium leading-none">
+          Total Expense: ₹{total.toLocaleString()}
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+          Showing total expenses by category
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }
 
 export default PieChart;

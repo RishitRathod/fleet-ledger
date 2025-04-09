@@ -1,23 +1,11 @@
 import React, { useState } from "react";
+import ExpenseBarChart from "@/components/charts/ExpenseBarChart";
+import ExpenseLineChart from "@/components/charts/ExpenseLineChart";
+import ExpenseAreaChart from "@/components/charts/ExpenseAreaChart";
+import ExpensePieChart from "@/components/charts/ExpensePieChart";
+import ExpenseRadarChart from "@/components/charts/ExpenseRadarChart"; // Update the import section
 import { 
-  BarChart, 
-  Bar, 
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  PieChart, 
-  Pie, 
-  Cell,
-  Legend
-} from "recharts";
-import { 
-  Card, 
+  Card,
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
@@ -29,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Download, Settings } from "lucide-react";
+import { ArrowLeft, Download, Settings, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // Sample data for users
@@ -67,7 +55,7 @@ const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
 const ExpenseComparison = () => {
   const { toast } = useToast();
   const [comparisonType, setComparisonType] = useState<"user" | "vehicle" | "user-vehicle">("vehicle");
-  const [chartTypes, setChartTypes] = useState<string[]>(["bar"]);
+  const [chartTypes, setChartTypes] = useState<string[]>(["bar", "radar"]);
   const [timeRange, setTimeRange] = useState("month");
   const [expenseTypes, setExpenseTypes] = useState<string[]>(["fuel", "maintenance", "insurance"]);
   const [chartStyle, setChartStyle] = useState("stacked");
@@ -106,11 +94,19 @@ const ExpenseComparison = () => {
   const currentData = getDataBasedOnType();
 
   const handleCheckboxChange = (value: string) => {
-    setChartTypes(prev => 
-      prev.includes(value) 
-        ? prev.filter(t => t !== value)
-        : [...prev, value]
-    );
+    if (value === "radar") {
+      setChartTypes(prev => 
+        prev.includes(value) 
+          ? prev.filter(type => type !== value)
+          : [...prev, value]
+      );
+    } else {
+      setChartTypes(prev => 
+        prev.includes(value) 
+          ? prev.filter(type => type !== value)
+          : [...prev, value]
+      );
+    }
   };
 
   const handleExpenseTypeChange = (value: string) => {
@@ -174,16 +170,23 @@ const ExpenseComparison = () => {
                   Settings
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-[700px] w-[90vw] bg-gray-500 border border-gray-800">
-                <DialogHeader>
-                  <DialogTitle className="text-white">Comparison Settings</DialogTitle>
+              <DialogContent className="sm:max-w-[700px] w-[90vw]">
+                <DialogHeader className="border-b pb-4">
+                  <DialogTitle className="text-xl font-semibold text-center">Comparison Settings</DialogTitle>
+                  <Button
+                    variant="ghost"
+                    className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100"
+                    onClick={() => setIsSettingsOpen(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </DialogHeader>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
                   {/* Left Column */}
                   <div className="space-y-6">
                     {/* Comparison Type */}
                     <div className="space-y-2">
-                      <Label className="text-gray-300">Comparison Type</Label>
+                      <Label className="text-sm font-medium">Comparison Type</Label>
                       <RadioGroup
                         value={comparisonType}
                         onValueChange={(value: any) => setComparisonType(value)}
@@ -206,26 +209,26 @@ const ExpenseComparison = () => {
 
                     {/* Time Range & Chart Style */}
                     <div className="space-y-2">
-                      <Label className="text-gray-300">Time Range</Label>
+                      <Label className="text-sm font-medium">Time Range</Label>
                       <Select value={timeRange} onValueChange={setTimeRange}>
-                        <SelectTrigger className="bg-gray-800 text-gray-300 hover:bg-gray-700">
+                        <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-900 text-gray-300">
-                          <SelectItem value="week" className="text-gray-300">Week</SelectItem>
-                          <SelectItem value="month" className="text-gray-300">Month</SelectItem>
-                          <SelectItem value="year" className="text-gray-300">Year</SelectItem>
+                        <SelectContent>
+                          <SelectItem value="week">Week</SelectItem>
+                          <SelectItem value="month">Month</SelectItem>
+                          <SelectItem value="year">Year</SelectItem>
                         </SelectContent>
                       </Select>
 
                       <Label className="mt-4 block text-gray-300">Chart Style</Label>
                       <Select value={chartStyle} onValueChange={setChartStyle}>
-                        <SelectTrigger className="bg-gray-800 text-gray-300 hover:bg-gray-700">
+                        <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-900 text-gray-300">
-                          <SelectItem value="stacked" className="text-gray-300">Stacked</SelectItem>
-                          <SelectItem value="grouped" className="text-gray-300">Grouped</SelectItem>
+                        <SelectContent>
+                          <SelectItem value="stacked">Stacked</SelectItem>
+                          <SelectItem value="grouped">Grouped</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -235,16 +238,18 @@ const ExpenseComparison = () => {
                   <div className="space-y-6">
                     {/* Chart Types */}
                     <div className="space-y-2">
-                      <Label className="text-gray-300">Chart Types</Label>
+                      <Label className="text-sm font-medium">Chart Types</Label>
                       <div className="space-y-2">
-                        {["bar", "line", "area", "pie"].map((type) => (
+                        {["bar", "line", "area", "pie", "radar"].map((type) => (
                           <div key={type} className="flex items-center space-x-2">
                             <Checkbox
-                              id={type}
+                              id={`chart-${type}`}
                               checked={chartTypes.includes(type)}
                               onCheckedChange={() => handleCheckboxChange(type)}
                             />
-                            <Label htmlFor={type} className="text-gray-300 capitalize">{type} Chart</Label>
+                            <Label htmlFor={`chart-${type}`} className="capitalize">
+                              {type} chart
+                            </Label>
                           </div>
                         ))}
                       </div>
@@ -252,7 +257,7 @@ const ExpenseComparison = () => {
 
                     {/* Expense Types */}
                     <div className="space-y-2">
-                      <Label className="text-gray-300">Expense Types</Label>
+                      <Label className="text-sm font-medium">Expense Types</Label>
                       <div className="space-y-2">
                         {["fuel", "maintenance", "insurance"].map((type) => (
                           <div key={type} className="flex items-center space-x-2">
@@ -271,14 +276,14 @@ const ExpenseComparison = () => {
                     {comparisonType === "user-vehicle" && (
                       <div className="mt-4 space-y-4">
                         <div className="space-y-2">
-                          <Label className="text-gray-300">Select Vehicle</Label>
+                          <Label className="text-sm font-medium">Select Vehicle</Label>
                           <Select value={selectedVehicle} onValueChange={handleVehicleSelectionChange}>
-                            <SelectTrigger className="bg-gray-800 text-gray-300 hover:bg-gray-700">
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select a vehicle" />
                             </SelectTrigger>
-                            <SelectContent className="bg-gray-900 text-gray-300">
+                            <SelectContent>
                               {[...new Set(userVehicleData.map(item => item.vehicle))].map((vehicle) => (
-                                <SelectItem key={vehicle} value={vehicle} className="text-gray-300">{vehicle}</SelectItem>
+                                <SelectItem key={vehicle} value={vehicle}>{vehicle}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -286,7 +291,7 @@ const ExpenseComparison = () => {
 
                         {selectedVehicle && (
                           <div className="space-y-2">
-                            <Label className="text-gray-300">Select Users</Label>
+                            <Label className="text-sm font-medium">Select Users</Label>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                               {usersForSelectedVehicle.map((user) => (
                                 <div key={user} className="flex items-center space-x-2">
@@ -321,115 +326,44 @@ const ExpenseComparison = () => {
         {/* Charts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {chartTypes.includes("bar") && (
-            <Card className="p-4 md:p-6">
-              <CardHeader className="p-0 mb-4">
-                <CardTitle>Bar Chart Comparison</CardTitle>
-              </CardHeader>
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={currentData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    {expenseTypes.map((type, index) => (
-                      <Bar
-                        key={type}
-                        dataKey={type}
-                        fill={COLORS[index % COLORS.length]}
-                        stackId={chartStyle === "stacked" ? "stack" : undefined}
-                      />
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
+            <ExpenseBarChart
+              data={currentData}
+              expenseTypes={expenseTypes}
+              chartStyle={chartStyle}
+              colors={COLORS}
+            />
+          )}
+
+          {chartTypes.includes("radar") && (
+            <ExpenseRadarChart // Update the radar chart usage
+              data={currentData}
+              expenseTypes={expenseTypes}
+              colors={COLORS}
+            />
           )}
 
           {chartTypes.includes("line") && (
-            <Card className="p-4 md:p-6">
-              <CardHeader className="p-0 mb-4">
-                <CardTitle>Line Chart Comparison</CardTitle>
-              </CardHeader>
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={currentData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    {expenseTypes.map((type, index) => (
-                      <Line
-                        key={type}
-                        type="monotone"
-                        dataKey={type}
-                        stroke={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
+            <ExpenseLineChart
+              data={currentData}
+              expenseTypes={expenseTypes}
+              colors={COLORS}
+            />
           )}
 
           {chartTypes.includes("area") && (
-            <Card className="p-4 md:p-6">
-              <CardHeader className="p-0 mb-4">
-                <CardTitle>Area Chart Comparison</CardTitle>
-              </CardHeader>
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={currentData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    {expenseTypes.map((type, index) => (
-                      <Area
-                        key={type}
-                        type="monotone"
-                        dataKey={type}
-                        fill={COLORS[index % COLORS.length]}
-                        stroke={COLORS[index % COLORS.length]}
-                        stackId={chartStyle === "stacked" ? "stack" : undefined}
-                      />
-                    ))}
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
+            <ExpenseAreaChart
+              data={currentData}
+              expenseTypes={expenseTypes}
+              chartStyle={chartStyle}
+              colors={COLORS}
+            />
           )}
 
           {chartTypes.includes("pie") && (
-            <Card className="p-4 md:p-6">
-              <CardHeader className="p-0 mb-4">
-                <CardTitle>Total Expense Distribution</CardTitle>
-              </CardHeader>
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      label
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
+            <ExpensePieChart
+              data={pieData}
+              colors={COLORS}
+            />
           )}
         </div>
       </div>

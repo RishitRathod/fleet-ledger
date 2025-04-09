@@ -10,6 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
+    "@mui/x-date-pickers": "^7.28.3",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-checkbox": "^1.1.4",
     "@radix-ui/react-collapsible": "^1.1.2",
@@ -45,6 +50,7 @@
     "datatables.net-responsive-bs5": "^3.0.4",
     "datatables.net-responsive-dt": "^3.0.4",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "fltest": "file:",
     "jquery": "^3.7.1",
     "jspdf": "^3.0.1",

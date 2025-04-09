@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, BarChart4, PieChart as PieChartIcon, LineChart as LineChartIcon, TrendingUp, ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,25 +22,92 @@ import {
 } from "@/components/ui/select";
 import BarChart from "./expensecharts/BarChart";
 import PieChart from "./expensecharts/PieChart";
-import LineChart from "./expensecharts/LineChart";
+import { LineChartComponent } from "./expensecharts/LineChart";
 import AreaChart from "./expensecharts/AreaChart";
 
-// Sample data - this would come from your backend in a real application
-const sampleData = [
-  { name: "Vehicle 1", value: 400, cost: 600, maintenance: 300 },
-  { name: "Vehicle 2", value: 300, cost: 400, maintenance: 250 },
-  { name: "Vehicle 3", value: 300, cost: 500, maintenance: 280 },
-  { name: "Vehicle 4", value: 200, cost: 300, maintenance: 220 },
-];
+// API response interfaces
+interface VehicleExpenseData {
+  vehicleName: string;
+  totalAmount: number;
+  // Add other fields if they exist in the API response
+}
 
-const monthlyData = [
-  { name: "Jan", expenses: 400, income: 600 },
-  { name: "Feb", expenses: 300, income: 580 },
-  { name: "Mar", expenses: 500, income: 550 },
-  { name: "Apr", expenses: 280, income: 590 },
-  { name: "May", expenses: 350, income: 600 },
-  { name: "Jun", expenses: 450, income: 620 },
-];
+interface UserExpenseData {
+  userName: string;
+  totalAmount: number;
+  // Add other fields if they exist in the API response
+}
+
+// Chart data interface
+interface ChartData {
+  name: string;
+  amount: number;
+}
+
+interface MonthlyData {
+  name: string;
+  expenses: number;
+  income: number;
+}
+
+// Fetch functions
+const fetchVehicleData = async (period: string, startDate?: Date, endDate?: Date): Promise<ChartData[]> => {
+  try {
+    let url = `http://localhost:5000/api/vehicles/getVehiclesWithTotalAmount`;
+    if (period === 'custom' && startDate && endDate) {
+      url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
+    }
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch vehicle data');
+    }
+    
+    // Get the raw data from API
+    const rawData: VehicleExpenseData[] = await response.json();
+    console.log('Raw vehicle data:', rawData);
+    
+    // Transform the data to match ChartData interface
+    const transformedData: ChartData[] = rawData.map(item => ({
+      name: item.vehicleName,
+      amount: item.totalAmount
+    }));
+    
+    console.log('Transformed vehicle data:', transformedData);
+    return transformedData;
+  } catch (error) {
+    console.error('Error fetching vehicle data:', error);
+    return [];
+  }
+};
+
+const fetchUserData = async (period: string, startDate?: Date, endDate?: Date): Promise<ChartData[]> => {
+  try {
+    let url = `http://localhost:5000/api/users/getUsersWithTotalAmount`;
+    // if (period === 'custom' && startDate && endDate) {
+    //   url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
+    // }
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data');
+    }
+    
+    // Get the raw data from API
+    const rawData: UserExpenseData[] = await response.json();
+    console.log('Raw user data:', rawData);
+    
+    // Transform the data to match ChartData interface
+    const transformedData: ChartData[] = rawData.map(item => ({
+      name: item.userName,
+      amount: item.totalAmount
+    }));
+    
+    console.log('Transformed user data:', transformedData);
+    return transformedData;
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    return [];
+  }
+};
 
 const chartTypes = [
   {
@@ -80,6 +147,30 @@ const ExpenseCharts = () => {
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["total", "fuel", "maintenance"]);
   const [showFilters, setShowFilters] = useState(true);
   const [showBlackSection, setShowBlackSection] = useState(false);
+  const [filterType, setFilterType] = useState<'vehicle' | 'user'>('vehicle');
+  const [datePeriod, setDatePeriod] = useState<'monthly' | 'quarterly' | 'yearly' | 'custom'>('monthly');
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+
+  // Fetch data when filter type, period, or dates change
+  useEffect(() => {
+    const fetchData = async () => {
+      const fetchFunction = filterType === 'vehicle' ? fetchVehicleData : fetchUserData;
+      const data = await fetchFunction(datePeriod, startDate, endDate);
+      setChartData(data);
+
+      // Transform data for monthly view (line chart)
+      // For now, we'll use the same data structure but modify it for line chart
+      const monthlyTransformed = data.map(item => ({
+        name: item.name,
+        expenses: item.amount, // Using amount as expenses
+        income: 0 // Set to 0 or remove if not needed
+      }));
+      setMonthlyData(monthlyTransformed);
+    };
+
+    fetchData();
+  }, [filterType, datePeriod, startDate, endDate]);
 
   const handleChartSelection = (chartId: string) => {
     setSelectedCharts(prev => {
@@ -133,22 +224,22 @@ const ExpenseCharts = () => {
                     <div className="h-[400px]">
                       {chartId === "bar" && (
                         <div className="w-full h-full">
-                          <BarChart />
+                          <BarChart chartData={chartData} />
                         </div>
                       )}
                       {chartId === "pie" && (
                         <div className="w-full h-full">
-                          <PieChart />
+                          <PieChart chartData={chartData} />
                         </div>
                       )}
                       {chartId === "line" && (
                         <div className="w-full h-full">
-                          <LineChart data={monthlyData} />
+                          <LineChartComponent data={monthlyData} />
                         </div>
                       )}
                       {chartId === "area" && (
                         <div className="w-full h-full">
-                          <AreaChart />
+                          <AreaChart data={chartData} />
                         </div>
                       )}
                     </div>
@@ -166,94 +257,129 @@ const ExpenseCharts = () => {
                 <h3 className="text-lg font-semibold mb-4 text-white">Filters</h3>
                 <div className="space-y-3">
                   <div>
-                    <h3 className="text-sm font-medium mb-2 text-gray-300">Date Range:</h3>
-                    <div className="grid grid-cols-1 gap-2">
+                    <h3 className="text-sm font-medium mb-2 text-gray-300">Date Period:</h3>
+                    <Select value={datePeriod} onValueChange={(value: 'monthly' | 'quarterly' | 'yearly' | 'custom') => setDatePeriod(value)}>
+                      <SelectTrigger className="w-full bg-black/80 border border-gray-700 text-gray-300 hover:bg-black/70">
+                        <SelectValue placeholder="Select period" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black/80 border border-gray-700 text-gray-300">
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                        <SelectItem value="custom">Custom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {datePeriod === 'custom' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="fromDate" className="block mb-1">From:</Label>
+                        <h3 className="text-sm font-medium mb-2 text-gray-300">From:</h3>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
                               className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !startDate && "text-muted-foreground"
+                                "w-full justify-start text-left font-normal bg-black/80 border border-gray-700 text-gray-300 hover:bg-black/70",
+                                !startDate && "text-gray-500"
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {startDate ? format(startDate, "MM/dd/yyyy") : "Select date"}
+                              {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent className="w-auto p-0 bg-black/80 border border-gray-700">
                             <Calendar
                               mode="single"
                               selected={startDate}
                               onSelect={setStartDate}
                               initialFocus
-                              className="p-3 pointer-events-auto"
+                              className="bg-black/80 text-gray-300"
                             />
                           </PopoverContent>
                         </Popover>
                       </div>
-                      
+
                       <div>
-                        <Label htmlFor="toDate" className="block mb-1">To:</Label>
+                        <h3 className="text-sm font-medium mb-2 text-gray-300">To:</h3>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
                               className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !endDate && "text-muted-foreground"
+                                "w-full justify-start text-left font-normal bg-black/80 border border-gray-700 text-gray-300 hover:bg-black/70",
+                                !endDate && "text-gray-500"
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {endDate ? format(endDate, "MM/dd/yyyy") : "Select date"}
+                              {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent className="w-auto p-0 bg-black/80 border border-gray-700">
                             <Calendar
                               mode="single"
                               selected={endDate}
                               onSelect={setEndDate}
                               initialFocus
-                              className="p-3 pointer-events-auto"
+                              className="bg-black/80 text-gray-300"
                             />
                           </PopoverContent>
                         </Popover>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div>
-                    <h3 className="text-sm font-medium mb-2 text-gray-300">Vehicle:</h3>
-                    <Select value={selectedVehicle} onValueChange={setSelectedVehicle}>
-                      <SelectTrigger className="w-full bg-black/80 border border-gray-700 text-gray-300 hover:bg-black/70">
-                        <SelectValue placeholder="Select vehicle" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-black/80 border border-gray-700 text-gray-300">
-                        {vehicles.map((vehicle) => (
-                          <SelectItem key={vehicle.id} value={vehicle.id}>
-                            {vehicle.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={filterType === 'vehicle' ? 'default' : 'outline'}
+                        onClick={() => setFilterType('vehicle')}
+                        className="w-full"
+                      >
+                        Vehicle
+                      </Button>
+                      <Button
+                        variant={filterType === 'user' ? 'default' : 'outline'}
+                        onClick={() => setFilterType('user')}
+                        className="w-full"
+                      >
+                        User
+                      </Button>
+                    </div>
 
-                  <div>
-                    <h3 className="text-sm font-medium mb-2 text-gray-300">User:</h3>
-                    <Select value={selectedUser} onValueChange={setSelectedUser}>
-                      <SelectTrigger className="w-full bg-black/80 border border-gray-700 text-gray-300 hover:bg-black/70">
-                        <SelectValue placeholder="Select user" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-black/80 border border-gray-700 text-gray-300">
-                        {users.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {filterType === 'vehicle' ? (
+                      <div>
+                        <h3 className="text-sm font-medium mb-2 text-gray-300">Vehicle:</h3>
+                        <Select value={selectedVehicle} onValueChange={setSelectedVehicle}>
+                          <SelectTrigger className="w-full bg-black/80 border border-gray-700 text-gray-300 hover:bg-black/70">
+                            <SelectValue placeholder="Select vehicle" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-black/80 border border-gray-700 text-gray-300">
+                            {vehicles.map((vehicle) => (
+                              <SelectItem key={vehicle.id} value={vehicle.id}>
+                                {vehicle.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ) : (
+                      <div>
+                        <h3 className="text-sm font-medium mb-2 text-gray-300">User:</h3>
+                        <Select value={selectedUser} onValueChange={setSelectedUser}>
+                          <SelectTrigger className="w-full bg-black/80 border border-gray-700 text-gray-300 hover:bg-black/70">
+                            <SelectValue placeholder="Select user" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-black/80 border border-gray-700 text-gray-300">
+                            {users.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
 
                   <div>
