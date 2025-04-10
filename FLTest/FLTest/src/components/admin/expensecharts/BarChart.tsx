@@ -5,6 +5,7 @@
  */
 
 "use client";
+
 import {
   Bar,
   BarChart as RechartsBarChart,
@@ -28,11 +29,38 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { useEffect, useRef, useState } from "react";
+
+interface ChartData {
+  name: string;
+  amount: number;
+}
+
 interface BarChartProps {
   chartData: ChartData[];
 }
 
 function BarChart({ chartData }: BarChartProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const { width } = containerRef.current.getBoundingClientRect();
+        setDimensions({
+          width: width,
+          height: 250
+        });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
   const total = chartData.reduce((sum, item) => sum + item.amount, 0);
 
   const chartConfig = chartData.reduce((acc, item, index) => {
@@ -57,51 +85,53 @@ function BarChart({ chartData }: BarChartProps) {
         <CardDescription>Total expenses by category</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
-          <RechartsBarChart
-            data={chartData}
-            width={400}
-            height={250}
-            margin={{ top: 20, right: 20, left: 10 }}
-          >
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis
-              dataKey="name"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-            />
-            <YAxis tickFormatter={(value: number) => `₹${value.toLocaleString()}`} />
-            <ChartTooltip
-              cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar
-              dataKey="amount"
-              fill="hsl(var(--chart-1))"
-              radius={[8, 8, 0, 0]}
-              shape={(props: any) => {
-                const colors = [
-                  "hsl(var(--chart-1))",
-                  "hsl(var(--chart-2))",
-                  "hsl(var(--chart-3))",
-                  "hsl(var(--chart-4))",
-                  "hsl(var(--chart-5))",
-                ];
-                const index = chartData.findIndex(item => item.amount === props.payload.amount);
-                const color = colors[index % colors.length];
-                return (
-                  <Rectangle
-                    {...props}
-                    fill={color}
-                    stroke={color}
-                    strokeWidth={2}
-                  />
-                );
-              }}
-            />
-          </RechartsBarChart>
-        </ChartContainer>
+        <div ref={containerRef} className="w-full h-full">
+          <ChartContainer config={chartConfig}>
+            <RechartsBarChart
+              data={chartData}
+              width={dimensions.width || 400}
+              height={dimensions.height}
+              margin={{ top: 20, right: 20, left: 10 }}
+            >
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="name"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+              />
+              <YAxis tickFormatter={(value: number) => `₹${value.toLocaleString()}`} />
+              <ChartTooltip
+                cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar
+                dataKey="amount"
+                fill="hsl(var(--chart-1))"
+                radius={[8, 8, 0, 0]}
+                shape={(props: any) => {
+                  const colors = [
+                    "hsl(var(--chart-1))",
+                    "hsl(var(--chart-2))",
+                    "hsl(var(--chart-3))",
+                    "hsl(var(--chart-4))",
+                    "hsl(var(--chart-5))",
+                  ];
+                  const index = chartData.findIndex(item => item.amount === props.payload.amount);
+                  const color = colors[index % colors.length];
+                  return (
+                    <Rectangle
+                      {...props}
+                      fill={color}
+                      stroke={color}
+                      strokeWidth={2}
+                    />
+                  );
+                }}
+              />
+            </RechartsBarChart>
+          </ChartContainer>
+        </div>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">

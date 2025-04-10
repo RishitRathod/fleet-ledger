@@ -199,19 +199,20 @@ const ExpenseCharts = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full p-4 md:p-6 bg-gradient-to-br">
-      <div className="max-w-[2800px] mx-auto space-y-4 md:space-y-6 animate-fade-in">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+    <div className="min-h-screen w-full p-2 sm:p-4 md:p-6 bg-gradient-to-br">
+      <div className="max-w-[2800px] mx-auto px-2 sm:px-4 md:px-6 space-y-2 sm:space-y-4 md:space-y-6 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4 md:gap-6">
           {/* Main Content Grid */}
-          <div className="md:col-span-9 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+          <div className="lg:col-span-9 space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 md:gap-6">
               {selectedCharts.map((chartId) => {
                 const chart = chartTypes.find(c => c.id === chartId);
                 if (!chart) return null;
 
                 return (
-                  <div key={chartId} className="relative">
-                    <div className="absolute top-0 right-0 z-10 flex items-center space-x-2">
+                  // <div key={chartId} className="relative bg-card rounded-lg shadow-md h-[300px] sm:h-[350px] md:h-[400px] p-2 sm:p-4">
+                  <div key={chartId}>
+                    <div className="absolute top-2 right-2 z-10 flex items-center space-x-2">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -221,36 +222,27 @@ const ExpenseCharts = () => {
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    <div className="h-[400px]">
-                      {chartId === "bar" && (
-                        <div className="w-full h-full">
-                          <BarChart chartData={chartData} />
-                        </div>
-                      )}
-                      {chartId === "pie" && (
-                        <div className="w-full h-full">
-                          <PieChart chartData={chartData} />
-                        </div>
-                      )}
-                      {chartId === "line" && (
-                        <div className="w-full h-full">
-                          <LineChartComponent data={monthlyData} />
-                        </div>
-                      )}
-                      {chartId === "area" && (
-                        <div className="w-full h-full">
-                          <AreaChart data={chartData} />
-                        </div>
-                      )}
-                    </div>
+                    {chartId === "bar" && (
+                      <BarChart chartData={chartData} />
+                    )}
+                    {chartId === "pie" && (
+                      <PieChart chartData={chartData} />
+                    )}
+                    {chartId === "line" && (
+                      <LineChartComponent data={monthlyData} />
+                    )}
+                    {chartId === "area" && (
+                      <AreaChart data={chartData} />
+                    )}
                   </div>
+                  // </div>
                 );
               })}
             </div>
           </div>
 
           {/* Filter Panel */}
-          <div className="md:col-span-3 space-y-4" style={{ display: showFilters ? 'block' : 'none' }}>
+          <div className="lg:col-span-3 space-y-4" style={{ display: showFilters ? 'block' : 'none' }}>
             <div className="relative">
               {/* Filter content */}
               <div className="bg-black/90 rounded-lg shadow-lg p-4 border border-gray-800">
