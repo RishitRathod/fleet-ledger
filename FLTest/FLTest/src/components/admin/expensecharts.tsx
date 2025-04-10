@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import BarChart from "./expensecharts/BarChart";
 import PieChart from "./expensecharts/PieChart";
-import { LineChartComponent } from "./expensecharts/LineChart";
+import LineChart from "./expensecharts/LineChart";
 import AreaChart from "./expensecharts/AreaChart";
 
 // API response interfaces
@@ -229,7 +229,7 @@ const ExpenseCharts = () => {
                       <PieChart chartData={chartData} />
                     )}
                     {chartId === "line" && (
-                      <LineChartComponent data={monthlyData} />
+                      <LineChart data={chartData} />
                     )}
                     {chartId === "area" && (
                       <AreaChart data={chartData} />
