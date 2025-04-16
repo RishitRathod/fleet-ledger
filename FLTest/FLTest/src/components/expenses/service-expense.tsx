@@ -52,7 +52,7 @@ export function ServiceExpenseModal() {
   const [selectedServiceType, setSelectedServiceType] = useState<string>("");
   const [amount, setAmount] = useState<number | "">("");
   const [description, setDescription] = useState<string>("");
-  // const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
+  const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
     const [vehicles, setVehicles] = useState<VehicleOption[]>([])
   
   const userEmail = localStorage.getItem('email');
@@ -71,7 +71,7 @@ export function ServiceExpenseModal() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: userEmail }),
+        body: JSON.stringify({  groupId: groupId }),
       });
 
       const data = await response.json();

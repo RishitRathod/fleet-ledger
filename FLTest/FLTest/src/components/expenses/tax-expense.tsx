@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { useExpenseModal, vehicles } from "./expense-store";
-
+import { DatePickerDemo } from "../date-picker";
 interface VehicleOption {
   value: string;
   label: string;
@@ -195,7 +195,7 @@ export function TaxExpenseModal() {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label className="text-sm font-medium">Payment Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -219,7 +219,8 @@ export function TaxExpenseModal() {
                   />
                 </PopoverContent>
               </Popover>
-            </div>
+            </div> */}
+            <DatePickerDemo />
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Tax Type</Label>

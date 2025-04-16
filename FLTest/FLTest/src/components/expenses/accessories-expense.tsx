@@ -98,14 +98,14 @@ export function AccessoriesExpenseModal() {
       return false;
     }
 
-    if (!selectedDate) {
-      toast({
-        title: "Error",
-        description: "Please select a date",
-        variant: "destructive",
-      });
-      return false;
-    }
+    // if (!selectedDate) {
+    //   toast({
+    //     title: "Error",
+    //     description: "Please select a date",
+    //     variant: "destructive",
+    //   });
+    //   return false;
+    // }
 
     return true;
   };
@@ -164,7 +164,7 @@ export function AccessoriesExpenseModal() {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label className="text-sm font-medium">Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -188,7 +188,7 @@ export function AccessoriesExpenseModal() {
                   />
                 </PopoverContent>
               </Popover>
-            </div>
+            </div> */}
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Accessory Name</Label>
