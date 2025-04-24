@@ -1,4 +1,4 @@
-const { Accessories } = require('../models');
+const { Accessories , Group, } = require('../models');
 const { sequelize } = require('../config/db');
 
 // Create a new service record
@@ -6,10 +6,14 @@ exports.createAccessory = async (req, res) => {
     try {
         console.log("Incoming Request Body:", req.body); // Debug log
 
+        const group = await Group.findOne({})
+
         const { accessory_type, amount, description, groupId } = req.body;
 
         // Validate request data
-        if (!accessory_type || !amount || !description || !groupId) {
+        // if (!accessory_type || !amount || !description || !groupId) {
+                if (!amount || !description || !groupId) {
+
             return res.status(400).json({ error: "All fields are required" });
         }
 
