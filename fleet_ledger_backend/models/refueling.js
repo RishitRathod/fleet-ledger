@@ -65,6 +65,14 @@ const Refueling = sequelize.define('Refueling', {
             key: 'id',
         },
     },
+    remarks: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    date: {
+        type: DataTypes.DATE,
+        allowNull: true,  // You can set this to false if it's a required field
+    },
 }, {
     timestamps: true,
 });
