@@ -15,7 +15,7 @@ const Accessories = sequelize.define('Accessories', {
     // },
     accessory_type: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     amount: {
         type: DataTypes.FLOAT,

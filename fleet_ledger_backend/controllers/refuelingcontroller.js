@@ -39,17 +39,23 @@ exports.uploadExcel = async (req, res) => {
         }
 
         // Function to parse and validate dates
-        // const parseDate = (dateValue) => {
-        //     if (!dateValue) return null; // If empty, return null (assuming NULL is allowed in DB)
+        const parseDate = (dateValue) => {
+            if (!dateValue) return null;
 
-        //     const parsedDate = new Date(dateValue);
-        //     return isNaN(parsedDate.getTime()) ? null : parsedDate; // Check for invalid date
-        // };
+            // If it's an Excel serial number (number), convert accordingly
+            if (typeof dateValue === 'number') {
+                return new Date(Math.round((dateValue - 25569) * 86400 * 1000)); // Excel epoch starts at 1900-01-01
+            }
+
+            // Try parsing if it's a string like '3-Oct-14'
+            const parsedDate = new Date(dateValue);
+            return isNaN(parsedDate.getTime()) ? null : parsedDate;
+        };
 
         // Format Data for Insertion
         const records = jsonData.map(row => ({
             groupId,
-            // date: parseDate(row['Date']),
+            date: parseDate(row['Date']),
             pricePerLiter: row['P. Price'] || 0,
             amount: row['Amount'] || 0,
             liters: row['Liters'] || 0,
@@ -83,6 +89,7 @@ exports.uploadExcel = async (req, res) => {
         return res.status(500).json({ message: "❌ Error processing file.", error: error.message });
     }  
 };
+
 
 exports.addFuelEntry = async (req, res) => {
     try {
