@@ -1,19 +1,19 @@
-const { Service } = require('../models');
-const { sequelize } = require('../config/db');
+const { Service, Group } = require('../models');
+const { sequelize, Op } = require('sequelize');
 
 // Create a new service record
 exports.createService = async (req, res) => {
     try {
         console.log("Incoming Request Body:", req.body); // Debug log
 
-        const { service_type, amount, description, groupId } = req.body;
+        const { service_type, amount, description, groupId, date } = req.body;
 
         // Validate request data
-        if (!service_type || !amount || !description || !groupId) {
+        if (!service_type || !amount || !description || !groupId || !date) {
             return res.status(400).json({ error: "All fields are required" });
         }
 
-        const service = await Service.create({ service_type, amount, description, groupId });
+        const service = await Service.create({ service_type, amount, description, groupId, date });
 
         res.status(201).json(service);
     } catch (error) {
@@ -68,11 +68,39 @@ exports.deleteService = async (req, res) => {
     try {
         const { id } = req.params;
         const service = await Service.findByPk(id);
+        
         if (!service) {
             return res.status(404).json({ message: 'Service not found' });
         }
+
         await service.destroy();
         res.status(200).json({ message: 'Service deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get services by date range
+exports.getServicesByDateRange = async (req, res) => {
+    try {
+        const { startDate, endDate, groupId } = req.query;
+        
+        const whereClause = {
+            date: {
+                [Op.between]: [new Date(startDate), new Date(endDate)]
+            }
+        };
+
+        if (groupId) {
+            whereClause.groupId = groupId;
+        }
+
+        const services = await Service.findAll({
+            where: whereClause,
+            include: [{ model: Group }]
+        });
+
+        res.status(200).json(services);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

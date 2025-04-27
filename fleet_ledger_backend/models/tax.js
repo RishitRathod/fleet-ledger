@@ -1,27 +1,27 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
-const Vehicle = require('./vehicle');
 const Group = require('./group');
 
-const Accessories = sequelize.define('Accessories', {
+const Tax = sequelize.define('Tax', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
-    date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
-    accessory_type: {
+    taxType: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
     },
     amount: {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
-    description : {
+    date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: DataTypes.NOW
+    },
+    description: {
         type: DataTypes.STRING,
         allowNull: true,
     },
@@ -30,11 +30,12 @@ const Accessories = sequelize.define('Accessories', {
         allowNull: false,
         references: {
             model: 'Groups',
-            key: 'id',
-        },
-    },
-}, {
-    timestamps: true,
+            key: 'id'
+        }
+    }
 });
 
-module.exports = Accessories;
+Tax.belongsTo(Group, { foreignKey: 'groupId' });
+Group.hasMany(Tax, { foreignKey: 'groupId' });
+
+module.exports = Tax;

@@ -1,6 +1,7 @@
 const xlsx = require('xlsx');
+const { Sequelize, Op } = require('sequelize');
 const { sequelize } = require('../config/db');
-const Refueling = require('../models/refueling');
+const { Refueling, Group } = require('../models');
 exports.uploadExcel = async (req, res) => {
     try {
         if (!req.file) {
@@ -33,7 +34,7 @@ exports.uploadExcel = async (req, res) => {
         console.log("✅ Extracted Data:", jsonData);
 
         // Ensure groupId is valid
-        const groupExists = await sequelize.models.Group.findByPk(groupId);
+        const groupExists = await Group.findByPk(groupId);
         if (!groupExists) {
             return res.status(400).json({ message: "❌ Invalid groupId. Group does not exist." });
         }
@@ -95,17 +96,28 @@ exports.addFuelEntry = async (req, res) => {
     try {
         console.log("📥 Received request body:", req.body); // Log the incoming request data
 
-        const { groupId, fuelType, liters, pricePerLiter, kmStart, kmEnd, location, days } = req.body;
+        const { groupId, fuelType, liters, pricePerLiter, kmStart, kmEnd, location, days, date } = req.body;
         
         // 1️⃣ Validate required fields
-        if (!groupId || !fuelType || !liters || !pricePerLiter) {
-            console.log("❌ Missing required fields:", { groupId, fuelType, liters, pricePerLiter });
-            return res.status(400).json({ message: "❌ Missing required fields." });
+        if (!groupId || !fuelType || !liters || !pricePerLiter || !date) {
+            return res.status(400).json({ message: "❌ Missing required fields (groupId, fuelType, liters, pricePerLiter, date)" });
+        }
+
+        // Validate date format (YYYY-MM-DD)
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            return res.status(400).json({ message: "❌ Invalid date format. Use YYYY-MM-DD" });
+        }
+
+        // Validate date is not in the future
+        const currentDate = new Date();
+        const inputDate = new Date(date);
+        if (inputDate > currentDate) {
+            return res.status(400).json({ message: "❌ Date cannot be in the future" });
         }
 
         // 2️⃣ Check if groupId exists
         console.log("🔍 Checking if group exists for groupId:", groupId);
-        const groupExists = await sequelize.models.Group.findByPk(groupId);
+        const groupExists = await Group.findByPk(groupId);
         if (!groupExists) {
             console.log("❌ Invalid groupId. Group does not exist.");
             return res.status(400).json({ message: "❌ Invalid groupId. Group does not exist." });
@@ -149,6 +161,7 @@ exports.addFuelEntry = async (req, res) => {
             days: days || 0,
             avgDailyExpense,
             fuelUtilization,
+            date: inputDate
         });
 
         console.log("✅ Fuel entry recorded successfully:", fuelEntry.dataValues);
@@ -185,5 +198,46 @@ exports.getAllRefuelingEntries = async (req, res) => {
             message: "Error fetching refueling entries",
             error: error.message
         });
+    }
+};
+
+// Get refueling entries by date range
+exports.getRefuelingByDateRange = async (req, res) => {
+    try {
+        const { startDate, endDate, groupId } = req.query;
+        console.log("Start Date:", startDate); // Debug log
+        console.log("End Date:", endDate); // Debug log
+        
+        if (!startDate || !endDate) {
+            return res.status(400).json({ error: "Start date and end date are required" });
+        }
+
+        // Validate date formats
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
+            return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
+        }
+
+        const whereClause = {
+            date: {
+                [Op.between]: [new Date(startDate), new Date(endDate)]
+            }
+        };
+
+        if (groupId) {
+            whereClause.groupId = groupId;
+        }
+
+        const refuelings = await Refueling.findAll({
+            where: whereClause,
+            include: [{ model: Group }],
+            order: [['date', 'ASC']]
+        });
+
+        console.log("Found refuelings:", refuelings.length); // Debug log
+        res.status(200).json(refuelings);
+    } catch (error) {
+        console.error("Error in getRefuelingByDateRange:", error);
+        res.status(500).json({ error: error.message });
     }
 };
