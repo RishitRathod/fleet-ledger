@@ -4,7 +4,8 @@ const getUsersWithTotalAmount = require('../controllers/userwiseexpensecontrolle
 
 // const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
-router.get('/getUsersWithTotalAmount', getUsersWithTotalAmount.getUsersWithTotalAmount)
+router.get('/getUsersWithTotalAmount', getUsersWithTotalAmount.getUsersWithTotalAmount);
+router.get('/getUsersWithTotalAmount/date-range', getUsersWithTotalAmount.getUsersWithTotalAmountByDateRange);
 router.post('/admin/users', getUsersUnderAdmin);
 router.post('/getUserByEmail', getUserByEmail);
 

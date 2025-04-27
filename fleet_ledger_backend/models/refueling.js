@@ -29,6 +29,11 @@ const Refueling = sequelize.define('Refueling', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    date: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+    },
     totalRun: {
         type: DataTypes.INTEGER,
         allowNull: false,
