@@ -3,6 +3,7 @@ const router = express.Router();
 const vehicleController = require('../controllers/vehiclecontroller');
 const getVehiclesWithTotalAmount = require('../controllers/vehiclewisecontroller')
 const vehiclewiseController = require('../controllers/vehiclewisecontroller'); // added this line
+const getExpenseCategory = require('../controllers/expensecategorycontroller'); // added this line
 router.post('/createVehicle', vehicleController.createVehicle);
 router.post('/getVehicleunderadmin', vehicleController.getVehicleunderadmin);
 router.post('/getVehicledata', vehicleController.getVehicledata);
