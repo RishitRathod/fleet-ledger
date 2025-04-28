@@ -42,6 +42,7 @@ app.use('/api/refuelings', require('./routes/refuelingRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
 app.use('/api/Accessories', require('./routes/accessoryRoutes'));
 app.use('/api/taxes', require('./routes/taxRoutes'));
+app.use('/api/category', require('./routes/CategoryRoutes'));
 
 
 // Start Server

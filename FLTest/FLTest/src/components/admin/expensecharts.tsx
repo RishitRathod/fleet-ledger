@@ -109,6 +109,36 @@ const fetchUserData = async (period: string, startDate?: Date, endDate?: Date): 
   }
 };
 
+
+const fetchCategoryData = async (period: string, startDate?: Date, endDate?: Date): Promise<ChartData[]> => {
+  try {
+    let url = `http://localhost:5000/api/category/getCatrgoryWithTotalAmount`;
+    // if (period === 'custom' && startDate && endDate) {
+    //   url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
+    // }
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data');
+    }
+    
+    // Get the raw data from API
+    const rawData: UserExpenseData[] = await response.json();
+    console.log('Raw user data:', rawData);
+    
+    // Transform the data to match ChartData interface
+    const transformedData: ChartData[] = rawData.map(item => ({
+      name: item.userName,
+      amount: item.totalAmount
+    }));
+    
+    console.log('Transformed user data:', transformedData);
+    return transformedData;
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    return [];
+  }
+};
+
 const chartTypes = [
   {
     id: "bar",
@@ -147,31 +177,45 @@ const ExpenseCharts = () => {
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["total", "fuel", "maintenance"]);
   const [showFilters, setShowFilters] = useState(true);
   const [showBlackSection, setShowBlackSection] = useState(false);
-  const [filterType, setFilterType] = useState<'vehicle' | 'user'>('vehicle');
+  const [filterType, setFilterType] = useState<'vehicle' | 'user' | 'category'>('vehicle');
   const [datePeriod, setDatePeriod] = useState<'monthly' | 'quarterly' | 'yearly' | 'custom'>('monthly');
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
 
-  // Fetch data when filter type, period, or dates change
   useEffect(() => {
     const fetchData = async () => {
-      const fetchFunction = filterType === 'vehicle' ? fetchVehicleData : fetchUserData;
-      const data = await fetchFunction(datePeriod, startDate, endDate);
-      setChartData(data);
-
-      // Transform data for monthly view (line chart)
-      // For now, we'll use the same data structure but modify it for line chart
-      const monthlyTransformed = data.map(item => ({
-        name: item.name,
-        expenses: item.amount, // Using amount as expenses
-        income: 0 // Set to 0 or remove if not needed
-      }));
-      setMonthlyData(monthlyTransformed);
+      let fetchFunction;
+  
+      if (filterType === 'vehicle') {
+        fetchFunction = fetchVehicleData;
+      } else if (filterType === 'user') {
+        fetchFunction = fetchUserData;
+      } else if (filterType === 'category') {
+        fetchFunction = fetchCategoryData;
+      } else {
+        console.error('Unknown filter type:', filterType);
+        return; // Important: Stop execution if filterType is unknown
+      }
+  
+      try {
+        const data = await fetchFunction(datePeriod, startDate, endDate);
+        setChartData(data);
+  
+        // Transform data for monthly view (line chart)
+        const monthlyTransformed = data.map(item => ({
+          name: item.name,
+          expenses: item.amount, // Using amount as expenses
+          income: 0 // Set to 0 or remove if not needed
+        }));
+        setMonthlyData(monthlyTransformed);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
-
+  
     fetchData();
   }, [filterType, datePeriod, startDate, endDate]);
-
+  
   const handleChartSelection = (chartId: string) => {
     setSelectedCharts(prev => {
       if (prev.includes(chartId)) {
@@ -336,6 +380,13 @@ const ExpenseCharts = () => {
                         className="w-full"
                       >
                         User
+                      </Button>
+                      <Button
+                        variant={filterType === 'category' ? 'default' : 'outline'}
+                        onClick={() => setFilterType('category')}
+                        className="w-full"
+                      >
+                        Category
                       </Button>
                     </div>
 
