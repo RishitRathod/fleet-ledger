@@ -94,8 +94,7 @@ const CalendarDialog = () => {
           <Input
             value={selectedDate ? format(selectedDate, "PPP") : ""}
             placeholder={format(new Date(), "PPP")}
-            // placeholder={new Date().toISOString().split("T")[0]}
-            // readOnly
+            readOnly
           />
           <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
             <DialogTrigger asChild>

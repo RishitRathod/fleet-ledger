@@ -47,7 +47,7 @@ export function TaxExpenseModal() {
   const { isOpen, onClose, type } = useExpenseModal();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
   const [selectedTaxType, setSelectedTaxType] = useState<string>("");
   const [validFrom, setValidFrom] = useState<Date>();
@@ -130,14 +130,14 @@ export function TaxExpenseModal() {
       return;
     }
 
-    if (!validFrom || !validTo) {
-      toast({
-        title: "Error",
-        description: "Please select validity period",
-        variant: "destructive",
-      });
-      return false;
-    }
+    // if (!validFrom || !validTo) {
+    //   toast({
+    //     title: "Error",
+    //     description: "Please select validity period",
+    //     variant: "destructive",
+    //   });
+    //   return false;
+    // }
 
     return true;
   };

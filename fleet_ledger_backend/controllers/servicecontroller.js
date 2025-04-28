@@ -5,7 +5,12 @@ const { sequelize, Op } = require('sequelize');
 exports.createService = async (req, res) => {
     try {
         console.log("Incoming Request Body:", req.body); // Debug log
-
+        const group = await Group.findOne({ where: { vehicleId: req.body.vehicleId } });
+        if (!group) {
+            return res.status(404).json({ error: "Group not found for this vehicle" });
+        }
+        req.body.groupId = group.id;
+        console.log("Group ID:", group.id);
         const { service_type, amount, description, groupId, date } = req.body;
 
         // Validate request data

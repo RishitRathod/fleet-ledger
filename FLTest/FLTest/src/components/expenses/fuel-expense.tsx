@@ -44,7 +44,7 @@ export function FuelExpenseModal() {
   const { isOpen, onClose, type } = useExpenseModal();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
   const userEmail = localStorage.getItem("email");
@@ -142,8 +142,9 @@ export function FuelExpenseModal() {
     setLoading(true);
 
     try {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
       const response = await fetch(
-        "http://localhost:5000/api/refuelings/addFuelEntry",
+        "http://localhost:5000/api/refuelings/add",
         {
           method: "POST",
           headers: {
@@ -151,7 +152,7 @@ export function FuelExpenseModal() {
           },
           body: JSON.stringify({
             vehicleId: selectedVehicle,
-            date: selectedDate?.toISOString(),
+            date: formattedDate,
             fuelType: selectedFuelType,
             liters: fuelQuantity,
             pricePerLiter,
@@ -162,7 +163,8 @@ export function FuelExpenseModal() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to add expense");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add expense");
       }
 
       toast({
@@ -171,10 +173,10 @@ export function FuelExpenseModal() {
       });
 
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to add expense",
+        description: error.message || "Failed to add expense",
         variant: "destructive",
       });
     } finally {

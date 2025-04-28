@@ -46,12 +46,12 @@ export function ServiceExpenseModal() {
   const { isOpen, onClose, type } = useExpenseModal();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
   const [selectedServiceType, setSelectedServiceType] = useState<string>("");
   const [amount, setAmount] = useState<number | "">("");
   const [description, setDescription] = useState<string>("");
-  const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
+  // const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
 
   const userEmail = localStorage.getItem("email");
@@ -71,7 +71,7 @@ export function ServiceExpenseModal() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ groupId: groupId }),
+          body: JSON.stringify({ email: userEmail }),
         }
       );
 
@@ -150,7 +150,10 @@ export function ServiceExpenseModal() {
       service_type: selectedServiceType, // Make sure this matches the backend field name
       amount: amount,
       description: description,
-      email: userEmail,
+      // email: userEmail,
+
+      vehicleId: selectedVehicle,
+      date: selectedDate,
     };
 
     console.log("Request Body:", requestBody); // Debugging: Check what's being sent
