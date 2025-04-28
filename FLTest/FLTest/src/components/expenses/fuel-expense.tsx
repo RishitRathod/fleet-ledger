@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { useExpenseModal } from "./expense-store";
-
+import CalendarDialog from "../calender-dialog";
 interface VehicleOption {
   value: string;
   label: string;
@@ -113,14 +113,14 @@ export function FuelExpenseModal() {
       return false;
     }
 
-    // if (!selectedDate) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Please select a date",
-    //     variant: "destructive",
-    //   })
-    //   return false
-    // }
+    if (!selectedDate) {
+      toast({
+        title: "Error",
+        description: "Please select a date",
+        variant: "destructive",
+      });
+      return false;
+    }
 
     if (!selectedFuelType) {
       toast({
@@ -211,6 +211,8 @@ export function FuelExpenseModal() {
                 </SelectContent>
               </Select>
             </div>
+
+            <CalendarDialog />
 
             {/* <div className="space-y-2">
               <Label className="text-sm font-medium">Date</Label>

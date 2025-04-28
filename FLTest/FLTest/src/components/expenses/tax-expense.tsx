@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { useExpenseModal, vehicles } from "./expense-store";
 import { DatePickerDemo } from "../date-picker";
+import CalendarDialog from "../calender-dialog";
 interface VehicleOption {
   value: string;
   label: string;
@@ -195,32 +196,7 @@ export function TaxExpenseModal() {
               </Select>
             </div>
 
-            {/* <div className="space-y-2">
-              <Label className="text-sm font-medium">Payment Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div> */}
-            <DatePickerDemo />
+            <CalendarDialog />
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Tax Type</Label>
