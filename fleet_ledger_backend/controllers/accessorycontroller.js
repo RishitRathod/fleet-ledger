@@ -5,8 +5,14 @@ const { sequelize, Op } = require('sequelize');
 exports.createAccessory = async (req, res) => {
     try {
         console.log("Incoming Request Body:", req.body); // Debug log
+        //from vehicle id find group id
 
-        const group = await Group.findOne({})
+        const group = await Group.findOne({ where: { vehicleId: req.body.vehicleId } });
+        if (!group) {
+            return res.status(404).json({ error: "Group not found for this vehicle" });
+        }
+        req.body.groupId = group.id;
+        console.log("Group ID:", group.id);
 
         const { accessory_type, amount, description, date, groupId } = req.body;
 
