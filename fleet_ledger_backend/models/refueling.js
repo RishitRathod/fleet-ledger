@@ -15,7 +15,7 @@ const Refueling = sequelize.define('Refueling', {
     },
     amount: {
         type: DataTypes.FLOAT,
-        allowNull: false,
+        allowNull: true,
     },
     liters: {
         type: DataTypes.FLOAT,
