@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ExpenseBarChart from "@/components/charts/ExpenseBarChart";
 import ExpenseLineChart from "@/components/charts/ExpenseLineChart";
 import ExpenseAreaChart from "@/components/charts/ExpenseAreaChart";
@@ -30,13 +30,13 @@ import { ArrowLeft, Download, Settings, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-
 // Type definitions for data
 interface ExpenseData {
   name: string;
-  fuel: number;
-  maintenance: number;
-  insurance: number;
+  refueling: number;
+  tax: number;
+  service: number;
+  accessories: number;
   [key: string]: string | number;
 }
 
@@ -57,42 +57,7 @@ interface Vehicle {
   registrationNumber: string;
 }
 
-interface PieData {
-  name: string;
-  value: number;
-}
 
-// Chart component props interfaces
-interface ExpenseBarChartProps {
-  data: ExpenseData[];
-  expenseTypes: string[];
-  chartStyle: "stacked" | "grouped";
-  colors: string[];
-}
-
-interface ExpenseRadarChartProps {
-  data: ExpenseData[];
-  expenseTypes: string[];
-  colors: string[];
-}
-
-interface ExpenseLineChartProps {
-  data: ExpenseData[];
-  expenseTypes: string[];
-  colors: string[];
-}
-
-interface ExpenseAreaChartProps {
-  data: ExpenseData[];
-  expenseTypes: string[];
-  chartStyle: "stacked" | "grouped";
-  colors: string[];
-}
-
-interface ExpensePieChartProps {
-  data: PieData[];
-  colors: string[];
-}
 
 const COLORS = [
   "#FF6384",
@@ -112,16 +77,16 @@ const fetchUsersFromDb = async (): Promise<User[]> => {
       return [];
     }
 
-    const response = await fetch("http://localhost:5000/api/admin/getUsersUnderAdmin", {
+    const response = await fetch("http://localhost:5000/api/users/admin/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: userEmail }),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch users: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
     if (data.success && data.users) {
       return data.users;
@@ -141,7 +106,7 @@ const fetchVehiclesFromDb = async (): Promise<Vehicle[]> => {
       console.error("User email not found in localStorage");
       return [];
     }
-    
+
     const response = await fetch(
       "http://localhost:5000/api/vehicles/getVehicleunderadmin",
       {
@@ -150,11 +115,11 @@ const fetchVehiclesFromDb = async (): Promise<Vehicle[]> => {
         body: JSON.stringify({ email: userEmail }),
       }
     );
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch vehicles: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
     if (data.success && data.vehicles) {
       return data.vehicles;
@@ -169,94 +134,8 @@ const fetchVehiclesFromDb = async (): Promise<Vehicle[]> => {
 
 const fetchUserVehicleRelationsFromDb = async (): Promise<UserVehicleData[]> => {
   // This would be replaced with actual API call
-  return Promise.resolve(userVehicleData);
+  return Promise.resolve([]);
 };
-
-// Sample data for users
-const userData = [
-  { name: "John", fuel: 350000, maintenance: 120000, insurance: 80000 },
-  { name: "Alice", fuel: 280000, maintenance: 95000, insurance: 80000 },
-  { name: "Bob", fuel: 320000, maintenance: 150000, insurance: 80000 },
-  { name: "Carol", fuel: 220000, maintenance: 85000, insurance: 80000 },
-  { name: "David", fuel: 180000, maintenance: 60000, insurance: 80000 },
-];
-
-// Sample data for vehicles
-const vehicleData = [
-  { name: "Vehicle 1", fuel: 186000, maintenance: 35000, insurance: 25000 },
-  { name: "Vehicle 2", fuel: 305000, maintenance: 80000, insurance: 25000 },
-  { name: "Vehicle 3", fuel: 237000, maintenance: 65000, insurance: 25000 },
-  { name: "Vehicle 4", fuel: 173000, maintenance: 42000, insurance: 25000 },
-  { name: "Vehicle 5", fuel: 209000, maintenance: 58000, insurance: 25000 },
-];
-
-// Sample data for user-vehicle relationships
-const userVehicleData = [
-  {
-    user: "John",
-    vehicle: "Vehicle 1",
-    name: "John - Vehicle 1",
-    fuel: 95000,
-    maintenance: 25000,
-    insurance: 15000,
-  },
-  {
-    user: "John",
-    vehicle: "Vehicle 2",
-    name: "John - Vehicle 2",
-    fuel: 120000,
-    maintenance: 40000,
-    insurance: 15000,
-  },
-  {
-    user: "Alice",
-    vehicle: "Vehicle 1",
-    name: "Alice - Vehicle 1",
-    fuel: 65000,
-    maintenance: 10000,
-    insurance: 15000,
-  },
-  {
-    user: "Bob",
-    vehicle: "Vehicle 3",
-    name: "Bob - Vehicle 3",
-    fuel: 145000,
-    maintenance: 55000,
-    insurance: 15000,
-  },
-  {
-    user: "Carol",
-    vehicle: "Vehicle 4",
-    name: "Carol - Vehicle 4",
-    fuel: 80000,
-    maintenance: 30000,
-    insurance: 15000,
-  },
-  {
-    user: "David",
-    vehicle: "Vehicle 5",
-    name: "David - Vehicle 5",
-    fuel: 75000,
-    maintenance: 22000,
-    insurance: 15000,
-  },
-  {
-    user: "Alice",
-    vehicle: "Vehicle 2",
-    name: "Alice - Vehicle 2",
-    fuel: 85000,
-    maintenance: 35000,
-    insurance: 15000,
-  },
-  {
-    user: "Bob",
-    vehicle: "Vehicle 1",
-    name: "Bob - Vehicle 1",
-    fuel: 75000,
-    maintenance: 30000,
-    insurance: 15000,
-  },
-];
 
 const ExpenseComparison = () => {
   const { toast } = useToast();
@@ -266,30 +145,80 @@ const ExpenseComparison = () => {
   const [chartTypes, setChartTypes] = useState<string[]>(["bar", "radar"]);
   const [timeRange, setTimeRange] = useState("month");
   const [expenseTypes, setExpenseTypes] = useState<string[]>([
-    "fuel",
-    "maintenance",
-    "insurance",
+    "refueling",
+    "tax",
+    "service",
+    "accessories",
   ]);
   const [chartStyle, setChartStyle] = useState<"stacked" | "grouped">("stacked");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  
+
   // Database data states
   const [users, setUsers] = useState<User[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  
+  const [comparisonData, setComparisonData] = useState<ExpenseData[]>([]);
+
   // Selection states
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
-  
-  // Temporary selection states for dialog
   const [tempSelectedUsers, setTempSelectedUsers] = useState<string[]>([]);
   const [tempSelectedVehicles, setTempSelectedVehicles] = useState<string[]>([]);
-  
-  // Loading states
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch data on component mount
   useEffect(() => {
+    const fetchComparisonData = async (userIds: string[]) => {
+      try {
+
+
+        const response = await fetch("http://localhost:5000/api/comparison/getusercomparison", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userList: userIds.length ? userIds.map(id => ({ userId: id })) : [{ userId: 'all' }],
+            startDate: timeRange ? getStartDate() : "2000-01-01",
+            endDate: timeRange ? new Date().toISOString() : "2025-12-31",
+            models: "all"
+          }),
+        });
+
+        console.log('Request body:', {
+          userList: userIds.length ? userIds.map(id => ({ userId: id })) : [{ userId: 'all' }],
+          startDate: timeRange ? getStartDate() : "2000-01-01",
+          endDate: timeRange ? new Date().toISOString() : "2025-12-31",
+          models: "all"
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('API Error:', errorData);
+          throw new Error(errorData.error || "Failed to fetch comparison data");
+        }
+
+        const data = await response.json();
+        console.log('Comparison data:', data);
+        return data;
+      } catch (error) {
+        console.error("Error fetching comparison data:", error);
+        throw error;
+      }
+    };
+
+    const getStartDate = () => {
+      const now = new Date();
+      switch (timeRange) {
+        case "week":
+          return new Date(now.setDate(now.getDate() - 7)).toISOString();
+        case "month":
+          return new Date(now.setMonth(now.getMonth() - 1)).toISOString();
+        case "year":
+          return new Date(now.setFullYear(now.getFullYear() - 1)).toISOString();
+        default:
+          return new Date(now.setMonth(now.getMonth() - 1)).toISOString();
+      }
+    };
+
     const fetchData = async () => {
       setIsLoading(true);
       try {
@@ -298,58 +227,87 @@ const ExpenseComparison = () => {
           toast({
             title: "Error",
             description: "Please log in to access this feature",
-            variant: "destructive"
+            variant: "destructive",
           });
           setIsLoading(false);
           return;
         }
 
+        // First fetch users and vehicles
         const [usersData, vehiclesData] = await Promise.all([
           fetchUsersFromDb(),
-          fetchVehiclesFromDb()
+          fetchVehiclesFromDb(),
         ]);
-        
+
+        console.log('Fetched users:', usersData);
+        console.log('Fetched vehicles:', vehiclesData);
+
+        let selectedUserIds: string[] = [];
+
         if (usersData.length > 0) {
           setUsers(usersData);
-          // Don't set default selections
-          setSelectedUsers([]);
-          setTempSelectedUsers([]);
+          // Always select the first user initially
+          selectedUserIds = [usersData[0]._id];
+          setSelectedUsers(selectedUserIds);
+          setTempSelectedUsers(selectedUserIds);
         } else {
           toast({
             title: "Warning",
             description: "No users found under your administration",
-            variant: "destructive"
+            variant: "destructive",
           });
+          return;
         }
 
         if (vehiclesData.length > 0) {
           setVehicles(vehiclesData);
-          // Don't set default selections
-          setSelectedVehicles([]);
-          setTempSelectedVehicles([]);
+          // Always select the first vehicle initially
+          const selectedVehicleIds = [vehiclesData[0]._id];
+          setSelectedVehicles(selectedVehicleIds);
+          setTempSelectedVehicles(selectedVehicleIds);
         } else {
           toast({
             title: "Warning",
             description: "No vehicles found under your administration",
-            variant: "destructive"
+            variant: "destructive",
           });
+          return;
+        }
+
+        // Fetch comparison data with the selected user
+        const comparisonData = await fetchComparisonData(selectedUserIds);
+        if (comparisonData) {
+          interface ComparisonDataItem {
+            name: string;
+            refueling?: number;
+            tax?: number;
+            service?: number;
+            accessories?: number;
+          }
+          const formattedData = comparisonData.data?.map((item: ComparisonDataItem) => ({
+            name: item.name,
+            refueling: item.refueling || 0,
+            tax: item.tax || 0,
+            service: item.service || 0,
+            accessories: item.accessories || 0,
+          })) || [];
+          setComparisonData(formattedData);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
         toast({
           title: "Error",
           description: "Failed to load data. Please try again.",
-          variant: "destructive"
+          variant: "destructive",
         });
       } finally {
         setIsLoading(false);
       }
     };
-    
-    fetchData();
-  }, [toast]);
 
-  // Reset temporary selections when dialog opens
+    fetchData();
+  }, [toast, timeRange, expenseTypes]);
+
   useEffect(() => {
     if (isSettingsOpen) {
       setTempSelectedUsers(selectedUsers);
@@ -357,31 +315,32 @@ const ExpenseComparison = () => {
     }
   }, [isSettingsOpen, selectedUsers, selectedVehicles]);
 
-  // Get current data based on comparison type and selections
   const getDataBasedOnType = (): ExpenseData[] => {
     switch (comparisonType) {
       case "user":
         if (selectedUsers.length === 0) return [];
         return users
-          .filter(user => selectedUsers.includes(user._id))
-          .map(user => ({
+          .filter((user) => selectedUsers.includes(user._id))
+          .map((user) => ({
             name: user.name,
-            fuel: Math.random() * 100000, // Replace with actual data from API
-            maintenance: Math.random() * 50000,
-            insurance: Math.random() * 30000,
+            refueling: Math.random() * 100000,
+            tax: Math.random() * 50000,
+            service: Math.random() * 30000,
+            accessories: Math.random() * 20000,
           }));
-        
+
       case "vehicle":
         if (selectedVehicles.length === 0) return [];
         return vehicles
-          .filter(vehicle => selectedVehicles.includes(vehicle._id))
-          .map(vehicle => ({
+          .filter((vehicle) => selectedVehicles.includes(vehicle._id))
+          .map((vehicle) => ({
             name: vehicle.name,
-            fuel: Math.random() * 100000, // Replace with actual data from API
-            maintenance: Math.random() * 50000,
-            insurance: Math.random() * 30000,
+            refueling: Math.random() * 100000,
+            tax: Math.random() * 50000,
+            service: Math.random() * 30000,
+            accessories: Math.random() * 20000,
           }));
-        
+
       default:
         return [];
     }
@@ -411,32 +370,19 @@ const ExpenseComparison = () => {
   };
 
   const getTotalExpense = (item: ExpenseData): number => {
-    return expenseTypes.reduce((sum, type) => sum + (Number(item[type]) || 0), 0);
+    return expenseTypes.reduce((sum, type) => {
+      const value = item[type];
+      return sum + (typeof value === 'number' ? value : 0);
+    }, 0);
   };
 
-  const pieData = currentData.map((item) => ({
+  const pieData: { name: string; value: number; }[] = currentData.map((item) => ({
     name: item.name,
     value: getTotalExpense(item),
   }));
 
-  // Handle selection changes
-  const toggleUserSelection = (userId: string) => {
-    setTempSelectedUsers(prev => 
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
-  };
   
-  const toggleVehicleSelection = (vehicleId: string) => {
-    setTempSelectedVehicles(prev => 
-      prev.includes(vehicleId)
-        ? prev.filter(id => id !== vehicleId)
-        : [...prev, vehicleId]
-    );
-  };
 
-  // Handle comparison type change
   const handleComparisonTypeChange = (value: "user" | "vehicle" | "user-vehicle" | "vehicle-user") => {
     setComparisonType(value);
   };
@@ -590,7 +536,7 @@ const ExpenseComparison = () => {
                         Expense Types
                       </Label>
                       <div className="space-y-2">
-                        {["fuel", "maintenance", "insurance"].map((type) => (
+                        {["refueling", "tax", "service", "accessories"].map((type) => (
                           <div
                             key={type}
                             className="flex items-center space-x-2"
@@ -698,13 +644,13 @@ const ExpenseComparison = () => {
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          {isLoading ? (
-            <div className="col-span-2 flex justify-center items-center py-12">
-              <p>Loading expense data...</p>
-            </div>
-          ) : currentData.length === 0 ? (
+          {currentData.length === 0 ? (
             <div className="col-span-2 flex justify-center items-center py-12">
               <p>Please select users and/or vehicles to display expense data</p>
+            </div>
+          ) : isLoading ? (
+            <div className="col-span-2 flex justify-center items-center py-12">
+              <p>Loading expense data...</p>
             </div>
           ) : (
             <>
@@ -715,6 +661,7 @@ const ExpenseComparison = () => {
                     expenseTypes={expenseTypes}
                     chartStyle={chartStyle}
                     colors={COLORS}
+                    className=""
                   />
                 </div>
               )}
@@ -722,29 +669,8 @@ const ExpenseComparison = () => {
               {chartTypes.includes("radar") && (
                 <div className="w-full">
                   <ExpenseRadarChart
-                    data={currentData}
+                    data={comparisonData}
                     expenseTypes={expenseTypes}
-                    colors={COLORS}
-                  />
-                </div>
-              )}
-
-              {chartTypes.includes("line") && (
-                <div className="w-full">
-                  <ExpenseLineChart
-                    data={currentData}
-                    expenseTypes={expenseTypes}
-                    colors={COLORS}
-                  />
-                </div>
-              )}
-
-              {chartTypes.includes("area") && (
-                <div className="w-full">
-                  <ExpenseAreaChart
-                    data={currentData}
-                    expenseTypes={expenseTypes}
-                    chartStyle={chartStyle}
                     colors={COLORS}
                   />
                 </div>
@@ -755,6 +681,31 @@ const ExpenseComparison = () => {
                   <ExpensePieChart
                     data={pieData}
                     colors={COLORS}
+                  />
+                </div>
+              )}
+
+              {chartTypes.includes("area") && (
+                <div className="w-full">
+                  <ExpenseAreaChart
+                    data={comparisonData}
+                    expenseTypes={expenseTypes}
+                    chartStyle={chartStyle}
+                    colors={COLORS}
+                  />
+                </div>
+              )}
+
+              {chartTypes.includes("pie") && (
+                <div className="w-full">
+                  <ExpensePieChart
+                    data={comparisonData.map(item => ({
+                      name: item.name,
+                      value: expenseTypes.reduce((sum, type) => 
+                        sum + (typeof item[type] === 'number' ? (item[type] as number) : 0), 0)
+                    }))}
+                    colors={COLORS}
+                    className="w-full"
                   />
                 </div>
               )}

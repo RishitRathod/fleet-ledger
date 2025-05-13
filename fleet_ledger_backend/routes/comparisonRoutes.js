@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const {getusercomparison} = require('../controllers/comparisonController'); // Adjust the path as necessary
+const {getusercomparison, getvehiclecomparison, getuservehiclecomparison, getvehicleusercomparison} = require('../controllers/comparisonController'); // Adjust the path as necessary
 
 router.post('/getusercomparison', getusercomparison);
-// router.post('/getvehiclecomparison', comparisonController.getvehiclecomparison);
-// router.post('/getuservehiclecomarison', comparisonController.getuservehiclecomarison);
-// router.post('/getvehicleusercomparison', comparisonController.getvehicleusercomparison);
+router.post('/getvehiclecomparison', getvehiclecomparison);
+router.post('/getuservehiclecomparison', getuservehiclecomparison);
+router.post('/getvehicleusercomparison', getvehicleusercomparison);
 
 module.exports = router;

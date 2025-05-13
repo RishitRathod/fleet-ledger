@@ -11,76 +11,37 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartTooltip } from "@/components/ui/chart";
 
-interface UserData {
-  name: string;
-  email: string;
-  role: string;
-  totalAmount: number;
-}
+
 
 interface ChartDataItem {
   name: string;
   value: number;
-  fill: string;
+  fill?: string;
 }
 
-interface TooltipProps {
-  active?: boolean;
-  payload?: Array<{
-    payload: ChartDataItem;
-    value: number;
-  }>;
+
+
+interface ExpensePieChartProps {
+  data: ChartDataItem[];
+  colors: string[];
+  className?: string;
 }
 
-const fetchUserData = async (): Promise<UserData[]> => {
-  try {
-    const response = await fetch(
-      "http://localhost:5000/api/users/getUsersWithTotalAmount"
-    );
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    return [];
-  }
-};
-
-function ExpensePieChart({ className }: { className?: string }) {
+const ExpensePieChart = ({ data, colors, className }: ExpensePieChartProps) => {
   const [chartData, setChartData] = React.useState<ChartDataItem[]>([]);
   const [totalExpense, setTotalExpense] = React.useState(0);
 
   React.useEffect(() => {
-    fetchUserData().then((data) => {
-      const colors = [
-        "hsl(var(--chart-1))",
-        "hsl(var(--chart-2))",
-        "hsl(var(--chart-3))",
-        "hsl(var(--chart-4))",
-        "hsl(var(--chart-5))",
-      ];
-
-      const formattedData = data
-        .filter((user) => user.totalAmount > 0)
-        .map((user, index) => ({
-          name: user.name,
-          value: parseFloat(user.totalAmount.toString()),
-          fill: colors[index % colors.length],
-        }));
-
-      const total = formattedData.reduce((sum, item) => sum + item.value, 0);
-
-      setChartData(formattedData);
-      setTotalExpense(total);
-    });
-  }, []);
+    const chartData = data.map((item, index) => ({
+      ...item,
+      fill: colors[index % colors.length],
+    }));
+    const total = chartData.reduce((sum, item) => sum + item.value, 0);
+    setChartData(chartData);
+    setTotalExpense(total);
+  }, [data, colors]);
 
   const CustomLabel = ({
     viewBox,
@@ -118,9 +79,9 @@ function ExpensePieChart({ className }: { className?: string }) {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <ChartTooltip
-                content={({ active, payload }: TooltipProps) => {
-                  if (!active || !payload || payload.length === 0) return null;
-                  const data = payload[0];
+                content={({ active, payload }) => {
+                  if (!active || !payload || !payload.length) return null;
+                  const data = payload[0] as { name: string; value: number };
                   return (
                     <div className="rounded-lg border bg-background p-2 shadow-sm">
                       <div className="grid grid-cols-2 gap-2">
@@ -128,7 +89,7 @@ function ExpensePieChart({ className }: { className?: string }) {
                           <span className="text-[0.70rem] uppercase text-muted-foreground">
                             User
                           </span>
-                          <span className="font-bold">{data.payload.name}</span>
+                          <span className="font-bold">{data.name}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">
