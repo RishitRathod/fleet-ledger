@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ExpenseBarChart from "@/components/charts/ExpenseBarChart";
 import ExpenseLineChart from "@/components/charts/ExpenseLineChart";
 import ExpenseAreaChart from "@/components/charts/ExpenseAreaChart";
 import ExpensePieChart from "@/components/charts/ExpensePieChart";
-import ExpenseRadarChart from "@/components/charts/ExpenseRadarChart"; // Update the import section
+import ExpenseRadarChart from "@/components/charts/ExpenseRadarChart";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,10 +23,154 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Download, Settings, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+
+// Type definitions for data
+interface ExpenseData {
+  name: string;
+  fuel: number;
+  maintenance: number;
+  insurance: number;
+  [key: string]: string | number;
+}
+
+interface UserVehicleData extends ExpenseData {
+  user: string;
+  vehicle: string;
+}
+
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+}
+
+interface Vehicle {
+  _id: string;
+  name: string;
+  registrationNumber: string;
+}
+
+interface PieData {
+  name: string;
+  value: number;
+}
+
+// Chart component props interfaces
+interface ExpenseBarChartProps {
+  data: ExpenseData[];
+  expenseTypes: string[];
+  chartStyle: "stacked" | "grouped";
+  colors: string[];
+}
+
+interface ExpenseRadarChartProps {
+  data: ExpenseData[];
+  expenseTypes: string[];
+  colors: string[];
+}
+
+interface ExpenseLineChartProps {
+  data: ExpenseData[];
+  expenseTypes: string[];
+  colors: string[];
+}
+
+interface ExpenseAreaChartProps {
+  data: ExpenseData[];
+  expenseTypes: string[];
+  chartStyle: "stacked" | "grouped";
+  colors: string[];
+}
+
+interface ExpensePieChartProps {
+  data: PieData[];
+  colors: string[];
+}
+
+const COLORS = [
+  "#FF6384",
+  "#36A2EB",
+  "#FFCE56",
+  "#4BC0C0",
+  "#9966FF",
+  "#FF9F40",
+];
+
+// API Services for fetching data
+const fetchUsersFromDb = async (): Promise<User[]> => {
+  try {
+    const userEmail = localStorage.getItem("email");
+    if (!userEmail) {
+      console.error("User email not found in localStorage");
+      return [];
+    }
+
+    const response = await fetch("http://localhost:5000/api/admin/getUsersUnderAdmin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: userEmail }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch users: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    if (data.success && data.users) {
+      return data.users;
+    } else {
+      throw new Error("Invalid users data");
+    }
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
+};
+
+const fetchVehiclesFromDb = async (): Promise<Vehicle[]> => {
+  try {
+    const userEmail = localStorage.getItem("email");
+    if (!userEmail) {
+      console.error("User email not found in localStorage");
+      return [];
+    }
+    
+    const response = await fetch(
+      "http://localhost:5000/api/vehicles/getVehicleunderadmin",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail }),
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch vehicles: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    if (data.success && data.vehicles) {
+      return data.vehicles;
+    } else {
+      throw new Error("Invalid vehicles data");
+    }
+  } catch (error) {
+    console.error("Error fetching vehicles:", error);
+    return [];
+  }
+};
+
+const fetchUserVehicleRelationsFromDb = async (): Promise<UserVehicleData[]> => {
+  // This would be replaced with actual API call
+  return Promise.resolve(userVehicleData);
+};
 
 // Sample data for users
 const userData = [
@@ -51,6 +195,7 @@ const userVehicleData = [
   {
     user: "John",
     vehicle: "Vehicle 1",
+    name: "John - Vehicle 1",
     fuel: 95000,
     maintenance: 25000,
     insurance: 15000,
@@ -58,6 +203,7 @@ const userVehicleData = [
   {
     user: "John",
     vehicle: "Vehicle 2",
+    name: "John - Vehicle 2",
     fuel: 120000,
     maintenance: 40000,
     insurance: 15000,
@@ -65,6 +211,7 @@ const userVehicleData = [
   {
     user: "Alice",
     vehicle: "Vehicle 1",
+    name: "Alice - Vehicle 1",
     fuel: 65000,
     maintenance: 10000,
     insurance: 15000,
@@ -72,6 +219,7 @@ const userVehicleData = [
   {
     user: "Bob",
     vehicle: "Vehicle 3",
+    name: "Bob - Vehicle 3",
     fuel: 145000,
     maintenance: 55000,
     insurance: 15000,
@@ -79,6 +227,7 @@ const userVehicleData = [
   {
     user: "Carol",
     vehicle: "Vehicle 4",
+    name: "Carol - Vehicle 4",
     fuel: 80000,
     maintenance: 30000,
     insurance: 15000,
@@ -86,6 +235,7 @@ const userVehicleData = [
   {
     user: "David",
     vehicle: "Vehicle 5",
+    name: "David - Vehicle 5",
     fuel: 75000,
     maintenance: 22000,
     insurance: 15000,
@@ -93,6 +243,7 @@ const userVehicleData = [
   {
     user: "Alice",
     vehicle: "Vehicle 2",
+    name: "Alice - Vehicle 2",
     fuel: 85000,
     maintenance: 35000,
     insurance: 15000,
@@ -100,19 +251,11 @@ const userVehicleData = [
   {
     user: "Bob",
     vehicle: "Vehicle 1",
+    name: "Bob - Vehicle 1",
     fuel: 75000,
     maintenance: 30000,
     insurance: 15000,
   },
-];
-
-const COLORS = [
-  "#FF6384",
-  "#36A2EB",
-  "#FFCE56",
-  "#4BC0C0",
-  "#9966FF",
-  "#FF9F40",
 ];
 
 const ExpenseComparison = () => {
@@ -127,60 +270,131 @@ const ExpenseComparison = () => {
     "maintenance",
     "insurance",
   ]);
-  const [chartStyle, setChartStyle] = useState("stacked");
-  const [selectedVehicle, setSelectedVehicle] = useState<string>("");
-  const [selectedUser, setSelectedUser] = useState<string>("");
-  const [selectedUsersForVehicle, setSelectedUsersForVehicle] = useState<
-    string[]
-  >([]);
+  const [chartStyle, setChartStyle] = useState<"stacked" | "grouped">("stacked");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  // Database data states
+  const [users, setUsers] = useState<User[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  
+  // Selection states
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
+  
+  // Temporary selection states for dialog
+  const [tempSelectedUsers, setTempSelectedUsers] = useState<string[]>([]);
+  const [tempSelectedVehicles, setTempSelectedVehicles] = useState<string[]>([]);
+  
+  // Loading states
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Get current data based on comparison type
-  const getDataBasedOnType = () => {
-    if (comparisonType === "user-vehicle" && selectedVehicle) {
-      const filteredData = userVehicleData.filter(
-        (item) => item.vehicle === selectedVehicle
-      );
+  // Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const userEmail = localStorage.getItem("email");
+        if (!userEmail) {
+          toast({
+            title: "Error",
+            description: "Please log in to access this feature",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
 
-      // If users are selected, filter by those users
-      if (selectedUsersForVehicle.length > 0) {
-        return filteredData
-          .filter((item) => selectedUsersForVehicle.includes(item.user))
-          .map((item) => ({
-            name: item.user,
-            fuel: item.fuel,
-            maintenance: item.maintenance,
-            insurance: item.insurance,
-          }));
+        const [usersData, vehiclesData] = await Promise.all([
+          fetchUsersFromDb(),
+          fetchVehiclesFromDb()
+        ]);
+        
+        if (usersData.length > 0) {
+          setUsers(usersData);
+          // Don't set default selections
+          setSelectedUsers([]);
+          setTempSelectedUsers([]);
+        } else {
+          toast({
+            title: "Warning",
+            description: "No users found under your administration",
+            variant: "destructive"
+          });
+        }
+
+        if (vehiclesData.length > 0) {
+          setVehicles(vehiclesData);
+          // Don't set default selections
+          setSelectedVehicles([]);
+          setTempSelectedVehicles([]);
+        } else {
+          toast({
+            title: "Warning",
+            description: "No vehicles found under your administration",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load data. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
       }
+    };
+    
+    fetchData();
+  }, [toast]);
 
-      return filteredData.map((item) => ({
-        name: item.user,
-        fuel: item.fuel,
-        maintenance: item.maintenance,
-        insurance: item.insurance,
-      }));
+  // Reset temporary selections when dialog opens
+  useEffect(() => {
+    if (isSettingsOpen) {
+      setTempSelectedUsers(selectedUsers);
+      setTempSelectedVehicles(selectedVehicles);
     }
+  }, [isSettingsOpen, selectedUsers, selectedVehicles]);
 
-    return comparisonType === "user" ? userData : vehicleData;
+  // Get current data based on comparison type and selections
+  const getDataBasedOnType = (): ExpenseData[] => {
+    switch (comparisonType) {
+      case "user":
+        if (selectedUsers.length === 0) return [];
+        return users
+          .filter(user => selectedUsers.includes(user._id))
+          .map(user => ({
+            name: user.name,
+            fuel: Math.random() * 100000, // Replace with actual data from API
+            maintenance: Math.random() * 50000,
+            insurance: Math.random() * 30000,
+          }));
+        
+      case "vehicle":
+        if (selectedVehicles.length === 0) return [];
+        return vehicles
+          .filter(vehicle => selectedVehicles.includes(vehicle._id))
+          .map(vehicle => ({
+            name: vehicle.name,
+            fuel: Math.random() * 100000, // Replace with actual data from API
+            maintenance: Math.random() * 50000,
+            insurance: Math.random() * 30000,
+          }));
+        
+      default:
+        return [];
+    }
   };
 
   const currentData = getDataBasedOnType();
 
   const handleCheckboxChange = (value: string) => {
-    if (value === "radar") {
-      setChartTypes((prev) =>
-        prev.includes(value)
-          ? prev.filter((type) => type !== value)
-          : [...prev, value]
-      );
-    } else {
-      setChartTypes((prev) =>
-        prev.includes(value)
-          ? prev.filter((type) => type !== value)
-          : [...prev, value]
-      );
-    }
+    setChartTypes((prev) =>
+      prev.includes(value)
+        ? prev.filter((type) => type !== value)
+        : [...prev, value]
+    );
   };
 
   const handleExpenseTypeChange = (value: string) => {
@@ -196,8 +410,8 @@ const ExpenseComparison = () => {
     });
   };
 
-  const getTotalExpense = (item: any) => {
-    return expenseTypes.reduce((sum, type) => sum + (item[type] || 0), 0);
+  const getTotalExpense = (item: ExpenseData): number => {
+    return expenseTypes.reduce((sum, type) => sum + (Number(item[type]) || 0), 0);
   };
 
   const pieData = currentData.map((item) => ({
@@ -205,25 +419,47 @@ const ExpenseComparison = () => {
     value: getTotalExpense(item),
   }));
 
-  // Get unique vehicles for dropdown
-  const uniqueVehicles = Array.from(
-    new Set(userVehicleData.map((item) => item.vehicle))
-  );
+  // Handle selection changes
+  const toggleUserSelection = (userId: string) => {
+    setTempSelectedUsers(prev => 
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+  
+  const toggleVehicleSelection = (vehicleId: string) => {
+    setTempSelectedVehicles(prev => 
+      prev.includes(vehicleId)
+        ? prev.filter(id => id !== vehicleId)
+        : [...prev, vehicleId]
+    );
+  };
 
-  // Get users for the selected vehicle
-  const usersForSelectedVehicle = selectedVehicle
-    ? [
-        ...new Set(
-          userVehicleData
-            .filter((item) => item.vehicle === selectedVehicle)
-            .map((item) => item.user)
-        ),
-      ]
-    : [];
+  // Handle comparison type change
+  const handleComparisonTypeChange = (value: "user" | "vehicle" | "user-vehicle" | "vehicle-user") => {
+    setComparisonType(value);
+  };
 
-  const handleVehicleSelectionChange = (vehicle: string) => {
-    setSelectedVehicle(vehicle);
-    setSelectedUsersForVehicle([]); // Reset selected users when vehicle changes
+  // Function to safely set chart style
+  const setChartStyleSafely = (value: string) => {
+    if (value === "stacked" || value === "grouped") {
+      setChartStyle(value);
+    }
+  };
+
+  // Handle dialog actions
+  const handleDialogOk = () => {
+    setSelectedUsers(tempSelectedUsers);
+    setSelectedVehicles(tempSelectedVehicles);
+    setIsSettingsOpen(false);
+  };
+
+  const handleDialogReset = () => {
+    setTempSelectedUsers([]);
+    setTempSelectedVehicles([]);
+    setSelectedUsers([]);
+    setSelectedVehicles([]);
   };
 
   return (
@@ -271,7 +507,7 @@ const ExpenseComparison = () => {
                       </Label>
                       <RadioGroup
                         value={comparisonType}
-                        onValueChange={(value: any) => setComparisonType(value)}
+                        onValueChange={handleComparisonTypeChange}
                         className="flex flex-col space-y-1"
                       >
                         <div className="flex items-center space-x-2">
@@ -284,30 +520,6 @@ const ExpenseComparison = () => {
                           <RadioGroupItem value="vehicle" id="vehicle" />
                           <Label htmlFor="vehicle" className="text-gray-300">
                             Vehicle Comparison
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem
-                            value="user-vehicle"
-                            id="user-vehicle"
-                          />
-                          <Label
-                            htmlFor="user-vehicle"
-                            className="text-gray-300"
-                          >
-                            User-Vehicle Comparison
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem
-                            value="vehicle-user"
-                            id="vehicle-user"
-                          />
-                          <Label
-                            htmlFor="vehicle-user"
-                            className="text-gray-300"
-                          >
-                            Vehicle-User Comparison
                           </Label>
                         </div>
                       </RadioGroup>
@@ -330,7 +542,10 @@ const ExpenseComparison = () => {
                       <Label className="mt-4 block text-gray-300">
                         Chart Style
                       </Label>
-                      <Select value={chartStyle} onValueChange={setChartStyle}>
+                      <Select
+                        value={chartStyle}
+                        onValueChange={setChartStyleSafely}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
@@ -397,140 +612,81 @@ const ExpenseComparison = () => {
                         ))}
                       </div>
                     </div>
-
-                    {/* Vehicle Selection for User-Vehicle Comparison */}
-                    {comparisonType === "user-vehicle" && (
-                      <div className="mt-4 space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">
-                            Select Vehicle
-                          </Label>
-                          <Select
-                            value={selectedVehicle}
-                            onValueChange={handleVehicleSelectionChange}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a vehicle" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                ...new Set(
-                                  userVehicleData.map((item) => item.vehicle)
-                                ),
-                              ].map((vehicle) => (
-                                <SelectItem key={vehicle} value={vehicle}>
-                                  {vehicle}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {selectedVehicle && (
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium">
-                              Select Users
-                            </Label>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                              {usersForSelectedVehicle.map((user) => (
-                                <div
-                                  key={user}
-                                  className="flex items-center space-x-2"
-                                >
-                                  <Checkbox
-                                    id={`user-${user}`}
-                                    checked={selectedUsersForVehicle.includes(
-                                      user
-                                    )}
-                                    onCheckedChange={() =>
-                                      setSelectedUsersForVehicle((prev) =>
-                                        prev.includes(user)
-                                          ? prev.filter((name) => name !== user)
-                                          : [...prev, user]
-                                      )
-                                    }
-                                  />
-                                  <Label
-                                    htmlFor={`user-${user}`}
-                                    className="text-gray-300"
-                                  >
-                                    {user}
-                                  </Label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Vehicle Selection for Vehicle-User Comparison */}
-                    {comparisonType === "vehicle-user" && (
-                      <div className="mt-4 space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">
-                            Select User
-                          </Label>
-                          <Select
-                            value={selectedVehicle}
-                            onValueChange={handleVehicleSelectionChange}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a vehicle" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                ...new Set(
-                                  userVehicleData.map((item) => item.vehicle)
-                                ),
-                              ].map((vehicle) => (
-                                <SelectItem key={vehicle} value={vehicle}>
-                                  {vehicle}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {selectedVehicle && (
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium">
-                              Select Users
-                            </Label>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                              {usersForSelectedVehicle.map((user) => (
-                                <div
-                                  key={user}
-                                  className="flex items-center space-x-2"
-                                >
-                                  <Checkbox
-                                    id={`user-${user}`}
-                                    checked={selectedUsersForVehicle.includes(
-                                      user
-                                    )}
-                                    onCheckedChange={() =>
-                                      setSelectedUsersForVehicle((prev) =>
-                                        prev.includes(user)
-                                          ? prev.filter((name) => name !== user)
-                                          : [...prev, user]
-                                      )
-                                    }
-                                  />
-                                  <Label
-                                    htmlFor={`user-${user}`}
-                                    className="text-gray-300"
-                                  >
-                                    {user}
-                                  </Label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
+                
+                {/* User/Vehicle Selection Section */}
+                <div className="border-t pt-4 mt-4">
+                  {/* User Selection */}
+                  {comparisonType === "user" && (
+                    <div className="mb-4">
+                      <Label className="text-sm font-medium mb-2 block">
+                        Select Users
+                      </Label>
+                      <ScrollArea className="h-32 border rounded-md p-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {users.map((user) => (
+                            <div key={user._id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`select-user-${user._id}`}
+                                checked={tempSelectedUsers.includes(user._id)}
+                                onCheckedChange={() => {
+                                  const newSelection = tempSelectedUsers.includes(user._id)
+                                    ? tempSelectedUsers.filter(id => id !== user._id)
+                                    : [...tempSelectedUsers, user._id];
+                                  setTempSelectedUsers(newSelection);
+                                }}
+                              />
+                              <Label htmlFor={`select-user-${user._id}`}>
+                                {user.name}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  )}
+                  
+                  {/* Vehicle Selection */}
+                  {comparisonType === "vehicle" && (
+                    <div>
+                      <Label className="text-sm font-medium mb-2 block">
+                        Select Vehicles
+                      </Label>
+                      <ScrollArea className="h-32 border rounded-md p-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {vehicles.map((vehicle) => (
+                            <div key={vehicle._id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`select-vehicle-${vehicle._id}`}
+                                checked={tempSelectedVehicles.includes(vehicle._id)}
+                                onCheckedChange={() => {
+                                  const newSelection = tempSelectedVehicles.includes(vehicle._id)
+                                    ? tempSelectedVehicles.filter(id => id !== vehicle._id)
+                                    : [...tempSelectedVehicles, vehicle._id];
+                                  setTempSelectedVehicles(newSelection);
+                                }}
+                              />
+                              <Label htmlFor={`select-vehicle-${vehicle._id}`}>
+                                {vehicle.name} ({vehicle.registrationNumber})
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  )}
+                </div>
+
+                {/* Dialog Footer with OK and Reset buttons */}
+                <DialogFooter className="mt-6 flex justify-between">
+                  <Button variant="outline" onClick={handleDialogReset}>
+                    Reset
+                  </Button>
+                  <Button onClick={handleDialogOk}>
+                    OK
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
             <Button variant="outline" onClick={handleExportData}>
@@ -542,42 +698,67 @@ const ExpenseComparison = () => {
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          {chartTypes.includes("bar") && (
-            <ExpenseBarChart
-              data={currentData}
-              expenseTypes={expenseTypes}
-              chartStyle={chartStyle}
-              colors={COLORS}
-            />
-          )}
+          {isLoading ? (
+            <div className="col-span-2 flex justify-center items-center py-12">
+              <p>Loading expense data...</p>
+            </div>
+          ) : currentData.length === 0 ? (
+            <div className="col-span-2 flex justify-center items-center py-12">
+              <p>Please select users and/or vehicles to display expense data</p>
+            </div>
+          ) : (
+            <>
+              {chartTypes.includes("bar") && (
+                <div className="w-full">
+                  <ExpenseBarChart
+                    data={currentData}
+                    expenseTypes={expenseTypes}
+                    chartStyle={chartStyle}
+                    colors={COLORS}
+                  />
+                </div>
+              )}
 
-          {chartTypes.includes("radar") && (
-            <ExpenseRadarChart // Update the radar chart usage
-              data={currentData}
-              expenseTypes={expenseTypes}
-              colors={COLORS}
-            />
-          )}
+              {chartTypes.includes("radar") && (
+                <div className="w-full">
+                  <ExpenseRadarChart
+                    data={currentData}
+                    expenseTypes={expenseTypes}
+                    colors={COLORS}
+                  />
+                </div>
+              )}
 
-          {chartTypes.includes("line") && (
-            <ExpenseLineChart
-              data={currentData}
-              expenseTypes={expenseTypes}
-              colors={COLORS}
-            />
-          )}
+              {chartTypes.includes("line") && (
+                <div className="w-full">
+                  <ExpenseLineChart
+                    data={currentData}
+                    expenseTypes={expenseTypes}
+                    colors={COLORS}
+                  />
+                </div>
+              )}
 
-          {chartTypes.includes("area") && (
-            <ExpenseAreaChart
-              data={currentData}
-              expenseTypes={expenseTypes}
-              chartStyle={chartStyle}
-              colors={COLORS}
-            />
-          )}
+              {chartTypes.includes("area") && (
+                <div className="w-full">
+                  <ExpenseAreaChart
+                    data={currentData}
+                    expenseTypes={expenseTypes}
+                    chartStyle={chartStyle}
+                    colors={COLORS}
+                  />
+                </div>
+              )}
 
-          {chartTypes.includes("pie") && (
-            <ExpensePieChart data={pieData} colors={COLORS} />
+              {chartTypes.includes("pie") && (
+                <div className="w-full">
+                  <ExpensePieChart
+                    data={pieData}
+                    colors={COLORS}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
