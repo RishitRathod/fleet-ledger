@@ -42,24 +42,28 @@ interface UserVehicleData extends ExpenseData {
 }
 
 interface User {
-  _id: string;
+  id: string;
+  adminId: string;
   name: string;
-  email: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Vehicle {
-  _id: string;
+  id: string;
   name: string;
-  registrationNumber: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // API Services for fetching data
-const fetchUsersFromDb = async (): Promise<User[]> => {
+const fetchUsersFromDb = async (): Promise<{ success: boolean; users: User[] }> => {
   try {
     const userEmail = localStorage.getItem("email");
     if (!userEmail) {
       console.error("User email not found in localStorage");
-      return [];
+      return { success: false, users: [] };
     }
 
     const response = await fetch("http://localhost:5000/api/users/admin/users", {
@@ -74,23 +78,19 @@ const fetchUsersFromDb = async (): Promise<User[]> => {
 
     const data = await response.json();
     console.log("Users fetched successfully:", data);
-    if (data.success && data.users) {
-      return data.users;
-    } else {
-      throw new Error("Invalid users data");
-    }
+    return data;
   } catch (error) {
     console.error("Error fetching users:", error);
-    return [];
+    return { success: false, users: [] };
   }
 };
 
-const fetchVehiclesFromDb = async (): Promise<Vehicle[]> => {
+const fetchVehiclesFromDb = async (): Promise<{ success: boolean; vehicles: Vehicle[] }> => {
   try {
     const userEmail = localStorage.getItem("email");
     if (!userEmail) {
       console.error("User email not found in localStorage");
-      return [];
+      return { success: false, vehicles: [] };
     }
 
     const response = await fetch(
@@ -107,14 +107,10 @@ const fetchVehiclesFromDb = async (): Promise<Vehicle[]> => {
     }
 
     const data = await response.json();
-    if (data.success && data.vehicles) {
-      return data.vehicles;
-    } else {
-      throw new Error("Invalid vehicles data");
-    }
+    return data;
   } catch (error) {
     console.error("Error fetching vehicles:", error);
-    return [];
+    return { success: false, vehicles: [] };
   }
 };
 
@@ -190,17 +186,25 @@ const ExpenseComparison = () => {
 
       const dateRange = getDateRange();
       
+      console.log('Selected Users:', selectedUsers);
+      console.log('Selected Vehicles:', selectedVehicles);
+      
       switch (comparisonType) {
         case "vehicle":
           if (!selectedVehicles.length) {
             throw new Error("No vehicles selected for comparison");
           }
+          console.log('Vehicle comparison - selected vehicles:', selectedVehicles);
           requestBody = {
-            vehicleList: selectedVehicles.map(id => ({ vehicleId: id })),
+            vehicleList: selectedVehicles.map(id => {
+              console.log('Processing vehicle id:', id);
+              return { vehicleId: id };
+            }),
             startDate: dateRange.startDate,
             endDate: dateRange.endDate,
             models: "all"
           };
+          console.log('Vehicle comparison request body:', requestBody);
           endpoint = "getvehiclecomparison";
           break;
 
@@ -208,12 +212,17 @@ const ExpenseComparison = () => {
           if (!selectedUsers.length) {
             throw new Error("No users selected for comparison");
           }
+          console.log('User comparison - selected users:', selectedUsers);
           requestBody = {
-            userList: selectedUsers.map(id => ({ userId: id })),
+            userList: selectedUsers.map(id => {
+              console.log('Processing user id:', id);
+              return { userId: id };
+            }),
             startDate: dateRange.startDate,
             endDate: dateRange.endDate,
             models: "all"
           };
+          console.log('User comparison request body:', requestBody);
           endpoint = "getusercomparison";
           break;
 
@@ -224,13 +233,19 @@ const ExpenseComparison = () => {
           if (!selectedVehicles.length) {
             throw new Error("Please select at least one vehicle for comparison");
           }
+          console.log('User-Vehicle comparison - selected user:', selectedUsers[0]);
+          console.log('User-Vehicle comparison - selected vehicles:', selectedVehicles);
           requestBody = {
             userId: selectedUsers[0],
-            vehicleIds: selectedVehicles,
+            vehicleList: selectedVehicles.map(id => {
+              console.log('Processing vehicle id:', id);
+              return { vehicleId: id };
+            }),
             startDate: dateRange.startDate,
             endDate: dateRange.endDate,
             models: "all"
           };
+          console.log('User-Vehicle comparison request body:', requestBody);
           endpoint = "getuservehiclecomparison";
           break;
 
@@ -241,13 +256,19 @@ const ExpenseComparison = () => {
           if (!selectedUsers.length) {
             throw new Error("Please select at least one user for comparison");
           }
+          console.log('Vehicle-User comparison - selected vehicle:', selectedVehicles[0]);
+          console.log('Vehicle-User comparison - selected users:', selectedUsers);
           requestBody = {
             vehicleId: selectedVehicles[0],
-            userIds: selectedUsers,
+            userList: selectedUsers.map(id => {
+              console.log('Processing user id:', id);
+              return { userId: id };
+            }),
             startDate: dateRange.startDate,
             endDate: dateRange.endDate,
             models: "all"
           };
+          console.log('Vehicle-User comparison request body:', requestBody);
           endpoint = "getvehicleusercomparison";
           break;
 
@@ -297,19 +318,23 @@ const ExpenseComparison = () => {
         }
 
         // First fetch users and vehicles
-        const [usersData, vehiclesData] = await Promise.all([
+        const [usersResponse, vehiclesResponse] = await Promise.all([
           fetchUsersFromDb(),
           fetchVehiclesFromDb(),
         ]);
 
-        console.log('Fetched users:', usersData);
-        console.log('Fetched vehicles:', vehiclesData);
+        console.log('Fetched users:', usersResponse);
+        console.log('Fetched vehicles:', vehiclesResponse);
+
+        // Extract users from response
+        const usersData = usersResponse.users || [];
+        const vehiclesData = vehiclesResponse.vehicles || [];
 
         if (usersData.length > 0) {
           setUsers(usersData);
           // Only set initial selection if no users are currently selected
           if (selectedUsers.length === 0) {
-            const initialUserIds = [usersData[0]._id];
+            const initialUserIds = [usersData[0].id];
             setSelectedUsers(initialUserIds);
             setTempSelectedUsers(initialUserIds);
           }
@@ -326,7 +351,7 @@ const ExpenseComparison = () => {
           setVehicles(vehiclesData);
           // Only set initial selection if no vehicles are currently selected
           if (selectedVehicles.length === 0) {
-            const initialVehicleIds = [vehiclesData[0]._id];
+            const initialVehicleIds = [vehiclesData[0].id];
             setSelectedVehicles(initialVehicleIds);
             setTempSelectedVehicles(initialVehicleIds);
           }
@@ -340,8 +365,8 @@ const ExpenseComparison = () => {
         }
 
         // Fetch comparison data
-        const comparisonData = await fetchComparisonData();
-        if (comparisonData) {
+        const response = await fetchComparisonData();
+        if (response) {
           interface ComparisonDataItem {
             id: string;
             name: string;
@@ -353,13 +378,23 @@ const ExpenseComparison = () => {
               taxTotal?: number;
             };
           }
-          const formattedData = comparisonData.map((item: ComparisonDataItem) => ({
-            name: item.name,
-            refueling: item.details.refuelingTotal || 0,
-            tax: item.details.taxTotal || 0,
-            service: item.details.serviceTotal || 0,
-            accessories: item.details.accessoryTotal || 0,
-          })) || [];
+
+          // Handle both user and vehicle comparison responses
+          const comparisonData = response.data || response;
+          
+          const formattedData = comparisonData.map((item: ComparisonDataItem) => {
+            // For vehicle comparison, details might be directly on the item
+            const details = item.details || item;
+            return {
+              name: item.name,
+              refueling: details.refuelingTotal || 0,
+              tax: details.taxTotal || 0,
+              service: details.serviceTotal || 0,
+              accessories: details.accessoryTotal || 0,
+            };
+          }) || [];
+          
+          console.log('Formatted comparison data:', formattedData);
           setComparisonData(formattedData);
         }
       } catch (error) {
@@ -388,10 +423,19 @@ const ExpenseComparison = () => {
     if (selectedUsers.length > 0 || selectedVehicles.length > 0) {
       // Only fetch if we have a valid date range
       if (timeRange !== 'custom' || (customStartDate && customEndDate)) {
+        console.log('Fetching comparison data due to changes in:', {
+          selectedUsers,
+          selectedVehicles,
+          timeRange,
+          customStartDate,
+          customEndDate,
+          comparisonType,
+          expenseTypes
+        });
         fetchComparisonData();
       }
     }
-  }, [selectedUsers, selectedVehicles, timeRange, customStartDate, customEndDate]);
+  }, [selectedUsers, selectedVehicles, timeRange, customStartDate, customEndDate, comparisonType, expenseTypes]);
 
   const getDataBasedOnType = (): ExpenseData[] => {
     switch (comparisonType) {
@@ -444,41 +488,55 @@ const ExpenseComparison = () => {
 
   // Handle dialog actions
   const handleDialogOk = async () => {
-    // Update selected users and vehicles
-    setSelectedUsers(tempSelectedUsers);
+    if (!tempSelectedUsers.length && !tempSelectedVehicles.length) {
+      toast({
+        title: 'Error',
+        description: 'Please select at least one user or vehicle',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Update selected users and vehicles
+      setSelectedUsers(tempSelectedUsers);
+      setSelectedVehicles(tempSelectedVehicles);
+
+      // Fetch new comparison data
+      const newData = await fetchComparisonData();
+      if (newData) {
+        const formattedData = newData.map((item: any) => {
+          const details = item.details || item;
+          return {
+            name: item.name,
+            refueling: details.refuelingTotal || 0,
+            tax: details.taxTotal || 0,
+            service: details.serviceTotal || 0,
+            accessories: details.accessoryTotal || 0,
+          };
+        });
+        setComparisonData(formattedData);
+      }
+
+      // Close the dialog
+      setIsSettingsOpen(false);
+    } catch (error) {
+      console.error('Error updating comparison data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update comparison data',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
     setSelectedVehicles(tempSelectedVehicles);
     setIsSettingsOpen(false);
 
-    // Fetch new comparison data with selected users
+    // Fetch new comparison data
     try {
-      const response = await fetch("http://localhost:5000/api/comparison/getusercomparison", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userList: tempSelectedUsers.length ? tempSelectedUsers.map(id => ({ userId: id })) : [{ userId: users[0]?._id || 'all' }],
-          startDate: timeRange ? getStartDate() : "2000-01-01",
-          endDate: new Date().toISOString(),
-          models: "all"
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch comparison data');
-      }
-
-      const data = await response.json();
-      if (data && data.data) {
-        const formattedData = data.data.map((item: any) => ({
-          name: item.name,
-          refueling: item.refueling || 0,
-          tax: item.tax || 0,
-          service: item.service || 0,
-          accessories: item.accessories || 0,
-        }));
-        setComparisonData(formattedData);
-      }
+      await fetchComparisonData();
     } catch (error) {
       console.error('Error updating comparison data:', error);
       toast({
@@ -729,32 +787,32 @@ const ExpenseComparison = () => {
                       <ScrollArea className="h-32 border rounded-md p-2">
                         <div className="grid grid-cols-2 gap-2">
                           {users.map((user) => (
-                            <div key={user._id} className="flex items-center space-x-2">
+                            <div key={user.id} className="flex items-center space-x-2">
                               {comparisonType === "user-vehicle" ? (
                                 <div className="flex items-center space-x-2">
                                   <input
                                     type="radio"
                                     name="user-selection"
-                                    value={user._id}
-                                    id={`select-user-${user._id}`}
-                                    checked={tempSelectedUsers.includes(user._id)}
-                                    onChange={() => setTempSelectedUsers([user._id])}
+                                    value={user.id}
+                                    id={`select-user-${user.id}`}
+                                    checked={tempSelectedUsers.includes(user.id)}
+                                    onChange={() => setTempSelectedUsers([user.id])}
                                   />
                                 </div>
                               ) : (
                                 <Checkbox
-                                  id={`select-user-${user._id}`}
-                                  checked={tempSelectedUsers.includes(user._id)}
+                                  id={`select-user-${user.id}`}
+                                  checked={tempSelectedUsers.includes(user.id)}
                                   onCheckedChange={() => {
-                                    const newSelection = tempSelectedUsers.includes(user._id)
-                                      ? tempSelectedUsers.filter(id => id !== user._id)
-                                      : [...tempSelectedUsers, user._id];
+                                    const newSelection = tempSelectedUsers.includes(user.id)
+                                      ? tempSelectedUsers.filter(id => id !== user.id)
+                                      : [...tempSelectedUsers, user.id];
                                     setTempSelectedUsers(newSelection);
                                   }}
                                 />
                               )}
                               <Label
-                                htmlFor={`select-user-${user._id}`}
+                                htmlFor={`select-user-${user.id}`}
                                 className="text-gray-300"
                               >
                                 {user.name}
@@ -776,32 +834,32 @@ const ExpenseComparison = () => {
                       <ScrollArea className="h-32 border rounded-md p-2">
                         <div className="grid grid-cols-2 gap-2">
                           {vehicles.map((vehicle) => (
-                            <div key={vehicle._id} className="flex items-center space-x-2">
+                            <div key={vehicle.id} className="flex items-center space-x-2">
                               {comparisonType === "vehicle-user" ? (
                                 <div className="flex items-center space-x-2">
                                   <input
                                     type="radio"
                                     name="vehicle-selection"
-                                    value={vehicle._id}
-                                    id={`select-vehicle-${vehicle._id}`}
-                                    checked={tempSelectedVehicles.includes(vehicle._id)}
-                                    onChange={() => setTempSelectedVehicles([vehicle._id])}
+                                    value={vehicle.id}
+                                    id={`select-vehicle-${vehicle.id}`}
+                                    checked={tempSelectedVehicles.includes(vehicle.id)}
+                                    onChange={() => setTempSelectedVehicles([vehicle.id])}
                                   />
                                 </div>
                               ) : (
                                 <Checkbox
-                                  id={`select-vehicle-${vehicle._id}`}
-                                  checked={tempSelectedVehicles.includes(vehicle._id)}
+                                  id={`select-vehicle-${vehicle.id}`}
+                                  checked={tempSelectedVehicles.includes(vehicle.id)}
                                   onCheckedChange={() => {
-                                    const newSelection = tempSelectedVehicles.includes(vehicle._id)
-                                      ? tempSelectedVehicles.filter(id => id !== vehicle._id)
-                                      : [...tempSelectedVehicles, vehicle._id];
+                                    const newSelection = tempSelectedVehicles.includes(vehicle.id)
+                                      ? tempSelectedVehicles.filter(id => id !== vehicle.id)
+                                      : [...tempSelectedVehicles, vehicle.id];
                                     setTempSelectedVehicles(newSelection);
                                   }}
                                 />
                               )}
                               <Label
-                                htmlFor={`select-vehicle-${vehicle._id}`}
+                                htmlFor={`select-vehicle-${vehicle.id}`}
                                 className="text-gray-300"
                               >
                                 {vehicle.name}
@@ -822,19 +880,19 @@ const ExpenseComparison = () => {
                       <ScrollArea className="h-32 border rounded-md p-2">
                         <div className="grid grid-cols-2 gap-2">
                           {users.map((user) => (
-                            <div key={user._id} className="flex items-center space-x-2">
+                            <div key={user.id} className="flex items-center space-x-2">
                               <Checkbox
-                                id={`select-user-${user._id}`}
-                                checked={tempSelectedUsers.includes(user._id)}
+                                id={`select-user-${user.id}`}
+                                checked={tempSelectedUsers.includes(user.id)}
                                 onCheckedChange={() => {
-                                  const newSelection = tempSelectedUsers.includes(user._id)
-                                    ? tempSelectedUsers.filter(id => id !== user._id)
-                                    : [...tempSelectedUsers, user._id];
+                                  const newSelection = tempSelectedUsers.includes(user.id)
+                                    ? tempSelectedUsers.filter(id => id !== user.id)
+                                    : [...tempSelectedUsers, user.id];
                                   setTempSelectedUsers(newSelection);
                                 }}
                               />
                               <Label
-                                htmlFor={`select-user-${user._id}`}
+                                htmlFor={`select-user-${user.id}`}
                                 className="text-gray-300"
                               >
                                 {user.name}

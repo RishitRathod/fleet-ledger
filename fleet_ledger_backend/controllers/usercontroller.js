@@ -27,7 +27,7 @@ exports.getUsersUnderAdmin = async (req, res) => {
 
         // Find users under the admin where status is 'accepted'
         const invitations = await Invitation.findAll({
-            where: { adminId: adminId}
+            where: { adminId: adminId }
         });
 
         if (!invitations.length) {
@@ -35,9 +35,18 @@ exports.getUsersUnderAdmin = async (req, res) => {
             return res.status(404).json({ error: "No users found under this admin" });
         }
 
-        console.log("Users found under admin:", invitations);
+        // Get user emails from invitations
+        const name = invitations.map(invitation => invitation.name);
 
-        res.status(200).json({ success: true, users: invitations });
+        // Find users with matching emails
+        const users = await User.findAll({
+            where: { name: name }
+        });
+
+        console.log("Users found under admin:", users);
+
+        res.status(200).json({ success: true, users: users });
+        
 
     } catch (err) {
         console.error("Error fetching users:", err);

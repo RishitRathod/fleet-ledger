@@ -263,15 +263,31 @@ useEffect(() => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-1">
+    <div className="container mx-auto px-4 py-1 max-w-full">
       {loading ? (
         <div>Loading...</div>
       ) : error ? (
         <div>Error: {error}</div>
       ) : (
         <>
-          <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Data Table</h1>
-          <div className="bg-white dark:bg-neutral-800 shadow rounded-lg p-5">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-6">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Data Table</h1>
+            <div className="flex items-center w-full sm:w-auto">
+              <label className="mr-2 text-sm text-gray-700 dark:text-neutral-200 whitespace-nowrap">Select Vehicle:</label>
+              <select
+                className="w-full sm:w-auto py-1.5 px-3 border rounded-lg text-sm text-gray-800 bg-white dark:bg-neutral-900 dark:text-neutral-200"
+                value={selectedVehicle}
+                onChange={handleVehicleChange}
+              >
+                {vehicles.map((vehicle) => (
+                  <option key={vehicle.id} value={vehicle.name}>
+                    {vehicle.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-neutral-800 shadow rounded-lg p-5 overflow-hidden">
             <div id="hs-datatable-with-export" className="flex flex-col">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div className="grow">
@@ -406,7 +422,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div className="min-h-[400px] overflow-x-auto">
+              <div className="min-h-[400px] overflow-x-auto max-w-full -mx-5 px-5">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
                   <thead className="bg-gray-50 dark:bg-neutral-800">
                     <tr>
@@ -626,7 +642,7 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          {/* <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div className="grow">
               <div className="relative max-w-xs w-full">
                 <label htmlFor="vehicle-select" className="sr-only">Select Vehicle</label>
@@ -643,7 +659,7 @@ useEffect(() => {
                 </select>
               </div>
             </div>
-          </div>
+          </div> */}
         </>
       )}
     </div>
