@@ -115,8 +115,52 @@ const fetchVehiclesFromDb = async (): Promise<{ success: boolean; vehicles: Vehi
 };
 
 const fetchUserVehicleRelationsFromDb = async (): Promise<UserVehicleData[]> => {
-  // This would be replaced with actual API call
-  return Promise.resolve([]);
+  try {
+    const userEmail = localStorage.getItem("email");
+    if (!userEmail) {
+      console.error("User email not found in localStorage");
+      return [];
+    }
+
+    // Get the current date and 30 days ago for default date range
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    const response = await fetch("http://localhost:5000/api/comparison/getuservehiclecomparison", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: userEmail,
+        startDate,
+        endDate,
+        models: ['Refueling', 'Service', 'Accessories', 'Tax']
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user-vehicle relations: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("User-vehicle relations data:", data);
+
+    if (data.success && data.data) {
+      // Transform the data into the format expected by charts
+      return data.data.map((item: any) => ({
+        user: item.userName,
+        vehicle: item.vehicleName,
+        refueling: item.refuelingTotal || 0,
+        tax: item.taxTotal || 0,
+        service: item.serviceTotal || 0,
+        accessories: item.accessoriesTotal || 0,
+        name: `${item.userName} - ${item.vehicleName}`,
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching user-vehicle relations:", error);
+    return [];
+  }
 };
 
 const ExpenseComparison = () => {
@@ -445,6 +489,14 @@ const ExpenseComparison = () => {
 
       case "vehicle":
         if (selectedVehicles.length === 0) return [];
+        return comparisonData;
+
+      case "user-vehicle":
+        if (selectedUsers.length !== 1 || selectedVehicles.length === 0) return [];
+        return comparisonData;
+
+      case "vehicle-user":
+        if (selectedVehicles.length !== 1 || selectedUsers.length === 0) return [];
         return comparisonData;
 
       default:

@@ -11,13 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface UserOption {
-  value: string;
-  label: string;
+  name: string;
 }
 
 interface VehicleOption {
-  value: string;
-  label: string;
+  name: string;
 }
 
 export function AssignVehicleModal({
@@ -58,10 +56,11 @@ export function AssignVehicleModal({
 
       const data = await response.json();
 
+      console.log("Users found under admin:", data.users);
+
       if (data.success && data.users) {
         const userOptions = data.users.map((user: any) => ({
-          value: user.id,
-          label: user.name,
+          name: user.name
         }));
 
         setUsers(userOptions);
@@ -87,11 +86,11 @@ export function AssignVehicleModal({
       );
 
       const data = await response.json();
+      console.log("Vehicles found under admin:", data.vehicles);
 
       if (data.success && data.vehicles) {
         const vehicleOptions = data.vehicles.map((vehicle: any) => ({
-          value: vehicle.id,
-          label: vehicle.name,
+          name: vehicle.name
         }));
 
         setVehicles(vehicleOptions);
@@ -112,6 +111,7 @@ export function AssignVehicleModal({
 
     setLoading(true);
     try {
+      console.log("Assigning user to vehicle:", selectedUser, selectedVehicle);
       const response = await fetch(
         "http://localhost:5000/api/groups/assignUserToVehicle",
         {
@@ -158,32 +158,32 @@ export function AssignVehicleModal({
           <div className="space-y-2">
             <Label className="text-sm font-medium">Username</Label>
             <select
+              id="user"
               value={selectedUser}
               onChange={(e) => setSelectedUser(e.target.value)}
               className="w-full border border-gray-300 rounded-lg py-2 px-4"
-              required
             >
-              <option value="">Select username</option>
+              <option value="">Select a user</option>
               {users.map((user) => (
-                <option key={user.value} value={user.value}>
-                  {user.label}
+                <option key={user.name} value={user.name}>
+                  {user.name}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Vehicle Name</Label>
+            <Label className="text-sm font-medium">Vehicle</Label>
             <select
+              id="vehicle"
               value={selectedVehicle}
               onChange={(e) => setSelectedVehicle(e.target.value)}
               className="w-full border border-gray-300 rounded-lg py-2 px-4"
-              required
             >
-              <option value="">Select vehicle</option>
+              <option value="">Select a vehicle</option>
               {vehicles.map((vehicle) => (
-                <option key={vehicle.value} value={vehicle.value}>
-                  {vehicle.label}
+                <option key={vehicle.name} value={vehicle.name}>
+                  {vehicle.name}
                 </option>
               ))}
             </select>
