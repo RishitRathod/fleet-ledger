@@ -1,4 +1,5 @@
-import React from 'react';
+"use client"
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -8,7 +9,7 @@ interface ExpenseLineChartProps {
   colors: string[];
 }
 
-const ExpenseLineChart: React.FC<ExpenseLineChartProps> = ({ data, expenseTypes, colors }) => {
+function ExpenseLineChart({ data, expenseTypes, colors }: ExpenseLineChartProps) {
   return (
     <Card className="p-4 md:p-6">
       <CardHeader className="p-0 mb-4">
@@ -28,6 +29,8 @@ const ExpenseLineChart: React.FC<ExpenseLineChartProps> = ({ data, expenseTypes,
                 type="monotone"
                 dataKey={type}
                 stroke={colors[index % colors.length]}
+                dot={false}
+                strokeWidth={2}
               />
             ))}
           </LineChart>
@@ -35,6 +38,6 @@ const ExpenseLineChart: React.FC<ExpenseLineChartProps> = ({ data, expenseTypes,
       </div>
     </Card>
   );
-};
+}
 
 export default ExpenseLineChart;

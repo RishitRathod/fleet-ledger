@@ -19,16 +19,20 @@ const getusercomparison = async (req, res) => {
         // Handle user list
         let whereClause = {};
         
-        if (!userList || (Array.isArray(userList) && userList.length === 1 && userList[0].userId === 'all')) {
-            // Fetch all users
-        } else if (Array.isArray(userList) && userList.length > 0) {
-            const userIds = userList.map(obj => obj.userId);
-            if (userIds.some(id => !id)) {
-                return res.status(400).json({ error: 'All objects must have a userId property' });
-            }
-            whereClause.id = userIds;
+        if (!userList || !Array.isArray(userList) || userList.length === 0) {
+            // Fetch all users if userList is not provided or empty
         } else {
-            return res.status(400).json({ error: 'UserList must be "all" or an array of user objects' });
+            // Check if any userIds are 'all', null, or undefined
+            const hasAllUsers = userList.some(obj => !obj.userId || obj.userId === 'all');
+            
+            if (!hasAllUsers) {
+                // If no 'all' users found, filter by specific userIds
+                const userIds = userList.map(obj => obj.userId).filter(id => id);
+                if (userIds.length > 0) {
+                    whereClause.id = userIds;
+                }
+            }
+            // If hasAllUsers is true, whereClause remains empty to fetch all users
         }
 
         let dateFilter = {};
@@ -139,54 +143,58 @@ const getvehiclecomparison = async (req, res) => {
     try {
         const { vehicleList, startDate, endDate, models } = req.body;
 
-        // Handle date range validation first
-        if (!startDate || !endDate) {
-            return res.status(400).json({ error: 'Both startDate and endDate are required' });
-        }
-
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            return res.status(400).json({ error: 'Invalid date format' });
-        }
-
-        if (start > end) {
-            return res.status(400).json({ error: 'startDate cannot be later than endDate' });
-        }
-
-        // Validate and process models
+        // Handle models
         const validModels = ['Refueling', 'Service', 'Accessories', 'Tax'];
-        let selectedModels;
+        let selectedModels = validModels; // Default to all models
         
-        if (!models || models === 'all') {
-            selectedModels = validModels;
-        } else if (Array.isArray(models)) {
+        if (models && models !== 'all' && Array.isArray(models)) {
             selectedModels = models.filter(model => validModels.includes(model));
             if (selectedModels.length === 0) {
                 return res.status(400).json({ error: 'No valid models selected' });
             }
-        } else {
-            return res.status(400).json({ error: 'Models must be "all" or an array of valid model names' });
         }
 
-        // Handle vehicle list
+        // Handle user list
         let whereClause = {};
         
-        if (!vehicleList || (Array.isArray(vehicleList) && vehicleList.length === 1 && vehicleList[0].vehicleId === 'all')) {
-            // Fetch all vehicles
-        } else if (Array.isArray(vehicleList) && vehicleList.length > 0) {
-            const vehicleIds = vehicleList.map(obj => obj.vehicleId);
-            if (vehicleIds.some(id => !id)) {
-                return res.status(400).json({ error: 'All objects must have a vehicleId property' });
-            }
-            whereClause.id = vehicleIds;
+        if (!vehicleList || !Array.isArray(vehicleList) || vehicleList.length === 0) {
+            // Fetch all users if userList is not provided or empty
         } else {
-            return res.status(400).json({ error: 'VehicleList must be "all" or an array of vehicle objects' });
+            // Check if any userIds are 'all', null, or undefined
+            const hasAllUsers = vehicleList.some(obj => !obj.vehicleId || obj.vehicleId === 'all');
+            
+            if (!hasAllUsers) {
+                // If no 'all' users found, filter by specific userIds
+                const userIds = vehicleList.map(obj => obj.vehicleId).filter(id => id);
+                if (userIds.length > 0) {
+                    whereClause.id = userIds;
+                }
+            }
+            // If hasAllUsers is true, whereClause remains empty to fetch all users
         }
 
-        // Fetch vehicles with filtered data
-        const vehicles = await Vehicle.findAll({
+        let dateFilter = {};
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return res.status(400).json({ error: 'Invalid date format' });
+            }
+
+            if (start > end) {
+                return res.status(400).json({ error: 'startDate cannot be later than endDate' });
+            }
+
+            dateFilter = {
+                createdAt: {
+                    [Op.between]: [start, end]
+                }
+            };
+        }
+
+        // Fetch users based on the where clause
+        const users = await Vehicle.findAll({
             where: whereClause,
             include: [{
                 model: Group,
@@ -220,8 +228,8 @@ const getvehiclecomparison = async (req, res) => {
             order: [['name', 'ASC']]
         });
 
-        // Process the data with filtered models
-        const vehicleData = vehicles.map(vehicle => {
+        // Process the data
+        const vehicleData = users.map(vehicle => {
             const details = {};
             let totalAmount = 0;
 
@@ -263,7 +271,7 @@ const getvehiclecomparison = async (req, res) => {
 
         res.json(vehicleData);
     } catch (error) {
-        console.error('Error fetching vehicles with total amount:', error);
+        console.error('Error fetching users with total amount:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
