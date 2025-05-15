@@ -21,13 +21,27 @@ const initializeDatabase = async () => {
     }
 };
 
-// CORS Configuration
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://fleet-ledger.vercel.app', 'https://fleet-ledger-xdjt.onrender.com'],
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://fleet-ledger.vercel.app',
+    'https://fleet-ledger-xdjt.onrender.com'
+  ];
+  
+  app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
-}));
+  }));
+
+
 
 // Middleware
 app.use(express.json());
