@@ -23,7 +23,7 @@ const initializeDatabase = async () => {
 
 // CORS Configuration
 app.use(cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173' || 'https://jade-kitsune-fa7a90.netlify.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
