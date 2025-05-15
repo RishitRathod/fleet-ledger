@@ -12,6 +12,7 @@ router.get('/vehiclewiseamount', vehiclewiseController.getVehiclesWithTotalAmoun
 router.get('/vehiclewiseamount/date-range', vehiclewiseController.getVehiclesWithTotalAmountByDateRange);
 router.get('/getVehiclesWithTotalAmount', getVehiclesWithTotalAmount.getVehiclesWithTotalAmount);
 router.get('/getExpenseCategory', getExpenseCategory.getExpenseCategory);
+router.post('/getExpenseCategoryByUserEmail', getExpenseCategory.getExpenseCategoryByUserEmail);
 // router.put('/:id', vehicleController.updateVehicle);
 // router.delete('/:id', vehicleController.deleteVehicle);
 

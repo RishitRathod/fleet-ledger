@@ -39,33 +39,42 @@ export function ExpenseCategory({ className }: { className?: string }) {
   React.useEffect(() => {
     const fetchExpenseData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/vehicles/getExpenseCategory');
+        const role = localStorage.getItem('role');
+        let response;
+        if(role === 'admin') {
+          response = await fetch('http://localhost:5000/api/vehicles/getExpenseCategory');
+        } else {
+          const userEmail = localStorage.getItem('email');
+          console.log('Fetching expense data for user with email:', userEmail);
+          response = await fetch('http://localhost:5000/api/vehicles/getExpenseCategoryByUserEmail', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: userEmail }),
+          });
+        }
+
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
+
         const data = await response.json();
-        // Get the first vehicle's data for the expense breakdown
-        if (data.length > 0) {
-          setExpenseData(data[0]);
+        const expenseInfo = Array.isArray(data) ? data[0] : data;
+
+        if (expenseInfo) {
+          setExpenseData(expenseInfo);
           
           // Log the expense distribution
           console.log('\n📊 Expense Distribution Analysis');
           console.log('----------------------------------------');
-          console.log(`Vehicle: ${data[0].name}`);
-          console.log(`Total Expenses: ₹${data[0].totalAmount.toLocaleString()}`);
+          console.log(`Vehicle: ${expenseInfo.name}`);
+          console.log(`Total Expenses: ₹${expenseInfo.totalAmount.toLocaleString()}`);
           console.log('\nExpense Breakdown:');
-          console.log(`1. Refueling: ₹${data[0].expenseBreakdown.refueling.amount.toLocaleString()} (${data[0].expenseBreakdown.refueling.percentage.toFixed(2)}%)`);
-          console.log(`2. Services: ₹${data[0].expenseBreakdown.service.amount.toLocaleString()} (${data[0].expenseBreakdown.service.percentage.toFixed(2)}%)`);
-          console.log(`3. Accessories: ₹${data[0].expenseBreakdown.accessories.amount.toLocaleString()} (${data[0].expenseBreakdown.accessories.percentage.toFixed(2)}%)`);
+          console.log(`1. Refueling: ₹${expenseInfo.expenseBreakdown.refueling.amount.toLocaleString()} (${expenseInfo.expenseBreakdown.refueling.percentage.toFixed(2)}%)`);
+          console.log(`2. Services: ₹${expenseInfo.expenseBreakdown.service.amount.toLocaleString()} (${expenseInfo.expenseBreakdown.service.percentage.toFixed(2)}%)`);
+          console.log(`3. Accessories: ₹${expenseInfo.expenseBreakdown.accessories.amount.toLocaleString()} (${expenseInfo.expenseBreakdown.accessories.percentage.toFixed(2)}%)`);
           console.log('----------------------------------------');
-          
-          // Log percentage distribution analysis
-          console.log('\n📈 Percentage Distribution Analysis');
-          console.log('----------------------------------------');
-          const totalPercentage = data[0].expenseBreakdown.refueling.percentage + 
-                                data[0].expenseBreakdown.service.percentage + 
-                                data[0].expenseBreakdown.accessories.percentage;
-          console.log(`Total Percentage: ${totalPercentage.toFixed(2)}%`);
           console.log('----------------------------------------');
         }
       } catch (error) {

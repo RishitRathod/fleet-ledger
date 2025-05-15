@@ -7,7 +7,7 @@ const { User, Vehicle, Group, Refueling } = require('../models'); // Ensure corr
 
 exports.createVehicle = async (req, res) => {
     try {
-        const { name, email } = req.body; // Get email from request
+        const { vehicleName, email } = req.body; // Get email from request
 
         // Find user by email
         const user = await User.findOne({ where: { email } });
@@ -16,7 +16,7 @@ exports.createVehicle = async (req, res) => {
         }
 
         // Create a new vehicle
-        const vehicle = await Vehicle.create({ name });
+        const vehicle = await Vehicle.create({ name: vehicleName });
 
         // Assign the vehicle to the user in Group table
         await Group.create({ userId: user.id, vehicleId: vehicle.id });
