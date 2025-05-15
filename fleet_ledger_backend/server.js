@@ -28,11 +28,14 @@ const allowedOrigins = [
     'https://fleet-ledger-xdjt.onrender.com'
   ];
   
+
+
   app.use(cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn('❌ Blocked by CORS:', origin);
         callback(new Error('Not allowed by CORS'));
       }
     },
@@ -40,10 +43,10 @@ const allowedOrigins = [
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   }));
-
-
+  
 
 // Middleware
+app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
