@@ -1,7 +1,7 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
-import { CartesianGrid, Dot, Line, LineChart } from "recharts"
+import * as React from "react"
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 
 import {
   Card,
@@ -14,102 +14,98 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 90, fill: "var(--color-other)" },
-]
 
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-    color: "hsl(var(--chart-2))",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig
+interface ChartData {
+  name: string;
+  amount: number;
+  fill?: string;
+}
 
-export function LineChartComponent() {
+interface LineChartProps {
+  data: ChartData[]
+}
+
+function LineChart({ data }: LineChartProps) {
+  const total = React.useMemo(() => {
+    return data.reduce((acc, curr) => acc + curr.amount, 0)
+  }, [data])
+
+  const chartConfig = React.useMemo(() => {
+    return data.reduce((acc, item, index) => {
+      acc[item.name] = {
+        label: item.name,
+        color: item.fill || `hsl(var(--chart-${index + 1}))`,
+      }
+      return acc
+    }, {} as ChartConfig)
+  }, [data])
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Line Chart - Dots Colors</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Expense Trend</CardTitle>
+        <CardDescription>Monthly expense trend</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              top: 24,
-              left: 24,
-              right: 24,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  indicator="line"
-                  nameKey="visitors"
-                  hideLabel
+          <div className="h-full w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsLineChart
+                data={data}
+                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis tickFormatter={(value: number) => `₹${value.toLocaleString()}`} />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload || payload.length === 0) return null
+                    const data = payload[0]
+                    return (
+                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="flex flex-col">
+                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                              Month
+                            </span>
+                            <span className="font-bold">{data.payload?.name || 'N/A'}</span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                              Amount
+                            </span>
+                            <span className="font-bold">
+                              ₹{(data.payload?.amount || 0).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }}
                 />
-              }
-            />
-            <Line
-              dataKey="visitors"
-              type="natural"
-              stroke="var(--color-visitors)"
-              strokeWidth={2}
-              dot={({ payload, ...props }) => {
-                return (
-                  <Dot
-                    key={payload.browser}
-                    r={5}
-                    cx={props.cx}
-                    cy={props.cy}
-                    fill={payload.fill}
-                    stroke={payload.fill}
-                  />
-                )
-              }}
-            />
-          </LineChart>
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke={data[0]?.fill || "hsl(var(--chart-1))"}
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: data[0]?.fill || "hsl(var(--chart-1))" }}
+                />
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          </div>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Total Expense: ₹{total.toLocaleString()}
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+          Showing monthly expense trend
         </div>
       </CardFooter>
     </Card>
   )
 }
+
+export default LineChart

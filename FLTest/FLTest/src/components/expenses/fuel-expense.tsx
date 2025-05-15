@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { useExpenseModal } from "./expense-store";
-
+import CalendarDialog from "../calender-dialog";
 interface VehicleOption {
   value: string;
   label: string;
@@ -44,7 +44,7 @@ export function FuelExpenseModal() {
   const { isOpen, onClose, type } = useExpenseModal();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
   const userEmail = localStorage.getItem("email");
@@ -52,7 +52,6 @@ export function FuelExpenseModal() {
   const [fuelQuantity, setFuelQuantity] = useState<number>(0);
   const [pricePerLiter, setPricePerLiter] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
 
   useEffect(() => {
     if (userEmail) {
@@ -113,14 +112,14 @@ export function FuelExpenseModal() {
       return false;
     }
 
-    // if (!selectedDate) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Please select a date",
-    //     variant: "destructive",
-    //   })
-    //   return false
-    // }
+    if (!selectedDate) {
+      toast({
+        title: "Error",
+        description: "Please select a date",
+        variant: "destructive",
+      });
+      return false;
+    }
 
     if (!selectedFuelType) {
       toast({
@@ -142,8 +141,10 @@ export function FuelExpenseModal() {
     setLoading(true);
 
     try {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      const email = localStorage.getItem("email");
       const response = await fetch(
-        "http://localhost:5000/api/refuelings/addFuelEntry",
+        "http://localhost:5000/api/refuelings/add",
         {
           method: "POST",
           headers: {
@@ -151,18 +152,19 @@ export function FuelExpenseModal() {
           },
           body: JSON.stringify({
             vehicleId: selectedVehicle,
-            date: selectedDate?.toISOString(),
+            date: formattedDate,
             fuelType: selectedFuelType,
             liters: fuelQuantity,
             pricePerLiter,
             totalAmount,
-            groupId,
+            email
           }),
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to add expense");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add expense");
       }
 
       toast({
@@ -171,10 +173,10 @@ export function FuelExpenseModal() {
       });
 
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to add expense",
+        description: error.message || "Failed to add expense",
         variant: "destructive",
       });
     } finally {
@@ -211,6 +213,8 @@ export function FuelExpenseModal() {
                 </SelectContent>
               </Select>
             </div>
+
+            <CalendarDialog />
 
             {/* <div className="space-y-2">
               <Label className="text-sm font-medium">Date</Label>

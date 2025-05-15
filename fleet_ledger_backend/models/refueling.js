@@ -15,7 +15,7 @@ const Refueling = sequelize.define('Refueling', {
     },
     amount: {
         type: DataTypes.FLOAT,
-        allowNull: false,
+        allowNull: true,
     },
     liters: {
         type: DataTypes.FLOAT,
@@ -28,6 +28,11 @@ const Refueling = sequelize.define('Refueling', {
     kmEnd: {
         type: DataTypes.INTEGER,
         allowNull: false,
+    },
+    date: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
     },
     totalRun: {
         type: DataTypes.INTEGER,

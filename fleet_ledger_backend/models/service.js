@@ -9,10 +9,11 @@ const Service = sequelize.define('Service', {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
-    // date: {
-    //     type: DataTypes.DATE,
-    //     allowNull: true,
-    // },
+    date: {
+        type: DataTypes.DATE,
+        allowNull: true, // Temporarily allow null during transition
+        defaultValue: DataTypes.NOW
+    },
     service_type: {
         type: DataTypes.STRING,
         allowNull: false,

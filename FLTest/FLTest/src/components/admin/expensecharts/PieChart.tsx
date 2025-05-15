@@ -10,25 +10,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-} from "@/components/ui/chart";
+} from "@/components/ui/chart"
 
 interface ChartData {
   name: string;
   amount: number;
+  fill?: string;
 }
 
 interface PieChartProps {
   chartData: ChartData[];
 }
-
-import { TooltipProps as RechartsTooltipProps } from "recharts";
-
-type CustomTooltipProps = RechartsTooltipProps<number, string>;
 
 function PieChart({ chartData }: PieChartProps) {
   const total = React.useMemo(() => {
@@ -78,75 +75,67 @@ function PieChart({ chartData }: PieChartProps) {
   }, [chartData])
 
   return (
-    <Card >
-      <CardHeader >
+    <Card>
+      <CardHeader>
         <CardTitle>Expense Distribution</CardTitle>
         <CardDescription>Total expenses by category</CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer config={chartConfig}>
-          <div className="h-[280px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart
-                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
-              >
-              <ChartTooltip
-                content={({ active, payload }: CustomTooltipProps) => {
-                  if (!active || !payload || payload.length === 0) return null;
-                  const data = payload[0];
-                  return (
-                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            Category
-                          </span>
-                          <span className="font-bold">{data.name}</span>
+      <CardContent>
+        <div className="w-full h-full">
+          <ChartContainer config={chartConfig}>
+            <div className="h-full w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart
+                  margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                >
+                  <Pie
+                    data={chartData}
+                    dataKey="amount"
+                    nameKey="name"
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={0}
+                    strokeWidth={0}
+                  >
+                    <Label content={<CustomLabel />} position="center" />
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.fill || `hsl(var(--chart-${(index % 5) + 1}))`}
+                      />
+                    ))}
+                  </Pie>
+                  <ChartTooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload || payload.length === 0) return null;
+                      const data = payload[0];
+                      return (
+                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-col">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                Category
+                              </span>
+                              <span className="font-bold">{data.payload?.name || 'N/A'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                Amount
+                              </span>
+                              <span className="font-bold">
+                                ₹{(data.payload?.amount || 0).toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            Amount
-                          </span>
-                          <span className="font-bold">
-                            ₹{data.value?.toLocaleString() ?? 0}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }}
-              />
-              <Pie
-                data={chartData}
-                dataKey="amount"
-                nameKey="name"
-                innerRadius={70}
-                outerRadius={100}
-                paddingAngle={0}
-                strokeWidth={0}
-              >
-                <Label content={<CustomLabel />} position="center" />
-                {chartData.map((entry, index) => {
-                  const colors = [
-                    "hsl(var(--chart-1))",
-                    "hsl(var(--chart-2))",
-                    "hsl(var(--chart-3))",
-                    "hsl(var(--chart-4))",
-                    "hsl(var(--chart-5))",
-                  ];
-                  return (
-                    <Cell
-                      key={entry.name}
-                      fill={colors[index % colors.length]}
-                      stroke="transparent"
-                    />
-                  );
-                })}
-              </Pie>
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartContainer>
+                      );
+                    }}
+                  />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+          </ChartContainer>
+        </div>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
@@ -157,7 +146,7 @@ function PieChart({ chartData }: PieChartProps) {
         </div>
       </CardFooter>
     </Card>
-  );
+  )
 }
 
 export default PieChart;

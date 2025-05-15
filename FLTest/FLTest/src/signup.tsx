@@ -87,114 +87,261 @@ export default function SignupFormDemo() {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     role: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+  const validateField = (name: string, value: string) => {
+    switch (name) {
+      case "name":
+        return value.length < 2 ? "Name must be at least 2 characters" : "";
+      case "email":
+        return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+          ? "Please enter a valid email address"
+          : "";
+      case "password":
+        return value.length < 6
+          ? "Password must be at least 6 characters"
+          : !value.match(/[A-Z]/)
+          ? "Password must contain at least one uppercase letter"
+          : !value.match(/[0-9]/)
+          ? "Password must contain at least one number"
+          : "";
+      case "confirmPassword":
+        return value !== formData.password ? "Passwords do not match" : "";
+      case "role":
+        return !["", "admin", "user"].includes(value.toLowerCase())
+          ? "Role must be either 'admin' or 'user'"
+          : "";
+      default:
+        return "";
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+    
+    // Only validate if there's a value or if there was a previous error
+    if (value || errors[id]) {
+      const error = validateField(id, value);
+      setErrors((prev) => ({ ...prev, [id]: error }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Validate all fields before submission
+    const newErrors: Record<string, string> = {};
+    Object.keys(formData).forEach((key) => {
+      const error = validateField(key, formData[key as keyof typeof formData]);
+      if (error) newErrors[key] = error;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
-    setError("");
+    setSubmitError("");
+
     try {
+      const { confirmPassword, ...submitData } = formData;
+      // Only convert role to lowercase, keep password case-sensitive
+      const formattedData = {
+        name: submitData.name,
+        email: submitData.email,
+        password: submitData.password, // Keep original case for password
+        role: submitData.role.toLowerCase()
+      };
+      
+      console.log('Sending signup data:', { ...formattedData, password: '***' });
+      
       const response = await fetch("http://localhost:5000/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formattedData),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Signup failed");
-      console.log("Signup Success:", data);
-      alert("Signup successful!");
+      window.location.href = "/loginform";
     } catch (err: any) {
-      setError(err.message);
+      setSubmitError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black flex flex-col items-center">
-      <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
-        Welcome to FleetLedger
-      </h2>
-      <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300 text-center">
-        Sign-in to FleetLedger
-      </p>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
+        <div>
+          <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 text-center">
+            Welcome to FleetLedger
+          </h2>
+          <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300 text-center">
+            Create your account
+          </p>
+        </div>
 
-      <form
-        className="my-8 w-full flex flex-col space-y-4"
-        onSubmit={handleSubmit}
-      >
-        <LabelInputContainer>
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            placeholder="Enter your name"
-            type="text"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </LabelInputContainer>
-        <LabelInputContainer>
-          <Label htmlFor="email">Email Address</Label>
-          <Input
-            id="email"
-            placeholder="Enter your email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </LabelInputContainer>
-        <LabelInputContainer>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            placeholder=""
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </LabelInputContainer>
-        <LabelInputContainer>
-          <Label htmlFor="role">Your role</Label>
-          <Input
-            id="role"
-            placeholder="admin/user"
-            type="text"
-            value={formData.role}
-            onChange={handleChange}
-            required
-          />
-        </LabelInputContainer>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="rounded-md space-y-4">
+            <LabelInputContainer>
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                placeholder="John Doe"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                className={cn(
+                  "bg-black/80 border-gray-700 text-white",
+                  errors.name && "border-red-500"
+                )}
+                required
+              />
+              {errors.name && (
+                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+              )}
+            </LabelInputContainer>
 
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            <LabelInputContainer>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                placeholder="you@example.com"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={cn(
+                  "bg-black/80 border-gray-700 text-white",
+                  errors.email && "border-red-500"
+                )}
+                required
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+              )}
+            </LabelInputContainer>
 
-        <button
-          className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset] mt-4"
-          type="submit"
-          disabled={loading}
-        >
-          {loading ? "Signing up..." : "Sign up →"}
-        </button>
-        {/* 
-        <LabelInputContainer className="items-center">
-        <Label htmlFor="role">Already have an account?  <a href="/loginform" className="text-blue-500">Login</a></Label> 
-      </LabelInputContainer> */}
-      </form>
-      <p className="text-center text-sm">
-        Already have an account?{" "}
-        <a href="/loginform" className="text-blue-500 hover:underline">
-          Sign in
-        </a>
-      </p>
+            <LabelInputContainer>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={cn(
+                  "bg-black/80 border-gray-700 text-white",
+                  errors.password && "border-red-500"
+                )}
+                required
+              />
+              {errors.password && (
+                <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+              )}
+            </LabelInputContainer>
+
+            <LabelInputContainer>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={cn(
+                  "bg-black/80 border-gray-700 text-white",
+                  errors.confirmPassword && "border-red-500"
+                )}
+                required
+              />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </LabelInputContainer>
+
+            <LabelInputContainer>
+              <Label htmlFor="role">Role</Label>
+              <select
+                id="role"
+                value={formData.role}
+                onChange={handleChange}
+                className={cn(
+                  "w-full px-3 py-2 rounded-md border text-white bg-black/80 border-gray-700 focus:outline-none",
+                  errors.role && "border-red-500"
+                )}
+                required
+              >
+                <option value="">Select Role</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
+              {errors.role && (
+                <p className="text-sm text-red-500 mt-1">{errors.role}</p>
+              )}
+            </LabelInputContainer>
+          </div>
+
+          {submitError && (
+            <p className="text-sm text-red-500 text-center">{submitError}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={cn(
+              "bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600",
+              "block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium",
+              "shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]",
+              "dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]",
+              "transition-all duration-200",
+              loading && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                Creating account...
+              </span>
+            ) : (
+              "Create Account"
+            )}
+          </button>
+
+          <p className="text-center text-sm text-neutral-600 dark:text-neutral-300">
+            Already have an account?{" "}
+            <a href="/loginform" className="text-blue-500 hover:underline">
+              Sign in
+            </a>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
@@ -207,8 +354,6 @@ const LabelInputContainer = ({
   className?: string;
 }) => {
   return (
-    <div className={cn("flex flex-col space-y-2 w-full", className)}>
-      {children}
-    </div>
+    <div className={cn("flex flex-col space-y-2", className)}>{children}</div>
   );
 };

@@ -38,13 +38,32 @@ interface ChartDataItem {
 
 const fetchVehicleData = async (): Promise<VehicleData[]> => {
   try {
-    const response = await fetch(
-      "http://localhost:5000/api/vehicles/getVehiclesWithTotalAmount"
-    );
+    const email = localStorage.getItem("email");
+    const role = localStorage.getItem("role");
+    let url = "http://localhost:5000/api/vehicles/getVehiclesWithTotalAmount";
+    let options: RequestInit = { method: "GET" };
+
+    if (role === "user") {
+      url = "http://localhost:5000/api/vehicles/getvehiclecomparisonbyemail";
+      options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      };
+    }
+
+    console.log('Fetching from URL:', url, 'with options:', options);
+    const response = await fetch(url, options);
+
     if (!response.ok) {
       throw new Error("Failed to fetch data");
     }
-    return await response.json();
+
+    const data = await response.json();
+    console.log('Received data:', data);
+    return data;
   } catch (error) {
     console.error("Error fetching vehicle data:", error);
     return [];
@@ -64,14 +83,20 @@ export function VehiclewiseExpense() {
         "hsl(var(--chart-4))",
         "hsl(var(--chart-5))",
       ];
-      const formattedData = data
-        .filter((vehicle) => vehicle.totalAmount > 0)
+
+      // Ensure data is an array
+      const vehiclesArray = Array.isArray(data) ? data : [data];
+      console.log('Processing vehicles array:', vehiclesArray);
+
+      const formattedData = vehiclesArray
+        .filter((vehicle) => vehicle && vehicle.totalAmount > 0)
         .map((vehicle, index) => ({
           vehicle: vehicle.name,
           expense: parseFloat(vehicle.totalAmount.toString()),
           fill: colors[index % colors.length],
         }));
 
+      console.log('Formatted chart data:', formattedData);
       const total = formattedData.reduce((sum, item) => sum + item.expense, 0);
       setChartData(formattedData);
       setTotalExpense(total);

@@ -1,18 +1,7 @@
 "use client"
 
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface ExpenseRadarChartProps {
   data: any[];
@@ -21,36 +10,31 @@ interface ExpenseRadarChartProps {
 }
 
 function ExpenseRadarChart({ data, expenseTypes, colors }: ExpenseRadarChartProps) {
-  const chartConfig = expenseTypes.reduce((acc, type, index) => ({
-    ...acc,
-    [type]: {
-      label: type.charAt(0).toUpperCase() + type.slice(1),
-      color: colors[index % colors.length]
-    }
-  }), {} as ChartConfig)
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Expense Radar Chart</CardTitle>
+    <Card className="p-4 md:p-6">
+      <CardHeader className="p-0 mb-4">
+        <CardTitle>Radar Chart Comparison</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+      <div className="w-full h-[300px]">
+        <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data}>
-            <PolarAngleAxis dataKey="name" />
             <PolarGrid />
-            <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
-            {expenseTypes.map((type) => (
+            <PolarAngleAxis dataKey="name" />
+            <Tooltip />
+            <Legend />
+            {expenseTypes.map((type, index) => (
               <Radar
                 key={type}
+                name={type.charAt(0).toUpperCase() + type.slice(1)}
                 dataKey={type}
-                fill={`var(--color-${type})`}
-                fillOpacity={0.6}
+                stroke={colors[index % colors.length]}
+                fill={colors[index % colors.length]}
+                fillOpacity={0.3}
               />
             ))}
           </RadarChart>
-        </ChartContainer>
-      </CardContent>
+        </ResponsiveContainer>
+      </div>
     </Card>
   );
 }

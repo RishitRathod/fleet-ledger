@@ -23,27 +23,23 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "@/styles/slider.css";
 
-// Card Component
+// Card Components
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}
+    className={`rounded-lg border bg-card text-card-foreground shadow-sm flex justify-center items-center ${className}`}
     {...props}
   />
 ));
 Card.displayName = "Card";
 
-const DashboardUser = () => {
+const Dashboard = () => {
   const { toast } = useToast();
-  
-  // Force re-render if needed
-  const [sliderKey, setSliderKey] = React.useState(0);
-  React.useEffect(() => {
-    setSliderKey(prevKey => prevKey + 1);
-  }, []);
+  const costSliderRef = React.useRef<any>(null);
+  const consumptionSliderRef = React.useRef<any>(null);
 
   const vehicleCosts = [
     { vehicle: "Car A", cost: "Rs. 5/km" },
@@ -52,95 +48,93 @@ const DashboardUser = () => {
     { vehicle: "Car D", cost: "Rs. 5.2/km" },
   ];
 
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const vehicleConsumption = [
+    { vehicle: "Car A", consumption: "5 Liters" },
+    { vehicle: "Car B", consumption: "6 Liters" },
+    { vehicle: "Car C", consumption: "4.5 Liters" },
+    { vehicle: "Car D", consumption: "5.2 Liters" },
+  ];
 
   const sliderSettings = {
-    dots: true,
+    dots: false,
     infinite: true,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
-    arrows: true,
-    responsive: [
-      {
-        breakpoint: 768,
-        settings: {
-          arrows: false
-        }
-      }
-    ]
+    autoplaySpeed: 4000,
+    pauseOnHover: true,
+    arrows: false,
   };
 
   return (
-    <div className="bg-gradient-to-br p-4 w-full md:p-6 min-h-screen">
-      <div className="animate-fade-in max-w-[1800px] md:space-y-6 mx-auto space-y-4">
-        {/* Expense Categories Card - Full Width */}
-        <div className="w-full">
-          <ExpenseCategory />
-        </div>
-
-        {/* Monthly Contribution and Total Vehicle Expenses - Side by Side */}
-        <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-4">
-          <div className="md:col-span-3">
-            <MonthlyContribution />
-          </div>
-          <div className="md:col-span-1">
-            <Totalvehicleexpense />
-          </div>
-        </div>
-
-        {/* User Pi Dash and Vehicle-wise Expenses */}
-        <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2">
-          <UserPiDash />
-          <VehiclewiseExpense />
-        </div>
-
-        {/* Additional Stats */}
-        <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-3">
-          <Card className="col-span-1 p-4 md:p-6">
-            <h4 className="text-muted-foreground text-sm font-medium">
-              Cost per Km (Per Vehicle)
-            </h4>
-            <div className="w-full relative min-h-[150px]">
-              {isClient && (
-                <Slider key={sliderKey} {...sliderSettings} className="slider-container">
-                  {vehicleCosts.map((item, index) => (
-                    <div key={index} className="p-4 text-center">
-                      <h5 className="text-lg font-semibold">{item.vehicle}</h5>
-                      <p className="bg-clip-text bg-gradient-to-r text-2xl text-transparent font-bold from-blue-500 to-cyan-500">
-                        {item.cost}
-                      </p>
-                    </div>
-                  ))}
-                </Slider>
-              )}
+    <div className="min-h-screen w-full p-4 md:p-6 bg-gradient-to-br">
+      <div className="max-w-[1800px] mx-auto space-y-4 md:space-y-6 animate-fade-in">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
+          {/* Left Section - 75% width */}
+          <div className="md:col-span-10 space-y-4 md:space-y-6">
+            {/* Top Section */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+              <div className="md:col-span-1">
+                <Totalvehicleexpense />
+              </div>
+              <div className="md:col-span-3">
+                <ExpenseCategory />
+              </div>
             </div>
-          </Card>
 
-          {["Avg. Daily Expenses", "Avg. Daily Consumption"].map(
-            (stat, index) => (
-              <Card key={index} className="p-4 md:p-6">
-                <div className="space-y-2">
-                  <h4 className="text-muted-foreground text-sm font-medium">
-                    {stat}
-                  </h4>
-                  <p className="bg-clip-text bg-gradient-to-r text-2xl text-transparent font-bold from-blue-500 to-cyan-500">
-                    {index === 0 ? "Rs. 200" : "5 Liters"}
-                  </p>
-                </div>
-              </Card>
-            )
-          )}
+            {/* Bottom Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <UserPiDash />
+              <VehiclewiseExpense />
+            </div>
+          </div>
+
+          {/* Right Section - Stats Cards Vertical Layout - 25% width */}
+          <div className="md:col-span-2 space-y-4 flex flex-col h-full">
+            {/* Slider for Cost per Km */}
+            <div className="flex-1 h-[100px]">
+              <Slider ref={costSliderRef} {...sliderSettings} className="h-full">
+                {vehicleCosts.map((item, index) => (
+                  <Card key={index} className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                    <h4 className="text-sm font-medium text-muted-foreground">{item.vehicle} - Cost per Km</h4>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      {item.cost}
+                    </p>
+                  </Card>
+                ))}
+              </Slider>
+            </div>
+
+            {/* Card for Avg. Daily Expenses */}
+            <Card className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+              <h4 className="text-sm font-medium text-muted-foreground">Avg. Daily Expenses</h4>
+              <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                Rs. 200
+              </p>
+            </Card>
+
+            {/* Slider for Avg. Daily Consumption */}
+            <div className="flex-1">
+              <Slider ref={consumptionSliderRef} {...sliderSettings} className="h-full">
+                {vehicleConsumption.map((item, index) => (
+                  <Card key={index} className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                    <h4 className="text-sm font-medium text-muted-foreground">{item.vehicle} - Avg. Daily Consumption</h4>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      {item.consumption}
+                    </p>
+                  </Card>
+                ))}
+              </Slider>
+            </div>
+
+           
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default DashboardUser;
+export default Dashboard;

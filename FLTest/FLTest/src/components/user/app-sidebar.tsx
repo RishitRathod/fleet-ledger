@@ -91,7 +91,7 @@ const data = {
     
     {
       title: "Import/Export",
-      url: "#",
+      url: "/data-table",
       icon: Import,
       
     },
