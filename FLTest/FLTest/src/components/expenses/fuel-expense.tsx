@@ -62,7 +62,7 @@ export function FuelExpenseModal() {
   const fetchVehicles = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
         {
           method: "POST",
           headers: {
@@ -144,7 +144,7 @@ export function FuelExpenseModal() {
       const formattedDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
       const email = localStorage.getItem("email");
       const response = await fetch(
-        `${import.meta.env.SERVER_ORIGIN}/api/refuelings/add`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/refuelings/add`,
         {
           method: "POST",
           headers: {

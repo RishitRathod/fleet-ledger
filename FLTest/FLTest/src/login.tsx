@@ -17,15 +17,19 @@ export function LoginForm({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(""); // Clear previous errors
-
+    const serverOrigin = import.meta.env.VITE_SERVER_ORIGIN;
+    console.log('Server Origin:', serverOrigin);
     try {
-      const response = await fetch(import.meta.env.SERVER_ORIGIN + "/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        `${serverOrigin}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await response.json();
 

@@ -65,7 +65,7 @@ export function ServiceExpenseModal() {
   const fetchVehicles = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
         {
           method: "POST",
           headers: {
@@ -160,7 +160,7 @@ export function ServiceExpenseModal() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.SERVER_ORIGIN}/api/services/createService`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/services/createService`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

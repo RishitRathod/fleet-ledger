@@ -66,7 +66,7 @@ export function TaxExpenseModal() {
   const fetchVehicles = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
         {
           method: "POST",
           headers: {
@@ -162,7 +162,7 @@ export function TaxExpenseModal() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.SERVER_ORIGIN}/api/taxes/createTax`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/taxes/createTax`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

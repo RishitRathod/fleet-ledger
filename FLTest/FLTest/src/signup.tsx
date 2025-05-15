@@ -162,7 +162,7 @@ export default function SignupFormDemo() {
       
       console.log('Sending signup data:', { ...formattedData, password: '***' });
       
-      const response = await fetch(import.meta.env.SERVER_ORIGIN + "/auth/signup", {
+      const response = await fetch(import.meta.env.VITE_SERVER_ORIGIN + "/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedData),

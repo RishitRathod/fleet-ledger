@@ -49,7 +49,7 @@ const TableDemoPage = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicles`);
+        const response = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehicles`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -79,7 +79,7 @@ const fetchRefuelingData = async () => {
   try {
     setLoading(true);
     setError(null);
-    const response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicledata`, {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehicledata`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

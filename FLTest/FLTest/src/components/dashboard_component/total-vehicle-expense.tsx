@@ -16,7 +16,7 @@ export function Totalvehicleexpense({ className }: { className?: string }) {
   React.useEffect(() => {
     const fetchExpenseData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehiclesWithTotalAmount`);
+        const response = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehiclesWithTotalAmount`);
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }

@@ -22,7 +22,7 @@ export function AddVehicleModal({ open, onOpenChange }: { open: boolean; onOpenC
     try {
       console.log("kokoVehicle name:", vehicleName);
       console.log("kpkoEmail:", email);
-      const response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/vehicles/createVehicle`, {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/createVehicle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -27,7 +27,7 @@ const Users = ({ className }: UsersProps) => {
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.SERVER_ORIGIN}/api/users/admin/users`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/users/admin/users`,
         {
           method: "POST",
           headers: {
@@ -56,7 +56,7 @@ const Users = ({ className }: UsersProps) => {
     }
     try {
       const response = await fetch(
-        `${import.meta.env.SERVER_ORIGIN}/api/invitations/admin/invite`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/invitations/admin/invite`,
         {
           method: "POST",
           headers: {
