@@ -76,7 +76,7 @@ function AreaChart({ data }: AreaChartProps) {
                               Amount
                             </span>
                             <span className="font-bold">
-                              ₹{(data.payload?.value || 0).toLocaleString()}
+                              ₹{(data.payload?.amount || 0).toLocaleString()}
                             </span>
                           </div>
                         </div>

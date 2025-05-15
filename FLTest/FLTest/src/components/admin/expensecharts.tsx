@@ -33,24 +33,11 @@ import PieChart from "./expensecharts/PieChart";
 import LineChart from "./expensecharts/LineChart";
 import AreaChart from "./expensecharts/AreaChart";
 
-// API response interfaces
-interface VehicleExpenseData {
-  vehicleName: string;
-  totalAmount: number;
-  // Add other fields if they exist in the API response
-}
-
-interface UserExpenseData {
-  userName: string;
-  totalAmount: number;
-  // Add other fields if they exist in the API response
-}
-
 // Chart data interface
 interface ChartData {
   name: string;
   amount: number;
-  fill: string;
+  fill?: string;
 }
 
 interface MonthlyData {
