@@ -23,16 +23,24 @@ const initializeDatabase = async () => {
 
 // CORS Configuration
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'https://fleet-ledger.onrender.com',
-        'https://fleet-ledger-7wv2jktgz-rishitrathods-projects.vercel.app',
-        /\.vercel\.app$/  // This will allow all subdomains of vercel.app
-    ],
+    origin: true, // Allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with']
 }));
+
+// Additional headers for CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+    // Handle preflight
+    if ('OPTIONS' === req.method) {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
 
 // Middleware
 app.use(express.json());

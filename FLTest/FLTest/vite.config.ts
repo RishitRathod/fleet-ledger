@@ -9,4 +9,24 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      credentials: true
+    },
+    proxy: {
+      '/api': {
+        target: 'https://fleet-ledger.onrender.com',
+        changeOrigin: true,
+        secure: false
+      },
+      '/auth': {
+        target: 'https://fleet-ledger.onrender.com',
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  },
 })
