@@ -156,7 +156,9 @@ const fetchCategoryData = async (
 
     // Get the raw data from API
     const data = await response.json();
-    if (!data || !Array.isArray(data)) {
+    console.log("Category data:", data);
+    
+    if (!data || !data.expenseBreakdown) {
       throw new Error("Invalid category data format");
     }
 
@@ -169,11 +171,11 @@ const fetchCategoryData = async (
     ];
 
     // Transform the data to match ChartData interface
-    const transformedData: ChartData[] = data
-      .filter((item: any) => item.totalAmount > 0)
-      .map((item: any, index: number) => ({
-        name: item.categoryName || 'Unknown Category',
-        amount: parseFloat(item.totalAmount.toString()),
+    const transformedData: ChartData[] = Object.entries(data.expenseBreakdown)
+      .filter(([_, value]: [string, any]) => value.amount > 0)
+      .map(([key, value]: [string, any], index: number) => ({
+        name: key.charAt(0).toUpperCase() + key.slice(1),
+        amount: value.amount,
         fill: colors[index % colors.length],
       }));
 
