@@ -23,9 +23,15 @@ const initializeDatabase = async () => {
 
 // CORS Configuration
 app.use(cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173' || 'https://fleet-ledger.onrender.com',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: [
+        'http://localhost:5173',
+        'https://fleet-ledger.onrender.com',
+        'https://fleet-ledger-7wv2jktgz-rishitrathods-projects.vercel.app',
+        /\.vercel\.app$/  // This will allow all subdomains of vercel.app
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with']
 }));
 
 // Middleware
