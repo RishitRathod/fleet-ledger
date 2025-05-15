@@ -16,17 +16,34 @@ export function Totalvehicleexpense({ className }: { className?: string }) {
   React.useEffect(() => {
     const fetchExpenseData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehiclesWithTotalAmount`);
+        const email = localStorage.getItem("email");
+        const role = localStorage.getItem("role");
+        let url = `${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehiclesWithTotalAmount`;
+        let options: RequestInit = { method: "GET" };
+
+        if (role === "user") {
+          url = `${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getvehiclecomparisonbyemail`;
+          options = {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email }),
+          };
+        }
+
+        console.log('Fetching from URL:', url, 'with options:', options);
+        const response = await fetch(url, options);
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
         const data = await response.json();
         console.log("Fetched data:", data);
-  
+
         // Calculate sum of all totalAmount fields
         const totalOfAllAmounts = data.reduce((acc, curr) => acc + curr.totalAmount, 0);
         console.log("Total Amount:", totalOfAllAmounts);
-  
+
         // Now you can even attach this total if you want
         const expenseData = { totalAmount: totalOfAllAmounts };
   
