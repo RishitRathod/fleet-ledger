@@ -321,25 +321,6 @@ export function TaxExpenseModal() {
                 </div>
               </>
             ) : null}
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Amount</Label>
-              <Input
-                type="number"
-                placeholder="Enter amount"
-                className="w-full"
-                min={0}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Description</Label>
-              <Textarea
-                placeholder="Enter additional details"
-                className="min-h-[100px]"
-              />
-            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
