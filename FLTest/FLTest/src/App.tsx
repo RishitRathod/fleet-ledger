@@ -113,6 +113,14 @@ export default function App() {
           }
         />
         <Route
+          path="/dashuser"
+          element={
+            <Layout>
+              <DashboardUser />
+            </Layout>
+          }
+        />
+        <Route
           path="/users"
           element={
             <Layout>

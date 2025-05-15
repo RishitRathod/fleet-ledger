@@ -29,8 +29,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { useExpenseModal, vehicles } from "./expense-store";
-
-
+import CalendarDialog from "../calender-dialog";
 interface VehicleOption {
   value: string;
   label: string;
@@ -47,15 +46,15 @@ export function ServiceExpenseModal() {
   const { isOpen, onClose, type } = useExpenseModal();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedVehicle, setSelectedVehicle] = useState<string>("");
   const [selectedServiceType, setSelectedServiceType] = useState<string>("");
   const [amount, setAmount] = useState<number | "">("");
   const [description, setDescription] = useState<string>("");
   // const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
-    const [vehicles, setVehicles] = useState<VehicleOption[]>([])
-  
-  const userEmail = localStorage.getItem('email');
+  const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
+
+  const userEmail = localStorage.getItem("email");
 
   useEffect(() => {
     if (userEmail) {
@@ -63,25 +62,27 @@ export function ServiceExpenseModal() {
     }
   }, [userEmail]);
 
-  
   const fetchVehicles = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/vehicles/getVehicleunderadmin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: userEmail }),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/vehicles/getVehicleunderadmin`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: userEmail }),
+        }
+      );
 
       const data = await response.json();
-      
+
       if (data.success && data.vehicles) {
         const vehicleOptions = data.vehicles.map((vehicle: any) => ({
           value: vehicle.id,
-          label: vehicle.name
+          label: vehicle.name,
         }));
-        
+
         setVehicles(vehicleOptions);
         console.log("Vehicles fetched:", vehicleOptions);
       } else {
@@ -92,11 +93,11 @@ export function ServiceExpenseModal() {
       toast({
         title: "Error",
         description: "Failed to fetch vehicles",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
-  
+
   if (type !== "service") return null;
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,10 +114,14 @@ export function ServiceExpenseModal() {
       });
       return false;
     }
-    // if (!selectedDate) {
-    //   toast({ title: "Error", description: "Please select a date", variant: "destructive" });
-    //   return false;
-    // }
+    if (!selectedDate) {
+      toast({
+        title: "Error",
+        description: "Please select a date",
+        variant: "destructive",
+      });
+      return false;
+    }
     if (!selectedServiceType) {
       toast({
         title: "Error",
@@ -145,7 +150,10 @@ export function ServiceExpenseModal() {
       service_type: selectedServiceType, // Make sure this matches the backend field name
       amount: amount,
       description: description,
-      email: userEmail
+      email: localStorage.getItem("email"),
+
+      vehicleId: selectedVehicle,
+      date: selectedDate,
     };
 
     console.log("Request Body:", requestBody); // Debugging: Check what's being sent
@@ -213,20 +221,7 @@ export function ServiceExpenseModal() {
               </Select>
             </div>
 
-            {/* <div className="space-y-2">
-              <Label className="text-sm font-medium">Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
-                    <CalendarIcon className="h-4 w-4 mr-2" />
-                    {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="p-0 w-auto" align="start">
-                  <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
-                </PopoverContent>
-              </Popover>
-            </div> */}
+            <CalendarDialog />
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Service Type</Label>

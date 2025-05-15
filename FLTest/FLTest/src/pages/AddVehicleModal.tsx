@@ -20,7 +20,9 @@ export function AddVehicleModal({ open, onOpenChange }: { open: boolean; onOpenC
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/vehicles/addVehicle", {
+      console.log("kokoVehicle name:", vehicleName);
+      console.log("kpkoEmail:", email);
+      const response = await fetch("http://localhost:5000/api/vehicles/createVehicle", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

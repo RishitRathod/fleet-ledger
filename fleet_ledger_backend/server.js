@@ -38,10 +38,12 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/invitations', require('./routes/invitationRoutes'));
 app.use('/api/vehicles', require('./routes/vehicleroutes'));
 app.use('/api/groups', require('./routes/grouproutes'));
-app.use('/api/refuelings', require('./routes/refurlingRoutes')); 
+app.use('/api/refuelings', require('./routes/refuelingRoutes')); 
 app.use('/api/services', require('./routes/serviceRoutes'));
 app.use('/api/Accessories', require('./routes/accessoryRoutes'));
-
+app.use('/api/taxes', require('./routes/taxRoutes'));
+app.use('/api/category', require('./routes/CategoryRoutes'));
+app.use('/api/comparison', require('./routes/comparisonRoutes.js'));
 
 
 // Start Server

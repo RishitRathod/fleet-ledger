@@ -1,23 +1,35 @@
-const { Accessories , Group, } = require('../models');
-const { sequelize } = require('../config/db');
+const { Accessories , Group, User } = require('../models');
+const { sequelize, Op } = require('sequelize');
 
 // Create a new service record
 exports.createAccessory = async (req, res) => {
     try {
         console.log("Incoming Request Body:", req.body); // Debug log
+        //from vehicle id find group id
+        const { vehicleId, email } = req.body;
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
 
-        const group = await Group.findOne({})
+        // find group id where vehicle id and user id both are present
+        const group = await Group.findOne({ where: { userId: user.id, vehicleId } });
+        if (!group) {
+            return res.status(404).json({ error: "Group not found for this vehicle" });
+        }
+        req.body.groupId = group.id;
+        console.log("Group ID:", group.id);
 
-        const { accessory_type, amount, description, groupId } = req.body;
+        const { accessory_type, amount, description, date, groupId } = req.body;
 
         // Validate request data
         // if (!accessory_type || !amount || !description || !groupId) {
-                if (!amount || !description || !groupId) {
+                if (!amount || !description || !groupId || !date) {
 
             return res.status(400).json({ error: "All fields are required" });
         }
 
-        const accessory = await Accessories.create({ accessory_type, amount, description, groupId });
+        const accessory = await Accessories.create({ accessory_type, amount, description, date, groupId });
 
         res.status(201).json(accessory);
     } catch (error) {
@@ -30,7 +42,7 @@ exports.createAccessory = async (req, res) => {
 // Get all service records
 exports.getAllServices = async (req, res) => {
     try {
-        const services = await Service.findAll();
+        const services = await Accessories.findAll();
         res.status(200).json(services);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -41,7 +53,7 @@ exports.getAllServices = async (req, res) => {
 exports.getServiceById = async (req, res) => {
     try {
         const { id } = req.params;
-        const service = await Service.findByPk(id);
+        const service = await Accessories.findByPk(id);
         if (!service) {
             return res.status(404).json({ message: 'Service not found' });
         }
@@ -56,7 +68,7 @@ exports.updateService = async (req, res) => {
     try {
         const { id } = req.params;
         const { date, service_type, amount, description, groupId } = req.body;
-        const service = await Service.findByPk(id);
+        const service = await Accessories.findByPk(id);
         if (!service) {
             return res.status(404).json({ message: 'Service not found' });
         }
@@ -71,7 +83,7 @@ exports.updateService = async (req, res) => {
 exports.deleteService = async (req, res) => {
     try {
         const { id } = req.params;
-        const service = await Service.findByPk(id);
+        const service = await Accessories.findByPk(id);
         if (!service) {
             return res.status(404).json({ message: 'Service not found' });
         }
@@ -81,3 +93,30 @@ exports.deleteService = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+// Get all services by date
+exports.getAllServicesByDateRange = async (req, res) => {   
+    try {
+        const { startDate, endDate } = req.query;
+        console.log("Start Date:", startDate); // Debug log
+        console.log("End Date:", endDate); // Debug log
+
+        if (!startDate || !endDate) {
+            return res.status(400).json({ error: "Start date and end date are required" });
+        }
+
+        const services = await Accessories.findAll({
+            where: {
+                date: {
+                    [Op.between]: [new Date(startDate), new Date(endDate)]
+                }
+            }
+        });
+
+        res.status(200).json(services);
+    } catch (error) {
+        console.error("Error in getAllServicesByDateRange:", error); // Debug log
+        res.status(500).json({ error: error.message });
+    }
+}
