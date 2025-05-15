@@ -14,12 +14,12 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
 } from "@/components/ui/chart"
 
 interface ChartData {
-  name: string
-  amount: number
+  name: string;
+  amount: number;
+  fill?: string;
 }
 
 interface LineChartProps {
@@ -33,16 +33,9 @@ function LineChart({ data }: LineChartProps) {
 
   const chartConfig = React.useMemo(() => {
     return data.reduce((acc, item, index) => {
-      const colors = [
-        "hsl(var(--chart-1))",
-        "hsl(var(--chart-2))",
-        "hsl(var(--chart-3))",
-        "hsl(var(--chart-4))",
-        "hsl(var(--chart-5))",
-      ]
       acc[item.name] = {
         label: item.name,
-        color: colors[index % colors.length],
+        color: item.fill || `hsl(var(--chart-${index + 1}))`,
       }
       return acc
     }, {} as ChartConfig)
@@ -94,9 +87,9 @@ function LineChart({ data }: LineChartProps) {
                 <Line
                   type="monotone"
                   dataKey="amount"
-                  stroke="hsl(var(--chart-1))"
+                  stroke={data[0]?.fill || "hsl(var(--chart-1))"}
                   strokeWidth={2}
-                  dot={{ r: 4 }}
+                  dot={{ r: 4, fill: data[0]?.fill || "hsl(var(--chart-1))" }}
                 />
               </RechartsLineChart>
             </ResponsiveContainer>

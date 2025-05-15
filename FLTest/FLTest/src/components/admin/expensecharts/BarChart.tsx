@@ -34,6 +34,7 @@ import { useEffect, useRef, useState } from "react";
 interface ChartData {
   name: string;
   amount: number;
+  fill?: string;
 }
 
 interface BarChartProps {
@@ -107,27 +108,16 @@ function BarChart({ chartData }: BarChartProps) {
               />
               <Bar
                 dataKey="amount"
-                fill="hsl(var(--chart-1))"
-                radius={[8, 8, 0, 0]}
-                shape={(props: any) => {
-                  const colors = [
-                    "hsl(var(--chart-1))",
-                    "hsl(var(--chart-2))",
-                    "hsl(var(--chart-3))",
-                    "hsl(var(--chart-4))",
-                    "hsl(var(--chart-5))",
-                  ];
-                  const index = chartData.findIndex(item => item.amount === props.payload.amount);
-                  const color = colors[index % colors.length];
-                  return (
-                    <Rectangle
-                      {...props}
-                      fill={color}
-                      stroke={color}
-                      strokeWidth={2}
-                    />
-                  );
-                }}
+                fill="hsl(var(--primary))"
+                radius={[4, 4, 0, 0]}
+                shape={(props: any) => (
+                  <Rectangle
+                    {...props}
+                    fill={props.payload.fill || props.fill}
+                    stroke={props.payload.fill || props.fill}
+                    strokeWidth={2}
+                  />
+                )}
               />
             </RechartsBarChart>
           </ChartContainer>

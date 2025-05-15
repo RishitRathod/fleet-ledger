@@ -14,12 +14,12 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
 } from "@/components/ui/chart"
 
 interface ChartData {
   name: string
   amount: number
+  fill?: string
 }
 
 interface AreaChartProps {
@@ -32,17 +32,10 @@ function AreaChart({ data }: AreaChartProps) {
   }, [data])
 
   const chartConfig = React.useMemo(() => {
-    return data.reduce((acc, item, index) => {
-      const colors = [
-        "hsl(var(--chart-1))",
-        "hsl(var(--chart-2))",
-        "hsl(var(--chart-3))",
-        "hsl(var(--chart-4))",
-        "hsl(var(--chart-5))",
-      ]
+    return data.reduce((acc, item) => {
       acc[item.name] = {
         label: item.name,
-        color: colors[index % colors.length],
+        color: item.fill || "hsl(var(--chart-1))",
       }
       return acc
     }, {} as ChartConfig)
@@ -94,9 +87,11 @@ function AreaChart({ data }: AreaChartProps) {
                 <Area
                   type="monotone"
                   dataKey="amount"
-                  stroke="hsl(var(--chart-1))"
-                  fill="hsl(var(--chart-1) / 0.3)"
+                  stroke={data[0]?.fill || "hsl(var(--chart-1))"}
+                  fill={data[0]?.fill || "hsl(var(--chart-1))"}
+                  fillOpacity={0.2}
                   strokeWidth={2}
+                  dot={{ r: 4, fill: data[0]?.fill || "hsl(var(--chart-1))" }}
                 />
               </RechartsAreaChart>
             </ResponsiveContainer>

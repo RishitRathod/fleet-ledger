@@ -20,6 +20,7 @@ import {
 interface ChartData {
   name: string;
   amount: number;
+  fill?: string;
 }
 
 interface PieChartProps {
@@ -97,22 +98,12 @@ function PieChart({ chartData }: PieChartProps) {
                     strokeWidth={0}
                   >
                     <Label content={<CustomLabel />} position="center" />
-                    {chartData.map((entry, index) => {
-                      const colors = [
-                        "hsl(var(--chart-1))",
-                        "hsl(var(--chart-2))",
-                        "hsl(var(--chart-3))",
-                        "hsl(var(--chart-4))",
-                        "hsl(var(--chart-5))",
-                      ];
-                      return (
-                        <Cell
-                          key={entry.name}
-                          fill={colors[index % colors.length]}
-                          stroke="transparent"
-                        />
-                      );
-                    })}
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.fill || `hsl(var(--chart-${(index % 5) + 1}))`}
+                      />
+                    ))}
                   </Pie>
                   <ChartTooltip
                     content={({ active, payload }) => {
