@@ -22,25 +22,29 @@ const initializeDatabase = async () => {
 };
 
 // CORS Configuration
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://fleet-ledger.vercel.app',
+    'https://fleet-ledger-git-main-rishitrathods-projects.vercel.app',
+    'https://fleet-ledger.onrender.com'
+];
+
 app.use(cors({
-    origin: true, // Allow all origins
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+        }
+        return callback(null, true);
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Additional headers for CORS
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-    // Handle preflight
-    if ('OPTIONS' === req.method) {
-        res.sendStatus(200);
-    } else {
-        next();
-    }
-});
+// Pre-flight requests
+app.options('*', cors());
 
 // Middleware
 app.use(express.json());
