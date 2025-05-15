@@ -55,7 +55,7 @@ export function AccessoriesExpenseModal() {
   const fetchVehicles = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/vehicles/getVehicleunderadmin",
+        `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -121,7 +121,7 @@ export function AccessoriesExpenseModal() {
     setLoading(true);
     try {
       const res = await fetch(
-        "http://localhost:5000/api/Accessories/createAccessory",
+        `${import.meta.env.SERVER_ORIGIN}/api/Accessories/createAccessory`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

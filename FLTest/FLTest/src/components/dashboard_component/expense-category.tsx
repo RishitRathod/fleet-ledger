@@ -42,11 +42,11 @@ export function ExpenseCategory({ className }: { className?: string }) {
         const role = localStorage.getItem('role');
         let response;
         if(role === 'admin') {
-          response = await fetch('http://localhost:5000/api/vehicles/getExpenseCategory');
+          response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/vehicles/getExpenseCategory`);
         } else {
           const userEmail = localStorage.getItem('email');
           console.log('Fetching expense data for user with email:', userEmail);
-          response = await fetch('http://localhost:5000/api/vehicles/getExpenseCategoryByUserEmail', {
+          response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/vehicles/getExpenseCategoryByUserEmail`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

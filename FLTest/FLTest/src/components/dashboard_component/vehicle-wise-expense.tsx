@@ -40,11 +40,11 @@ const fetchVehicleData = async (): Promise<VehicleData[]> => {
   try {
     const email = localStorage.getItem("email");
     const role = localStorage.getItem("role");
-    let url = "http://localhost:5000/api/vehicles/getVehiclesWithTotalAmount";
+    let url = `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehiclesWithTotalAmount`;
     let options: RequestInit = { method: "GET" };
 
     if (role === "user") {
-      url = "http://localhost:5000/api/vehicles/getvehiclecomparisonbyemail";
+      url = `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getvehiclecomparisonbyemail`;
       options = {
         method: "POST",
         headers: {

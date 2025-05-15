@@ -66,7 +66,7 @@ const fetchUsersFromDb = async (): Promise<{ success: boolean; users: User[] }> 
       return { success: false, users: [] };
     }
 
-    const response = await fetch("http://localhost:5000/api/users/admin/users", {
+    const response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/users/admin/users`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: userEmail }),
@@ -94,7 +94,7 @@ const fetchVehiclesFromDb = async (): Promise<{ success: boolean; vehicles: Vehi
     }
 
     const response = await fetch(
-      "http://localhost:5000/api/vehicles/getVehicleunderadmin",
+      `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -126,7 +126,7 @@ const fetchUserVehicleRelationsFromDb = async (): Promise<UserVehicleData[]> => 
     const endDate = new Date().toISOString().split('T')[0];
     const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-    const response = await fetch("http://localhost:5000/api/comparison/getuservehiclecomparison", {
+    const response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/comparison/getuservehiclecomparison`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

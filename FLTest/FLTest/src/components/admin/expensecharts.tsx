@@ -53,7 +53,7 @@ const fetchVehicleData = async (
   endDate?: Date
 ): Promise<ChartData[]> => {
   try {
-    let url = `http://localhost:5000/api/vehicles/getVehiclesWithTotalAmount`;
+    let url = `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehiclesWithTotalAmount`;
     if (period === "custom" && startDate && endDate) {
       url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
     }
@@ -99,7 +99,7 @@ const fetchUserData = async (
   endDate?: Date
 ): Promise<ChartData[]> => {
   try {
-    let url = `http://localhost:5000/api/users/getUsersWithTotalAmount`;
+    let url = `${import.meta.env.SERVER_ORIGIN}/api/users/getUsersWithTotalAmount`;
     if (period === "custom" && startDate && endDate) {
       url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
     }
@@ -145,7 +145,7 @@ const fetchCategoryData = async (
   endDate?: Date
 ): Promise<ChartData[]> => {
   try {
-    let url = `http://localhost:5000/api/category/getCatrgoryWithTotalAmount`;
+    let url = `${import.meta.env.SERVER_ORIGIN}/api/category/getCatrgoryWithTotalAmount`;
     if (period === "custom" && startDate && endDate) {
       url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
     }

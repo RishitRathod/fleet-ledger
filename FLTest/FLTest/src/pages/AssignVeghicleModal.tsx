@@ -44,7 +44,7 @@ export function AssignVehicleModal({
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/users/admin/users`,
+        `${import.meta.env.SERVER_ORIGIN}/api/users/admin/users`,
         {
           method: "POST",
           headers: {
@@ -75,7 +75,7 @@ export function AssignVehicleModal({
   const fetchVehicles = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/vehicles/getVehicleunderadmin`,
+        `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
         {
           method: "POST",
           headers: {
@@ -113,7 +113,7 @@ export function AssignVehicleModal({
     try {
       console.log("Assigning user to vehicle:", selectedUser, selectedVehicle);
       const response = await fetch(
-        "http://localhost:5000/api/groups/assignUserToVehicle",
+        `${import.meta.env.SERVER_ORIGIN}/api/groups/assignUserToVehicle`,
         {
           method: "POST",
           headers: {

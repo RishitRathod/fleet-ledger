@@ -48,7 +48,7 @@ export function RefuelingImportModal() {
   const fetchVehicles = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/vehicles/getVehicleunderadmin`,
+        `${import.meta.env.SERVER_ORIGIN}/api/vehicles/getVehicleunderadmin`,
         {
           method: "POST",
           headers: {
@@ -83,7 +83,7 @@ export function RefuelingImportModal() {
   const handleVehicleChange = async (vehicleId: string) => {
     setSelectedVehicle(vehicleId);
     try {
-      const response = await fetch('http://localhost:5000/api/groups/getGroupByVehicle', {
+      const response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/groups/getGroupByVehicle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vehicleId, email: userEmail })
@@ -143,7 +143,7 @@ export function RefuelingImportModal() {
     formData.append('sheetName', selectedSheet);
 
     try {
-      const response = await fetch('http://localhost:5000/api/refuelings/upload', {
+      const response = await fetch(`${import.meta.env.SERVER_ORIGIN}/api/refuelings/upload`, {
         method: 'POST',
         body: formData,
       });

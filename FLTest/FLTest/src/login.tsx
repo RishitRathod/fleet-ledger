@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 export function LoginForm({
   className,
   ...props
@@ -20,7 +19,7 @@ export function LoginForm({
     setError(""); // Clear previous errors
 
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
+      const response = await fetch(import.meta.env.SERVER_ORIGIN + "/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

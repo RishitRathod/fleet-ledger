@@ -33,7 +33,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
         if (!email) return;
 
         const response = await fetch(
-          "http://localhost:5000/api/invitations/user/notifications",
+          `${import.meta.env.SERVER_ORIGIN}/api/invitations/user/notifications`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -60,7 +60,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
   const handleAction = async (id: string, action: "accept" | "reject") => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/invitations/${action}`,
+        `${import.meta.env.SERVER_ORIGIN}/api/invitations/${action}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
