@@ -60,20 +60,76 @@ export function ExpenseCategory({ className }: { className?: string }) {
         }
 
         const data = await response.json();
-        const expenseInfo = Array.isArray(data) ? data[0] : data;
+        console.log('Fetched data:', data);
 
-        if (expenseInfo) {
+        // For admin role, data comes as an array of vehicles
+        if (role === 'admin') {
+          // Calculate totals across all vehicles
+          const totalRefueling = data.reduce((sum: number, vehicle: any) => 
+            sum + vehicle.expenseBreakdown.refueling.amount, 0);
+          const totalService = data.reduce((sum: number, vehicle: any) => 
+            sum + vehicle.expenseBreakdown.service.amount, 0);
+          const totalAccessories = data.reduce((sum: number, vehicle: any) => 
+            sum + vehicle.expenseBreakdown.accessories.amount, 0);
+          
+          const grandTotal = totalRefueling + totalService + totalAccessories;
+
+          // Create aggregated data
+          const expenseInfo = {
+            name: 'All Vehicles',
+            totalAmount: grandTotal,
+            expenseBreakdown: {
+              refueling: {
+                amount: totalRefueling,
+                percentage: grandTotal > 0 ? (totalRefueling / grandTotal) * 100 : 0
+              },
+              service: {
+                amount: totalService,
+                percentage: grandTotal > 0 ? (totalService / grandTotal) * 100 : 0
+              },
+              accessories: {
+                amount: totalAccessories,
+                percentage: grandTotal > 0 ? (totalAccessories / grandTotal) * 100 : 0
+              }
+            }
+          };
           setExpenseData(expenseInfo);
+        } else {
+          // For user role, data comes directly
+          const totalAmount = data.refueling.amount + data.service.amount + data.accessories.amount;
+          const expenseInfo = {
+            name: 'Vehicle Expenses',
+            totalAmount: totalAmount,
+            expenseBreakdown: {
+              refueling: {
+                amount: data.refueling.amount || 0,
+                percentage: totalAmount > 0 ? (data.refueling.amount / totalAmount) * 100 : 0
+              },
+              service: {
+                amount: data.service.amount || 0,
+                percentage: totalAmount > 0 ? (data.service.amount / totalAmount) * 100 : 0
+              },
+              accessories: {
+                amount: data.accessories.amount || 0,
+                percentage: totalAmount > 0 ? (data.accessories.amount / totalAmount) * 100 : 0
+              }
+            }
+          };
+          setExpenseData(expenseInfo);
+        }
+
+        // Log the data structure for debugging
+        if (expenseData) {
           
           // Log the expense distribution
           console.log('\n📊 Expense Distribution Analysis');
           console.log('----------------------------------------');
-          console.log(`Vehicle: ${expenseInfo.name}`);
-          console.log(`Total Expenses: ₹${expenseInfo.totalAmount.toLocaleString()}`);
+          console.log(`Vehicle: ${expenseData.name}`);
+          console.log(`Total Expenses: ₹${expenseData.totalAmount.toLocaleString()}`);
           console.log('\nExpense Breakdown:');
-          console.log(`1. Refueling: ₹${expenseInfo.expenseBreakdown.refueling.amount.toLocaleString()} (${expenseInfo.expenseBreakdown.refueling.percentage.toFixed(2)}%)`);
-          console.log(`2. Services: ₹${expenseInfo.expenseBreakdown.service.amount.toLocaleString()} (${expenseInfo.expenseBreakdown.service.percentage.toFixed(2)}%)`);
-          console.log(`3. Accessories: ₹${expenseInfo.expenseBreakdown.accessories.amount.toLocaleString()} (${expenseInfo.expenseBreakdown.accessories.percentage.toFixed(2)}%)`);
+          console.log(`1. Refueling: ₹${expenseData.expenseBreakdown.refueling.amount.toLocaleString()} (${expenseData.expenseBreakdown.refueling.percentage.toFixed(2)}%)`);
+          console.log(`2. Services: ₹${expenseData.expenseBreakdown.service.amount.toLocaleString()} (${expenseData.expenseBreakdown.service.percentage.toFixed(2)}%)`);
+          console.log(`3. Accessories: ₹${expenseData.expenseBreakdown.accessories.amount.toLocaleString()} (${expenseData.expenseBreakdown.accessories.percentage.toFixed(2)}%)`);
           console.log('----------------------------------------');
           console.log('----------------------------------------');
         }
@@ -111,19 +167,19 @@ export function ExpenseCategory({ className }: { className?: string }) {
   const expenseCategories = expenseData ? [
     { 
       name: "Fuel", 
-      value: (expenseData.expenseBreakdown.refueling.amount / totalAmount) * 100, 
+      value: expenseData.expenseBreakdown.refueling.percentage, 
       color: "#4CAF50",
       amount: expenseData.expenseBreakdown.refueling.amount
     },
     { 
       name: "Services", 
-      value: (expenseData.expenseBreakdown.service.amount / totalAmount) * 100, 
+      value: expenseData.expenseBreakdown.service.percentage, 
       color: "#1976D2",
       amount: expenseData.expenseBreakdown.service.amount
     },
     { 
       name: "Accessories", 
-      value: (expenseData.expenseBreakdown.accessories.amount / totalAmount) * 100, 
+      value: expenseData.expenseBreakdown.accessories.percentage, 
       color: "#FFC107",
       amount: expenseData.expenseBreakdown.accessories.amount
     }
