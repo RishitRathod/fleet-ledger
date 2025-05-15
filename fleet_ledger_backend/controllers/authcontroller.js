@@ -30,8 +30,38 @@ const signup = async (req, res) => {
         res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (error) {
         await transaction.rollback(); // Rollback on failure
-        console.error("Signup Error:", error); // Debugging
-        res.status(500).json({ message: 'Signup failed', error: error.message });
+        console.error("Signup Error:", {
+            message: error.message,
+            name: error.name,
+            errors: error.errors,
+            stack: error.stack
+        });
+        
+        // Check for specific error types
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({ 
+                message: 'Signup failed', 
+                error: 'Email already registered'
+            });
+        }
+        
+        if (error.name === 'SequelizeValidationError') {
+            const validationErrors = error.errors.map(err => ({
+                field: err.path,
+                message: err.message
+            }));
+            return res.status(400).json({ 
+                message: 'Signup failed', 
+                error: 'Validation error',
+                details: validationErrors
+            });
+        }
+        
+        res.status(500).json({ 
+            message: 'Signup failed', 
+            error: error.message,
+            type: error.name
+        });
     }
 };
 
