@@ -13,6 +13,7 @@ router.get('/vehiclewiseamount/date-range', vehiclewiseController.getVehiclesWit
 router.get('/getVehiclesWithTotalAmount', getVehiclesWithTotalAmount.getVehiclesWithTotalAmount);
 router.get('/getExpenseCategory', getExpenseCategory.getExpenseCategory);
 router.post('/getExpenseCategoryByUserEmail', getExpenseCategory.getExpenseCategoryByUserEmail);
+router.post('/getvehiclecomparisonbyemail', vehicleController.getvehiclecomparisonbyemail);
 // router.put('/:id', vehicleController.updateVehicle);
 // router.delete('/:id', vehicleController.deleteVehicle);
 

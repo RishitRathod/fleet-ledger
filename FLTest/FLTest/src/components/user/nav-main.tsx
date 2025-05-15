@@ -51,7 +51,7 @@ export function NavMain({ items }: NavMainProps) {
   const { onOpen } = useExpenseModal();
   const { openFromSidebar } = useRefuelingModal();
   const location = useLocation();
-  const isOnDashboard = location.pathname === "/dashboard";
+  const isOnDashboard = location.pathname === "/dashuser";
 
   const [addVehicleOpen, setAddVehicleOpen] = useState(false);
   const [assignVehicleOpen, setAssignVehicleOpen] = useState(false);

@@ -52,7 +52,6 @@ export function FuelExpenseModal() {
   const [fuelQuantity, setFuelQuantity] = useState<number>(0);
   const [pricePerLiter, setPricePerLiter] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const groupId = "7fbd53d4-ec6c-4021-99a0-fc2e86f2a1b6";
 
   useEffect(() => {
     if (userEmail) {
@@ -143,6 +142,7 @@ export function FuelExpenseModal() {
 
     try {
       const formattedDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      const email = localStorage.getItem("email");
       const response = await fetch(
         "http://localhost:5000/api/refuelings/add",
         {
@@ -157,7 +157,7 @@ export function FuelExpenseModal() {
             liters: fuelQuantity,
             pricePerLiter,
             totalAmount,
-            groupId,
+            email
           }),
         }
       );

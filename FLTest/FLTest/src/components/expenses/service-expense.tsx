@@ -150,7 +150,7 @@ export function ServiceExpenseModal() {
       service_type: selectedServiceType, // Make sure this matches the backend field name
       amount: amount,
       description: description,
-      // email: userEmail,
+      email: localStorage.getItem("email"),
 
       vehicleId: selectedVehicle,
       date: selectedDate,

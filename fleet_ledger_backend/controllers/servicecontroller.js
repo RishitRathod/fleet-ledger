@@ -1,11 +1,16 @@
-const { Service, Group } = require('../models');
+const { Service, Group, User } = require('../models');
 const { sequelize, Op } = require('sequelize');
 
 // Create a new service record
 exports.createService = async (req, res) => {
     try {
         console.log("Incoming Request Body:", req.body); // Debug log
-        const group = await Group.findOne({ where: { vehicleId: req.body.vehicleId } });
+        const email = req.body.email;
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        const group = await Group.findOne({ where: { vehicleId: req.body.vehicleId, userId: user.id } });
         if (!group) {
             return res.status(404).json({ error: "Group not found for this vehicle" });
         }

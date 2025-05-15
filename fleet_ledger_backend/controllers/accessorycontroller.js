@@ -1,4 +1,4 @@
-const { Accessories , Group, } = require('../models');
+const { Accessories , Group, User } = require('../models');
 const { sequelize, Op } = require('sequelize');
 
 // Create a new service record
@@ -6,8 +6,14 @@ exports.createAccessory = async (req, res) => {
     try {
         console.log("Incoming Request Body:", req.body); // Debug log
         //from vehicle id find group id
+        const { vehicleId, email } = req.body;
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
 
-        const group = await Group.findOne({ where: { vehicleId: req.body.vehicleId } });
+        // find group id where vehicle id and user id both are present
+        const group = await Group.findOne({ where: { userId: user.id, vehicleId } });
         if (!group) {
             return res.status(404).json({ error: "Group not found for this vehicle" });
         }

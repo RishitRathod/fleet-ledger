@@ -131,7 +131,7 @@ export function AccessoriesExpenseModal() {
             accessory_type: accessoryName,
             amount: Number(amount),
             description,
-            adminEmail: userEmail,
+            email: userEmail,
           }),
         }
       );

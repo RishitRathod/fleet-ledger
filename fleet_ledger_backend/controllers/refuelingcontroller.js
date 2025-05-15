@@ -1,7 +1,7 @@
 const xlsx = require('xlsx');
 const { Sequelize, Op } = require('sequelize');
 const { sequelize } = require('../config/db');
-const { Refueling, Group } = require('../models');
+const { Refueling, Group, User } = require('../models');
 exports.uploadExcel = async (req, res) => {
     try {
         if (!req.file) {
@@ -96,7 +96,27 @@ exports.addFuelEntry = async (req, res) => {
     try {
         console.log("📥 Received request body:", req.body); // Log the incoming request data
 
-        const { groupId, fuelType, liters, pricePerLiter, kmStart, kmEnd, location, days, date } = req.body;
+        const { email, vehicleId, fuelType, liters, pricePerLiter, kmStart, kmEnd, location, days, date } = req.body;
+
+        // Find user by email
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Find group where user and vehicle match
+        const group = await Group.findOne({
+            where: {
+                userId: user.id,
+                vehicleId: vehicleId
+            }
+        });
+
+        if (!group) {
+            return res.status(404).json({ message: 'Group not found for this user and vehicle combination' });
+        }
+
+        const groupId = group.id;
         
         // 1️⃣ Validate required fields
         if (!groupId || !fuelType || !liters || !pricePerLiter || !date) {

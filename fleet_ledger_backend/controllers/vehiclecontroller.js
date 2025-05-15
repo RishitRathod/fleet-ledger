@@ -1,4 +1,4 @@
-const { User, Vehicle, Group, Refueling } = require('../models'); // Ensure correct imports
+const { User, Vehicle, Group, Refueling, Service, Accessories, Tax } = require('../models'); // Ensure correct imports
 
 /**
  * @desc Create a new vehicle
@@ -182,5 +182,98 @@ exports.getVehicledata = async (req, res) => {
     } catch (error) {
         console.error("Error in getVehicledata:", error);
         res.status(500).json({ success: false, message: "Error fetching vehicle data" });
+    }
+};
+
+exports.getvehiclecomparisonbyemail = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+
+        // First find the user
+        const user = await User.findOne({ where: { email } });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Then find all groups associated with this user
+        const groups = await Group.findAll({
+            where: { userId: user.id },
+            include: [
+                {
+                    model: Vehicle,
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: Refueling,
+                    attributes: ['amount'],
+                    required: false
+                },
+                {
+                    model: Service,
+                    attributes: ['amount'],
+                    required: false
+                },
+                {
+                    model: Accessories,
+                    attributes: ['amount'],
+                    required: false
+                },
+                {
+                    model: Tax,
+                    attributes: ['amount'],
+                    required: false
+                }
+            ]
+        });
+
+        // Process and aggregate the data by vehicle
+        const vehicleMap = new Map();
+
+        groups.forEach(group => {
+            if (!group.Vehicle) return;
+
+            const vehicleId = group.Vehicle.id;
+            if (!vehicleMap.has(vehicleId)) {
+                vehicleMap.set(vehicleId, {
+                    id: vehicleId,
+                    name: group.Vehicle.name,
+                    totalAmount: 0,
+                    details: {
+                        refuelingTotal: 0,
+                        serviceTotal: 0,
+                        accessoryTotal: 0,
+                        taxTotal: 0
+                    }
+                });
+            }
+
+            const vehicleData = vehicleMap.get(vehicleId);
+            
+            // Sum up all expenses from this group
+            const refuelingAmount = group.Refuelings?.reduce((sum, r) => sum + (r.amount || 0), 0) || 0;
+            const serviceAmount = group.Services?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
+            const accessoryAmount = group.Accessories?.reduce((sum, a) => sum + (a.amount || 0), 0) || 0;
+            const taxAmount = group.Taxes?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
+
+            vehicleData.details.refuelingTotal += refuelingAmount;
+            vehicleData.details.serviceTotal += serviceAmount;
+            vehicleData.details.accessoryTotal += accessoryAmount;
+            vehicleData.details.taxTotal += taxAmount;
+            vehicleData.totalAmount += refuelingAmount + serviceAmount + accessoryAmount + taxAmount;
+        });
+
+        // Convert map to array and sort by vehicle name
+        const vehicleData = Array.from(vehicleMap.values())
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        res.json(vehicleData);
+    } catch (error) {
+        console.error('Error fetching vehicle comparison:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };

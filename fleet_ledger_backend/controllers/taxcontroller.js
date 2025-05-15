@@ -1,8 +1,19 @@
-const { Tax, Group } = require('../models');
+const { Tax, Group, User } = require('../models');
 const { Op } = require('sequelize');
 
 exports.createTax = async (req, res) => {
     try {
+        const email = req.body.email;
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        const group = await Group.findOne({ where: { vehicleId: req.body.vehicleId, userId: user.id } });
+        if (!group) {
+            return res.status(404).json({ error: "Group not found for this vehicle" });
+        }
+        req.body.groupId = group.id;
+        console.log("Group ID:", group.id);
         const { taxType, amount, date, description, groupId } = req.body;
 
         if (!taxType || !amount || !date || !groupId) {

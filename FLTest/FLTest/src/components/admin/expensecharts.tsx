@@ -318,27 +318,42 @@ const ExpenseCharts = () => {
                       Filter Type:
                     </h3>
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant={filterType === "vehicle" ? "default" : "outline"}
-                        onClick={() => setFilterType("vehicle")}
-                        className="w-full"
-                      >
-                        Vehicle
-                      </Button>
-                      <Button
-                        variant={filterType === "user" ? "default" : "outline"}
-                        onClick={() => setFilterType("user")}
-                        className="w-full"
-                      >
-                        User
-                      </Button>
-                      <Button
-                        variant={filterType === "category" ? "default" : "outline"}
-                        onClick={() => setFilterType("category")}
-                        className="w-full"
-                      >
-                        Category
-                      </Button>
+                    <Button
+                      onClick={() => setFilterType("vehicle")}
+                      className={cn(
+                        "w-full border",
+                        filterType === "vehicle"
+                          ? "bg-white text-black border-gray-300"
+                          : "bg-transparent text-white border-gray-600 hover:bg-gray-800"
+                      )}
+                    >
+                      Vehicle
+                    </Button>
+
+                    <Button
+                      onClick={() => setFilterType("user")}
+                      className={cn(
+                        "w-full border",
+                        filterType === "user"
+                          ? "bg-white text-black border-gray-300"
+                          : "bg-transparent text-white border-gray-600 hover:bg-gray-800"
+                      )}
+                    >
+                      User
+                    </Button>
+
+                    <Button
+                      onClick={() => setFilterType("category")}
+                      className={cn(
+                        "w-full border",
+                        filterType === "category"
+                          ? "bg-white text-black border-gray-300"
+                          : "bg-transparent text-white border-gray-600 hover:bg-gray-800"
+                      )}
+                    >
+                      Category
+                    </Button>
+
                     </div>
                   </div>
                   <div>
@@ -448,11 +463,12 @@ const ExpenseCharts = () => {
                             <Checkbox
                               id={`chart-${chart.id}`}
                               checked={selectedCharts.includes(chart.id)}
-                              onCheckedChange={() =>
-                                handleChartSelection(chart.id)
-                              }
-                              className="bg-black/80 border border-gray-700 text-blue-400"
+                              onCheckedChange={() => handleChartSelection(chart.id)}
+                              className={cn(
+                                "border border-gray-700 bg-black/80 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                              )}
                             />
+
                             <div className="grid gap-1 leading-none">
                               <Label
                                 htmlFor={`chart-${chart.id}`}
