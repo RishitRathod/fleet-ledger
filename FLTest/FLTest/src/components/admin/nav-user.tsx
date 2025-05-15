@@ -14,6 +14,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 import { useNotifications } from "@/hooks/use-notifications"
 import { NotificationModal } from "@/components/notifications/notification-modal"
+import { useSession } from "@/hooks/use-session"
 
 export function NavUser({
   user,
@@ -26,6 +27,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const notifications = useNotifications()
+  const { logout } = useSession()
 
   return (
     <>
@@ -85,7 +87,7 @@ export function NavUser({
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={logout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>

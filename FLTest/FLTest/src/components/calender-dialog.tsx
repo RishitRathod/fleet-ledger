@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
@@ -6,10 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
-const CalendarDialog = () => {
+interface CalendarDialogProps {
+  onDateSelect?: (date: Date) => void;
+  selectedDate?: Date;
+}
+
+const CalendarDialog = ({ onDateSelect, selectedDate: propSelectedDate }: CalendarDialogProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentMonth, setCurrentMonth] = useState(3); // April (0-indexed)
+  const [selectedDate, setSelectedDate] = useState(propSelectedDate || new Date());
+  const [currentMonth, setCurrentMonth] = useState(4); // April (0-indexed)
   const [currentYear, setCurrentYear] = useState(2025);
 
   const isSelectedDate = (day: {
@@ -160,9 +165,16 @@ const CalendarDialog = () => {
                           day.currentMonth ? "text-gray-100" : "text-gray-500"
                         } hover:bg-gray-800 flex items-center justify-center`}
                         onClick={() => {
-                          setSelectedDate(
-                            new Date(day.year, day.month, day.day)
-                          );
+                          const newDate = new Date(day.year, day.month, day.day);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          
+                          if (newDate > today) {
+                            return; // Prevent selecting future dates
+                          }
+                          
+                          setSelectedDate(newDate);
+                          onDateSelect?.(newDate);
                           setIsCalendarOpen(false);
                         }}
                       >
@@ -180,9 +192,16 @@ const CalendarDialog = () => {
                           day.currentMonth ? "text-gray-100" : "text-gray-500"
                         } hover:bg-gray-800 flex items-center justify-center`}
                         onClick={() => {
-                          setSelectedDate(
-                            new Date(day.year, day.month, day.day)
-                          );
+                          const newDate = new Date(day.year, day.month, day.day);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          
+                          if (newDate > today) {
+                            return; // Prevent selecting future dates
+                          }
+                          
+                          setSelectedDate(newDate);
+                          onDateSelect?.(newDate);
                           setIsCalendarOpen(false);
                         }}
                       >
@@ -200,9 +219,16 @@ const CalendarDialog = () => {
                           day.currentMonth ? "text-gray-100" : "text-gray-500"
                         } hover:bg-gray-800 flex items-center justify-center`}
                         onClick={() => {
-                          setSelectedDate(
-                            new Date(day.year, day.month, day.day)
-                          );
+                          const newDate = new Date(day.year, day.month, day.day);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          
+                          if (newDate > today) {
+                            return; // Prevent selecting future dates
+                          }
+                          
+                          setSelectedDate(newDate);
+                          onDateSelect?.(newDate);
                           setIsCalendarOpen(false);
                         }}
                       >
@@ -222,11 +248,18 @@ const CalendarDialog = () => {
                           isSelectedDate(day)
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "hover:bg-gray-800"
-                        } flex items-center justify-center`}
+                        } flex items-center justify-center ${new Date(day.year, day.month, day.day) > new Date() ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => {
-                          setSelectedDate(
-                            new Date(day.year, day.month, day.day)
-                          );
+                          const newDate = new Date(day.year, day.month, day.day);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          
+                          if (newDate > today) {
+                            return; // Prevent selecting future dates
+                          }
+                          
+                          setSelectedDate(newDate);
+                          onDateSelect?.(newDate);
                           setIsCalendarOpen(false);
                         }}
                       >
@@ -246,11 +279,18 @@ const CalendarDialog = () => {
                           isSelectedDate(day)
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "hover:bg-gray-800"
-                        } flex items-center justify-center`}
+                        } flex items-center justify-center ${new Date(day.year, day.month, day.day) > new Date() ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => {
-                          setSelectedDate(
-                            new Date(day.year, day.month, day.day)
-                          );
+                          const newDate = new Date(day.year, day.month, day.day);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          
+                          if (newDate > today) {
+                            return; // Prevent selecting future dates
+                          }
+                          
+                          setSelectedDate(newDate);
+                          onDateSelect?.(newDate);
                           setIsCalendarOpen(false);
                         }}
                       >

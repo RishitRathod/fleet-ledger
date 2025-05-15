@@ -245,7 +245,10 @@ export function TaxExpenseModal() {
               />
             </div>
 
-            <CalendarDialog />
+            <CalendarDialog
+              selectedDate={selectedDate}
+              onDateSelect={(date) => setSelectedDate(date)}
+            />
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Tax Type</Label>

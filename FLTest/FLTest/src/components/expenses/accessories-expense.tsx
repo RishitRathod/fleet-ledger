@@ -185,7 +185,10 @@ export function AccessoriesExpenseModal() {
           </div>
 
           {/* Date */}
-          <CalendarDialog />
+          <CalendarDialog
+            selectedDate={selectedDate}
+            onDateSelect={(date) => setSelectedDate(date)}
+          />
           {/* Accessory Name */}
           <div className="space-y-2">
             <Label>Accessory Name</Label>

@@ -87,22 +87,43 @@ export function ExpenseCategory({ className }: { className?: string }) {
     fetchExpenseData();
   }, []);
 
+  // Calculate total amount for percentage validation
+  const totalAmount = expenseData ? (
+    expenseData.expenseBreakdown.refueling.amount +
+    expenseData.expenseBreakdown.service.amount +
+    expenseData.expenseBreakdown.accessories.amount
+  ) : 0;
+
+  // Debug log the amounts and calculations
+  if (expenseData) {
+    console.log('Debug: Expense Amounts', {
+      total: totalAmount,
+      fuel: expenseData.expenseBreakdown.refueling.amount,
+      fuelPercent: (expenseData.expenseBreakdown.refueling.amount / totalAmount) * 100,
+      services: expenseData.expenseBreakdown.service.amount,
+      servicesPercent: (expenseData.expenseBreakdown.service.amount / totalAmount) * 100,
+      accessories: expenseData.expenseBreakdown.accessories.amount,
+      accessoriesPercent: (expenseData.expenseBreakdown.accessories.amount / totalAmount) * 100
+    });
+  }
+
+  // Create categories with validated percentages
   const expenseCategories = expenseData ? [
     { 
       name: "Fuel", 
-      value: expenseData.expenseBreakdown.refueling.percentage, 
+      value: (expenseData.expenseBreakdown.refueling.amount / totalAmount) * 100, 
       color: "#4CAF50",
       amount: expenseData.expenseBreakdown.refueling.amount
     },
     { 
       name: "Services", 
-      value: expenseData.expenseBreakdown.service.percentage, 
+      value: (expenseData.expenseBreakdown.service.amount / totalAmount) * 100, 
       color: "#1976D2",
       amount: expenseData.expenseBreakdown.service.amount
     },
     { 
       name: "Accessories", 
-      value: expenseData.expenseBreakdown.accessories.percentage, 
+      value: (expenseData.expenseBreakdown.accessories.amount / totalAmount) * 100, 
       color: "#FFC107",
       amount: expenseData.expenseBreakdown.accessories.amount
     }
@@ -135,22 +156,28 @@ export function ExpenseCategory({ className }: { className?: string }) {
 
         {/* Progress Bar with Multiple Colors & White Lines */}
         <div className="w-full h-3 rounded-full overflow-hidden bg-gray-200 relative">
-          <div className="flex w-full h-full">
-            {expenseCategories.map((item, index) => (
-              <div
-                key={index}
-                className="h-full transition-all duration-300 hover:opacity-80 relative"
-                style={{
-                  width: `${item.value}%`,
-                  backgroundColor: item.color,
-                }}
-              >
-                {/* White separator line (except last one) */}
-                {index < expenseCategories.length - 1 && (
-                  <div className="absolute right-0 top-0 h-full w-[2px] bg-white"></div>
-                )}
-              </div>
-            ))}
+          <div className="relative w-full h-full">
+            {expenseCategories.map((item, index) => {
+              console.log(`Rendering bar for ${item.name}: ${item.value}%`);
+              return (
+                <div
+                  key={index}
+                  className="absolute h-full transition-all duration-300 hover:opacity-80"
+                  style={{
+                    left: `${expenseCategories
+                      .slice(0, index)
+                      .reduce((acc, curr) => acc + curr.value, 0)}%`,
+                    width: `${item.value}%`,
+                    backgroundColor: item.color,
+                  }}
+                >
+                  {/* White separator line (except last one) */}
+                  {index < expenseCategories.length - 1 && (
+                    <div className="absolute right-0 top-0 h-full w-[2px] bg-white"></div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

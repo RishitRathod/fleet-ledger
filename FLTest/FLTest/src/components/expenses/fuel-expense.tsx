@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -12,11 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -24,9 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useExpenseModal } from "./expense-store";
 import CalendarDialog from "../calender-dialog";
 interface VehicleOption {
@@ -214,7 +206,10 @@ export function FuelExpenseModal() {
               </Select>
             </div>
 
-            <CalendarDialog />
+            <CalendarDialog
+              selectedDate={selectedDate}
+              onDateSelect={(date) => setSelectedDate(date)}
+            />
 
             {/* <div className="space-y-2">
               <Label className="text-sm font-medium">Date</Label>

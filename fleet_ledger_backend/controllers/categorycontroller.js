@@ -7,23 +7,42 @@ const safeSum = (x) => (x === null ? 0 : x);
 const getCatrgoryWithTotalAmount = async (req, res) => {
     try {
         // Fetch sum of 'amount' from each table, ensuring null is handled
-        const [refuelingTotalRaw, serviceTotalRaw, accessoriesTotalRaw, taxTotalRaw] = await Promise.all([
+        const [refuelingTotalRaw, serviceTotalRaw, accessoriesTotalRaw] = await Promise.all([
             Refueling.sum('amount', { where: { amount: { [Sequelize.Op.ne]: null } } }),
             Service.sum('amount', { where: { amount: { [Sequelize.Op.ne]: null } } }),
-            Accessories.sum('amount', { where: { amount: { [Sequelize.Op.ne]: null } } }),
-            Tax.sum('amount', { where: { amount: { [Sequelize.Op.ne]: null } } }),
+            Accessories.sum('amount', { where: { amount: { [Sequelize.Op.ne]: null } } })
         ]);
 
-        // Safely handle null totals with the safeSum function
-        const categoryData = [
-            { name: 'Refueling', totalAmount: safeSum(refuelingTotalRaw) },
-            { name: 'Service', totalAmount: safeSum(serviceTotalRaw) },
-            { name: 'Accessories', totalAmount: safeSum(accessoriesTotalRaw) },
-            { name: 'Tax', totalAmount: safeSum(taxTotalRaw) }
-        ];
+        // Safely handle null totals
+        const refuelingAmount = safeSum(refuelingTotalRaw);
+        const serviceAmount = safeSum(serviceTotalRaw);
+        const accessoriesAmount = safeSum(accessoriesTotalRaw);
+        
+        // Calculate total amount
+        const totalAmount = refuelingAmount + serviceAmount + accessoriesAmount;
+        
+        // Calculate percentages
+        const response = {
+            name: 'Vehicle Expenses',
+            totalAmount: totalAmount,
+            expenseBreakdown: {
+                refueling: {
+                    amount: refuelingAmount,
+                    percentage: totalAmount > 0 ? (refuelingAmount / totalAmount) * 100 : 0
+                },
+                service: {
+                    amount: serviceAmount,
+                    percentage: totalAmount > 0 ? (serviceAmount / totalAmount) * 100 : 0
+                },
+                accessories: {
+                    amount: accessoriesAmount,
+                    percentage: totalAmount > 0 ? (accessoriesAmount / totalAmount) * 100 : 0
+                }
+            }
+        };
 
         // Send the response with category data
-        res.json(categoryData);
+        res.json(response);
     } catch (error) {
         console.error('Error fetching category totals:', error);
         res.status(500).json({ error: 'Internal server error' });
