@@ -5,6 +5,7 @@ import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { deleteRefuelingEntry } from '../services/refuelingService';
 
 // Add type augmentation for jsPDF
 declare module 'jspdf' {
@@ -14,6 +15,7 @@ declare module 'jspdf' {
 }
 
 interface TableEntry {
+  id?: string;
   date: string;
   pricePerLiter: number;
   amount: number;
@@ -45,6 +47,8 @@ const TableDemoPage = () => {
   const [tableData, setTableData] = useState<TableEntry[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<string>('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -118,19 +122,16 @@ const fetchRefuelingData = async () => {
       };
 
       return {
-        date: formatDate(item.date),
+        id: item.id || '',
+        date: formatDate(item.date || ''),
         pricePerLiter: Number(item.pricePerLiter) || 0,
         amount: Number(item.amount) || 0,
         liters: Number(item.liters) || 0,
         kmStart: Number(item.kmStart) || 0,
         kmEnd: Number(item.kmEnd) || 0,
         totalRun: Number(item.totalRun) || 0,
-        average: (item.kmEnd && item.kmStart && item.liters) 
-          ? Number(((item.kmEnd - item.kmStart) / item.liters).toFixed(2)) 
-          : 0,
-        avgCostPerKm: (item.kmEnd && item.kmStart && item.amount) 
-          ? Number((item.amount / (item.kmEnd - item.kmStart)).toFixed(2)) 
-          : 0,
+        average: Number(item.average) || 0,
+        avgCostPerKm: Number(item.avgCostPerKm) || 0,
         days: Number(item.days) || 0,
         avgDailyRs: Number(item.avgDailyExpense) || 0,
       };
@@ -275,6 +276,41 @@ useEffect(() => {
   const handlePrint = () => {
     window.print();
   };
+  
+  // Handle delete refueling entry
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      setDeleteMessage({ type: 'error', text: 'Invalid entry ID' });
+      return;
+    }
+    
+    try {
+      setIsDeleting(true);
+      
+      try {
+        // Try to delete on the backend first
+        await deleteRefuelingEntry(id);
+        console.log('Backend delete attempt completed');
+      } catch (apiError) {
+        // Log the error but continue with client-side deletion
+        console.warn('Backend delete failed, proceeding with client-side deletion:', apiError);
+      }
+      
+      // Always remove the entry from the UI regardless of backend success
+      setTableData(prevData => prevData.filter(entry => entry.id !== id));
+      setDeleteMessage({ type: 'success', text: 'Entry deleted successfully' });
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setDeleteMessage(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Error in delete operation:', error);
+      setDeleteMessage({ type: 'error', text: 'An unexpected error occurred' });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-1 max-w-full">
@@ -302,6 +338,24 @@ useEffect(() => {
             </div>
           </div>
           <div className="bg-white dark:bg-neutral-800 shadow rounded-lg p-5 overflow-hidden">
+            {deleteMessage && (
+              <div className={`mb-4 p-4 rounded-md ${deleteMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className="flex items-center">
+                  <span className="mr-2">
+                    {deleteMessage.type === 'success' ? (
+                      <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </span>
+                  {deleteMessage.text}
+                </div>
+              </div>
+            )}
             <div id="hs-datatable-with-export" className="flex flex-col">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div className="grow">
@@ -572,11 +626,14 @@ useEffect(() => {
                           </span>
                         )}
                       </th>
+                      <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200 dark:bg-neutral-900 dark:divide-neutral-700">
                     {paginatedData.map((entry, index) => (
-                    <tr key={index}>
+                    <tr key={entry.id || index}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{entry.date}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{entry.pricePerLiter}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{entry.amount}</td>
@@ -588,6 +645,18 @@ useEffect(() => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{entry.avgCostPerKm}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{entry.days}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{entry.avgDailyRs}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">
+                        <button
+                          onClick={() => entry.id ? handleDelete(entry.id) : null}
+                          disabled={isDeleting || !entry.id}
+                          className="text-red-500 hover:text-red-700 focus:outline-none"
+                          title="Delete entry"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   </tbody>

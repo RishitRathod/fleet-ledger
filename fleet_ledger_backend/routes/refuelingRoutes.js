@@ -11,4 +11,7 @@ router.get('/', refuelingController.getAllRefuelingEntries);
 // Get refueling records by date range
 router.get('/getRefuelingByDateRange', refuelingController.getRefuelingByDateRange);
 
+// Delete a refueling record by ID
+router.delete('/:id', refuelingController.deleteRefuelingEntry);
+
 module.exports = router;

@@ -261,3 +261,55 @@ exports.getRefuelingByDateRange = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// Delete a refueling entry by ID
+exports.deleteRefuelingEntry = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id) {
+            return res.status(400).json({ 
+                success: false,
+                message: "❌ Missing refueling entry ID in request."
+            });
+        }
+
+        console.log(`🗑️ Attempting to delete refueling entry with ID: ${id}`);
+        
+        // Find the entry first to confirm it exists
+        const refuelingEntry = await Refueling.findByPk(id);
+        
+        if (!refuelingEntry) {
+            // Try to find by different ID formats (in case of UUID vs numeric ID issues)
+            const allRefuelings = await Refueling.findAll();
+            console.log(`Searching through ${allRefuelings.length} refueling entries for ID: ${id}`);
+            
+            // Log the first few entries to debug
+            if (allRefuelings.length > 0) {
+                console.log('Sample refueling IDs:', allRefuelings.slice(0, 3).map(r => r.id));
+            }
+            
+            return res.status(404).json({
+                success: false,
+                message: `❌ Refueling entry with ID ${id} not found.`
+            });
+        }
+        
+        // Delete the entry
+        await refuelingEntry.destroy();
+        
+        console.log(`✅ Successfully deleted refueling entry with ID: ${id}`);
+        
+        return res.status(200).json({
+            success: true,
+            message: "✅ Refueling entry deleted successfully!"
+        });
+    } catch (error) {
+        console.error("❌ Error deleting refueling entry:", error);
+        return res.status(500).json({
+            success: false,
+            message: "❌ Error deleting refueling entry.",
+            error: error.message
+        });
+    }
+};
