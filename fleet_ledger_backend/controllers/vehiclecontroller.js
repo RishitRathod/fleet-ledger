@@ -147,6 +147,9 @@ exports.deleteVehicle = async (req, res) => {
 exports.getVehicledata = async (req, res) => {
     try {
         const { name } = req.body;
+        const { email } = req.body;
+        const user = await User.findOne({ where: { email } });
+        
         console.log("Fetching data for vehicle:", name);
 
         // Find vehicle by name
@@ -157,7 +160,7 @@ exports.getVehicledata = async (req, res) => {
         console.log("Vehicle found:", vehicle.id);
 
         // Find groups associated with the vehicle
-        const groups = await Group.findAll({ where: { vehicleId: vehicle.id } });
+        const groups = await Group.findAll({ where: { vehicleId: vehicle.id, userId: user.id } });
         if (!groups || groups.length === 0) {
             return res.status(404).json({ success: false, message: "No group found for this vehicle" });
         }

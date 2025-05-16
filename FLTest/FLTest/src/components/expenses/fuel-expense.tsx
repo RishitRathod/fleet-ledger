@@ -136,20 +136,23 @@ export function FuelExpenseModal() {
       const formattedDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
       const email = localStorage.getItem("email");
       const response = await fetch(
-        `${import.meta.env.VITE_SERVER_ORIGIN}/api/refuelings/add`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/refueling/add`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            email,
             vehicleId: selectedVehicle,
-            date: formattedDate,
             fuelType: selectedFuelType,
             liters: fuelQuantity,
             pricePerLiter,
-            totalAmount,
-            email
+            kmStart: 0,
+            kmEnd: 0,
+            location: "",
+            days: 1,
+            date: formattedDate
           }),
         }
       );
