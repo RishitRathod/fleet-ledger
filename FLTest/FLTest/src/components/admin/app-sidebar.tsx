@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { useEffect, useState } from "react";
 import {
   AudioWaveform,
   Command,
@@ -26,11 +27,11 @@ import {
   SidebarRail,
 } from "../ui/sidebar";
 
-// Sample data
+// Default data structure
 const data = {
   user: {
-    name: "Admin",
-    email: "admin@example.com",
+    name: "",
+    email: "",
     avatar: "/avatars/shadcn.jpg",
   },
   teams: [
@@ -79,7 +80,6 @@ const data = {
         },
       ],
     },
- 
     {
       title: "Users",
       url: "/users",
@@ -130,6 +130,20 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [userData, setUserData] = useState(data.user);
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const userName = localStorage.getItem('name') || "Admin";
+    const userEmail = localStorage.getItem('email') || "admin@example.com";
+    
+    setUserData({
+      name: userName,
+      email: userEmail,
+      avatar: "/avatars/shadcn.jpg",
+    });
+  }, []);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -139,7 +153,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} vehicleitems={data.vehicleitems} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

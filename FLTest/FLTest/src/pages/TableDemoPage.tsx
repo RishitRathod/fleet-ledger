@@ -104,23 +104,37 @@ const fetchRefuelingData = async () => {
       throw new Error("Invalid refueling data format");
     }
 
-    const transformedData = refuelingData.map((item: any) => ({
-      date: item.date || '',
-      pricePerLiter: Number(item.pricePerLiter) || 0,
-      amount: Number(item.amount) || 0,
-      liters: Number(item.liters) || 0,
-      kmStart: Number(item.kmStart) || 0,
-      kmEnd: Number(item.kmEnd) || 0,
-      totalRun: Number(item.totalRun) || 0,
-      average: (item.kmEnd && item.kmStart && item.liters) 
-        ? Number(((item.kmEnd - item.kmStart) / item.liters).toFixed(2)) 
-        : 0,
-      avgCostPerKm: (item.kmEnd && item.kmStart && item.amount) 
-        ? Number((item.amount / (item.kmEnd - item.kmStart)).toFixed(2)) 
-        : 0,
-      days: Number(item.days) || 0,
-      avgDailyRs: Number(item.avgDailyExpense) || 0,
-    }));
+    const transformedData = refuelingData.map((item: any) => {
+      // Format date from ISO string to DD/MM/YYYY
+      const formatDate = (dateString: string) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString; // Return original if invalid
+        return date.toLocaleDateString('en-GB', { // en-GB gives DD/MM/YYYY format
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      };
+
+      return {
+        date: formatDate(item.date),
+        pricePerLiter: Number(item.pricePerLiter) || 0,
+        amount: Number(item.amount) || 0,
+        liters: Number(item.liters) || 0,
+        kmStart: Number(item.kmStart) || 0,
+        kmEnd: Number(item.kmEnd) || 0,
+        totalRun: Number(item.totalRun) || 0,
+        average: (item.kmEnd && item.kmStart && item.liters) 
+          ? Number(((item.kmEnd - item.kmStart) / item.liters).toFixed(2)) 
+          : 0,
+        avgCostPerKm: (item.kmEnd && item.kmStart && item.amount) 
+          ? Number((item.amount / (item.kmEnd - item.kmStart)).toFixed(2)) 
+          : 0,
+        days: Number(item.days) || 0,
+        avgDailyRs: Number(item.avgDailyExpense) || 0,
+      };
+    });
 
     console.log("Transformed data:", transformedData);
     setTableData(transformedData);

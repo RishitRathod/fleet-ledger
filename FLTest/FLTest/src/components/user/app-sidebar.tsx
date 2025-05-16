@@ -1,6 +1,7 @@
 "use client";
 
 import type * as React from "react";
+import { useEffect, useState } from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -35,11 +36,11 @@ import {
   SidebarRail,
 } from "../ui/sidebar";
 
-// Sample data
+// Default data structure
 const data = {
   user: {
-    name: "User",
-    email: "user@example.com",
+    name: "",
+    email: "",
     avatar: "/avatars/shadcn.jpg",
   },
   teams: [
@@ -117,6 +118,20 @@ const data = {
 };
 
 export function AppSidebarUser({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [userData, setUserData] = useState(data.user);
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const userName = localStorage.getItem('name') || "User";
+    const userEmail = localStorage.getItem('email') || "user@example.com";
+    
+    setUserData({
+      name: userName,
+      email: userEmail,
+      avatar: "/avatars/shadcn.jpg",
+    });
+  }, []);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -127,7 +142,7 @@ export function AppSidebarUser({ ...props }: React.ComponentProps<typeof Sidebar
         {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
