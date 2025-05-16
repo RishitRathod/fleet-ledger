@@ -1,13 +1,11 @@
 "use client";
 import { useState } from "react";
-import flLogo from "./assets/fl.png";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSession } from "@/hooks/use-session";
-// import ChartIllustration from "@/assets/chart-illustration.png"; // <-- place your generated image here
 
 export function LoginForm({
   className,
@@ -37,59 +35,81 @@ export function LoginForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden">
-        <CardContent className="grid grid-cols-1 md:grid-cols-2">
-          {/* LEFT: the login form */}
-          <form className="p-6 md:p-8 flex flex-col gap-6" onSubmit={handleLogin}>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold">Welcome back</h1>
-              <p className="text-sm text-muted-foreground">Login to your account</p>
-            </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className={cn("w-full max-w-md shadow-lg", className)} {...props}>
+        <CardContent className="p-6 sm:p-8">
+          <div className="space-y-8">
+            {/* Header */}
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                Fleet Ledger
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Sign in to manage your fleet
+              </p>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            {/* Error Message */}
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800">
+                <p className="text-sm text-red-600 dark:text-red-400 text-center">
+                  {error}
+                </p>
+              </div>
+            )}
 
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
+            {/* Login Form */}
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full py-2"
+                  />
+                </div>
 
-            <p className="text-center text-sm">
-              Don’t have an account?{" "}
-              <a href="/signup" className="text-blue-500 hover:underline">
-                Sign up
-              </a>
-            </p>
-          </form>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full py-2"
+                  />
+                </div>
+              </div>
 
-          {/* RIGHT: the illustration */}
-          <div className="hidden md:block bg-[#111111] p-8 relative h-full">
-            <img
-              src={flLogo}
-              alt="Fleet Ledger"
-              className="w-full h-full object-contain"
-            />
+              <Button 
+                type="submit" 
+                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+              >
+                Sign in
+              </Button>
+
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Don't have an account?{" "}
+                  <a 
+                    href="/signup" 
+                    className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                  >
+                    Create one
+                  </a>
+                </p>
+              </div>
+            </form>
           </div>
         </CardContent>
       </Card>

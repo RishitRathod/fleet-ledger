@@ -36,24 +36,180 @@ const Card = React.forwardRef<
 ));
 Card.displayName = "Card";
 
+interface Vehicle {
+  id: string;
+  name: string;
+  model: string;
+  registrationNumber: string;
+}
+
+interface VehicleData {
+  refueling: Array<{
+    date: string;
+    pricePerLiter: number;
+    amount: number;
+    liters: number;
+    kmStart: number;
+    kmEnd: number;
+    totalRun: number;
+    days: number;
+    avgDailyExpense: number;
+  }>;
+}
+
+interface VehicleCost {
+  vehicle: string;
+  cost: string;
+  avgCostPerKm: number;
+}
+
+interface VehicleConsumption {
+  vehicle: string;
+  consumption: string;
+  avgLiters: number;
+}
+
 const Dashboard = () => {
   const { toast } = useToast();
   const costSliderRef = React.useRef<any>(null);
   const consumptionSliderRef = React.useRef<any>(null);
+  
+  const [vehicles, setVehicles] = React.useState<Vehicle[]>([]);
+  const [vehicleCosts, setVehicleCosts] = React.useState<VehicleCost[]>([]);
+  const [vehicleConsumption, setVehicleConsumption] = React.useState<VehicleConsumption[]>([]);
+  const [avgDailyExpense, setAvgDailyExpense] = React.useState<number>(0);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const vehicleCosts = [
-    { vehicle: "Car A", cost: "Rs. 5/km" },
-    { vehicle: "Car B", cost: "Rs. 6/km" },
-    { vehicle: "Car C", cost: "Rs. 4.5/km" },
-    { vehicle: "Car D", cost: "Rs. 5.2/km" },
-  ];
+  React.useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehicles`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.success) {
+          setVehicles(data.data);
+          // Fetch data for each vehicle
+          await Promise.all(data.data.map((vehicle: Vehicle) => fetchVehicleData(vehicle.name)));
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching vehicles:', error);
+        setError('Error fetching vehicles');
+        setLoading(false);
+        toast({
+          title: "Error",
+          description: "Failed to fetch vehicle data",
+          variant: "destructive",
+        });
+      }
+    };
 
-  const vehicleConsumption = [
-    { vehicle: "Car A", consumption: "5 Liters" },
-    { vehicle: "Car B", consumption: "6 Liters" },
-    { vehicle: "Car C", consumption: "4.5 Liters" },
-    { vehicle: "Car D", consumption: "5.2 Liters" },
-  ];
+    fetchVehicles();
+  }, [toast]);
+
+  const fetchVehicleData = async (vehicleName: string) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_ORIGIN}/api/vehicles/getVehicledata`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: vehicleName }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || `Failed to fetch data for ${vehicleName}`);
+      }
+
+      // Process the refueling data
+      processVehicleData(vehicleName, data.data);
+
+    } catch (error) {
+      console.error(`Error fetching data for ${vehicleName}:`, error);
+    }
+  };
+
+  const processVehicleData = (vehicleName: string, data: VehicleData) => {
+    if (!data.refueling || !Array.isArray(data.refueling) || data.refueling.length === 0) {
+      return;
+    }
+
+    // Calculate average cost per km
+    let totalCost = 0;
+    let totalDistance = 0;
+    let totalLiters = 0;
+    let totalDailyExpense = 0;
+    let entryCount = 0;
+
+    data.refueling.forEach(entry => {
+      const distance = entry.kmEnd - entry.kmStart;
+      if (distance > 0) {
+        totalCost += entry.amount;
+        totalDistance += distance;
+      }
+      totalLiters += entry.liters;
+      totalDailyExpense += entry.avgDailyExpense || 0;
+      entryCount++;
+    });
+
+    const avgCostPerKm = totalDistance > 0 ? totalCost / totalDistance : 0;
+    const avgLiters = entryCount > 0 ? totalLiters / entryCount : 0;
+    const avgDailyExp = entryCount > 0 ? totalDailyExpense / entryCount : 0;
+
+    // Update vehicle costs
+    setVehicleCosts(prev => {
+      const newCosts = [...prev];
+      const existingIndex = newCosts.findIndex(item => item.vehicle === vehicleName);
+      
+      const newCostItem = {
+        vehicle: vehicleName,
+        cost: `Rs. ${avgCostPerKm.toFixed(2)}/km`,
+        avgCostPerKm: avgCostPerKm
+      };
+
+      if (existingIndex >= 0) {
+        newCosts[existingIndex] = newCostItem;
+      } else {
+        newCosts.push(newCostItem);
+      }
+      
+      return newCosts;
+    });
+
+    // Update vehicle consumption
+    setVehicleConsumption(prev => {
+      const newConsumption = [...prev];
+      const existingIndex = newConsumption.findIndex(item => item.vehicle === vehicleName);
+      
+      const newConsumptionItem = {
+        vehicle: vehicleName,
+        consumption: `${avgLiters.toFixed(2)} Liters`,
+        avgLiters: avgLiters
+      };
+
+      if (existingIndex >= 0) {
+        newConsumption[existingIndex] = newConsumptionItem;
+      } else {
+        newConsumption.push(newConsumptionItem);
+      }
+      
+      return newConsumption;
+    });
+
+    // Update average daily expense
+    setAvgDailyExpense(prev => {
+      // Calculate weighted average based on number of entries
+      const totalEntries = prev > 0 ? entryCount + 1 : entryCount;
+      return totalEntries > 0 ? 
+        ((prev * (totalEntries - entryCount)) + totalDailyExpense) / totalEntries : 
+        avgDailyExp;
+    });
+  };
 
   const sliderSettings = {
     dots: false,
@@ -95,38 +251,64 @@ const Dashboard = () => {
           <div className="md:col-span-2 space-y-4 flex flex-col h-full">
             {/* Slider for Cost per Km */}
             <div className="flex-1 h-[100px]">
-              <Slider ref={costSliderRef} {...sliderSettings} className="h-full">
-                {vehicleCosts.map((item, index) => (
-                  <Card key={index} className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
-                    <h4 className="text-sm font-medium text-muted-foreground">{item.vehicle} - Cost per Km</h4>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                      {item.cost}
-                    </p>
-                  </Card>
-                ))}
-              </Slider>
+              {loading ? (
+                <Card className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </Card>
+              ) : vehicleCosts.length > 0 ? (
+                <Slider ref={costSliderRef} {...sliderSettings} className="h-full">
+                  {vehicleCosts.map((item, index) => (
+                    <Card key={index} className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                      <h4 className="text-sm font-medium text-muted-foreground">{item.vehicle} - Cost per Km</h4>
+                      <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                        {item.cost}
+                      </p>
+                    </Card>
+                  ))}
+                </Slider>
+              ) : (
+                <Card className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                  <p className="text-sm text-muted-foreground">No vehicle data available</p>
+                </Card>
+              )}
             </div>
 
             {/* Card for Avg. Daily Expenses */}
             <Card className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
               <h4 className="text-sm font-medium text-muted-foreground">Avg. Daily Expenses</h4>
-              <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                Rs. 200
-              </p>
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                  Rs. {avgDailyExpense.toFixed(2)}
+                </p>
+              )}
             </Card>
 
             {/* Slider for Avg. Daily Consumption */}
             <div className="flex-1">
-              <Slider ref={consumptionSliderRef} {...sliderSettings} className="h-full">
-                {vehicleConsumption.map((item, index) => (
-                  <Card key={index} className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
-                    <h4 className="text-sm font-medium text-muted-foreground">{item.vehicle} - Avg. Daily Consumption</h4>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                      {item.consumption}
-                    </p>
-                  </Card>
-                ))}
-              </Slider>
+              {loading ? (
+                <Card className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </Card>
+              ) : vehicleConsumption.length > 0 ? (
+                <Slider ref={consumptionSliderRef} {...sliderSettings} className="h-full">
+                  {vehicleConsumption.map((item, index) => (
+                    <Card key={index} className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                      <h4 className="text-sm font-medium text-muted-foreground">{item.vehicle} - Avg. Daily Consumption</h4>
+                      <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                        {item.consumption}
+                      </p>
+                    </Card>
+                  ))}
+                </Slider>
+              ) : (
+                <Card className="p-4 md:p-6 flex flex-col justify-center items-center h-full text-center">
+                  <p className="text-sm text-muted-foreground">No consumption data available</p>
+                </Card>
+              )}
             </div>
 
            
