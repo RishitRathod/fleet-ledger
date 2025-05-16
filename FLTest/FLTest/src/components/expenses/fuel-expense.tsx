@@ -136,7 +136,7 @@ export function FuelExpenseModal() {
       const formattedDate = selectedDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
       const email = localStorage.getItem("email");
       const response = await fetch(
-        `${import.meta.env.VITE_SERVER_ORIGIN}/api/refueling/add`,
+        `${import.meta.env.VITE_SERVER_ORIGIN}/api/refuel/add`,
         {
           method: "POST",
           headers: {

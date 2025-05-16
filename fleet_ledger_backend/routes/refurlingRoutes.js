@@ -31,7 +31,7 @@ const upload = multer({
 
 // File upload route
 router.post('/upload', upload.single('file'), refuelingController.uploadExcel);
-router.post('/addFuelEntry', refuelingController.addFuelEntry);
+// router.post('/addFuelEntry', refuelingController.addFuelEntry);
 router.get('/all', refuelingController.getAllRefuelingEntries);
 
 module.exports = router;
