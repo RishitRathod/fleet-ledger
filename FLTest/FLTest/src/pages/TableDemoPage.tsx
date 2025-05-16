@@ -84,7 +84,7 @@ const fetchRefuelingData = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name: selectedVehicle }),
+      body: JSON.stringify({ name: selectedVehicle, email: localStorage.getItem('email') }),
     });
 
     const data = await response.json();

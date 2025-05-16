@@ -30,22 +30,27 @@ exports.getUsersUnderAdmin = async (req, res) => {
             where: { adminId: adminId }
         });
 
-        if (!invitations.length) {
-            console.error("No users found under this admin");
-            return res.status(404).json({ error: "No users found under this admin" });
+        // Get user names from invitations
+        const names = invitations.map(invitation => invitation.name);
+
+        // Find users with matching names
+        let users = [];
+        if (names.length > 0) {
+            users = await User.findAll({
+                where: { name: names }
+            });
         }
 
-        // Get user emails from invitations
-        const name = invitations.map(invitation => invitation.name);
+        // Add admin to the users list
+        users.unshift(admin); // Add admin at the beginning of the array
 
-        // Find users with matching emails
-        const users = await User.findAll({
-            where: { name: name }
+        console.log("Users including admin:", users);
+
+        res.status(200).json({ 
+            success: true, 
+            users: users,
+            totalUsers: users.length
         });
-
-        console.log("Users found under admin:", users);
-
-        res.status(200).json({ success: true, users: users });
         
 
     } catch (err) {

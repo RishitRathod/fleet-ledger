@@ -46,6 +46,7 @@ interface User {
   adminId: string;
   name: string;
   status: string;
+  role: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -60,7 +61,7 @@ interface Vehicle {
 // API Services for fetching data
 const fetchUsersFromDb = async (): Promise<{ success: boolean; users: User[] }> => {
   try {
-    const userEmail = localStorage.getItem("email");
+    const userEmail = "jay@gmail.com";
     if (!userEmail) {
       console.error("User email not found in localStorage");
       return { success: false, users: [] };
@@ -87,7 +88,7 @@ const fetchUsersFromDb = async (): Promise<{ success: boolean; users: User[] }> 
 
 const fetchVehiclesFromDb = async (): Promise<{ success: boolean; vehicles: Vehicle[] }> => {
   try {
-    const userEmail = localStorage.getItem("email");
+    const userEmail = "jay@gmail.com";
     if (!userEmail) {
       console.error("User email not found in localStorage");
       return { success: false, vehicles: [] };
@@ -116,7 +117,7 @@ const fetchVehiclesFromDb = async (): Promise<{ success: boolean; vehicles: Vehi
 
 const fetchUserVehicleRelationsFromDb = async (): Promise<UserVehicleData[]> => {
   try {
-    const userEmail = localStorage.getItem("email");
+    const userEmail = "jay@gmail.com";
     if (!userEmail) {
       console.error("User email not found in localStorage");
       return [];
@@ -350,7 +351,7 @@ const ExpenseComparison = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const userEmail = localStorage.getItem("email");
+        const userEmail = "jay@gmail.com";
         if (!userEmail) {
           toast({
             title: "Error",
@@ -374,7 +375,11 @@ const ExpenseComparison = () => {
         const usersData = usersResponse.users || [];
         const vehiclesData = vehiclesResponse.vehicles || [];
 
+        console.log('Raw users data:', usersData);
+        console.log('Users with admin:', usersData.filter(user => user.role === 'admin'));
+
         if (usersData.length > 0) {
+          console.log('Setting users state with:', usersData);
           setUsers(usersData);
           // Only set initial selection if no users are currently selected
           if (selectedUsers.length === 0) {
@@ -838,39 +843,45 @@ const ExpenseComparison = () => {
                       </Label>
                       <ScrollArea className="h-32 border rounded-md p-2">
                         <div className="grid grid-cols-2 gap-2">
-                          {users.map((user) => (
-                            <div key={user.id} className="flex items-center space-x-2">
-                              {comparisonType === "user-vehicle" ? (
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="radio"
-                                    name="user-selection"
-                                    value={user.id}
+                          {users.map((user) => {
+                            console.log('Rendering user:', user);
+                            return (
+                              <div key={user.id} className="flex items-center space-x-2">
+                                {comparisonType === "user-vehicle" ? (
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="radio"
+                                      name="user-selection"
+                                      value={user.id}
+                                      id={`select-user-${user.id}`}
+                                      checked={tempSelectedUsers.includes(user.id)}
+                                      onChange={() => setTempSelectedUsers([user.id])}
+                                    />
+                                  </div>
+                                ) : (
+                                  <Checkbox
                                     id={`select-user-${user.id}`}
                                     checked={tempSelectedUsers.includes(user.id)}
-                                    onChange={() => setTempSelectedUsers([user.id])}
+                                    onCheckedChange={() => {
+                                      const newSelection = tempSelectedUsers.includes(user.id)
+                                        ? tempSelectedUsers.filter(id => id !== user.id)
+                                        : [...tempSelectedUsers, user.id];
+                                      setTempSelectedUsers(newSelection);
+                                    }}
                                   />
-                                </div>
-                              ) : (
-                                <Checkbox
-                                  id={`select-user-${user.id}`}
-                                  checked={tempSelectedUsers.includes(user.id)}
-                                  onCheckedChange={() => {
-                                    const newSelection = tempSelectedUsers.includes(user.id)
-                                      ? tempSelectedUsers.filter(id => id !== user.id)
-                                      : [...tempSelectedUsers, user.id];
-                                    setTempSelectedUsers(newSelection);
-                                  }}
-                                />
-                              )}
-                              <Label
-                                htmlFor={`select-user-${user.id}`}
-                                className="text-gray-300"
-                              >
-                                {user.name}
-                              </Label>
-                            </div>
-                          ))}
+                                )}
+                                <Label
+                                  htmlFor={`select-user-${user.id}`}
+                                  className={`text-gray-300 flex items-center gap-2 ${user.role === 'admin' ? 'font-semibold' : ''}`}
+                                >
+                                  {user.name}
+                                  <span className={`text-xs px-2 py-0.5 rounded ${user.role === 'admin' ? 'bg-blue-500 text-white' : 'bg-gray-500 text-white'}`}>
+                                    {user.role}
+                                  </span>
+                                </Label>
+                              </div>
+                            );
+                          })}
                         </div>
                       </ScrollArea>
                     </div>
