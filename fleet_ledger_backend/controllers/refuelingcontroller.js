@@ -313,3 +313,71 @@ exports.deleteRefuelingEntry = async (req, res) => {
         });
     }
 };
+
+// Update a refueling entry by ID
+exports.updateRefuelingEntry = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+        
+        if (!id) {
+            return res.status(400).json({ 
+                success: false,
+                message: "❌ Missing refueling entry ID in request."
+            });
+        }
+
+        console.log(`📝 Attempting to update refueling entry with ID: ${id}`);
+        console.log('Update data:', updateData);
+        
+        // Find the entry first to confirm it exists
+        const refuelingEntry = await Refueling.findByPk(id);
+        
+        if (!refuelingEntry) {
+            return res.status(404).json({
+                success: false,
+                message: `❌ Refueling entry with ID ${id} not found.`
+            });
+        }
+        
+        // Calculate derived values if necessary fields are provided
+        if (updateData.kmStart !== undefined && updateData.kmEnd !== undefined && updateData.liters !== undefined) {
+            const totalRun = updateData.kmEnd - updateData.kmStart;
+            updateData.totalRun = totalRun;
+            
+            if (totalRun > 0) {
+                updateData.average = (updateData.liters / totalRun) * 100;
+            }
+        }
+        
+        if (updateData.liters !== undefined && updateData.pricePerLiter !== undefined) {
+            updateData.amount = updateData.liters * updateData.pricePerLiter;
+        }
+        
+        if (updateData.amount !== undefined && updateData.totalRun !== undefined && updateData.totalRun > 0) {
+            updateData.avgCostPerKm = updateData.amount / updateData.totalRun;
+        }
+        
+        if (updateData.amount !== undefined && updateData.days !== undefined && updateData.days > 0) {
+            updateData.avgDailyExpense = updateData.amount / updateData.days;
+        }
+        
+        // Update the entry
+        await refuelingEntry.update(updateData);
+        
+        console.log(`✅ Successfully updated refueling entry with ID: ${id}`);
+        
+        return res.status(200).json({
+            success: true,
+            message: "✅ Refueling entry updated successfully!",
+            data: refuelingEntry
+        });
+    } catch (error) {
+        console.error("❌ Error updating refueling entry:", error);
+        return res.status(500).json({
+            success: false,
+            message: "❌ Error updating refueling entry.",
+            error: error.message
+        });
+    }
+};

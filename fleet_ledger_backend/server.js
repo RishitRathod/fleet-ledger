@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const portfinder = require('portfinder');
+const passport = require('passport');
+const session = require('express-session');
 const { connectDB } = require('./config/db');
 
 dotenv.config();
@@ -40,7 +42,8 @@ const allowedOrigins = [
       }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   }));
   
@@ -49,6 +52,19 @@ const allowedOrigins = [
 app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Session configuration
+app.use(session({
+  secret: process.env.JWT_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
+
+// Initialize Passport and session
+require('./auth/google'); // Load Google authentication strategy
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Routes
 app.use('/auth', require('./routes/authRoutes'));

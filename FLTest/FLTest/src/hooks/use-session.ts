@@ -5,6 +5,8 @@ export interface SessionUser {
   email: string;
   role: string;
   token: string;
+  name?: string;
+  profilePicture?: string;
 }
 
 export const useSession = () => {

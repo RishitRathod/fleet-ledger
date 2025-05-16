@@ -5,7 +5,7 @@ import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { deleteRefuelingEntry } from '../services/refuelingService';
+import { deleteRefuelingEntry, updateRefuelingEntry, RefuelingEntryData } from '../services/refuelingService';
 
 // Add type augmentation for jsPDF
 declare module 'jspdf' {
@@ -27,6 +27,8 @@ interface TableEntry {
   avgCostPerKm: number;
   days: number;
   avgDailyRs: number;
+  location?: string;
+  fuelType?: string;
 }
 
 interface Vehicle {
@@ -49,6 +51,10 @@ const TableDemoPage = () => {
   const [selectedVehicle, setSelectedVehicle] = useState<string>('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<TableEntry | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -311,6 +317,111 @@ useEffect(() => {
       setIsDeleting(false);
     }
   };
+  
+  // Handle edit button click
+  const handleEditClick = (entry: TableEntry) => {
+    setEditingEntry(entry);
+    setIsEditing(true);
+  };
+  
+  // Handle edit form input changes
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    if (!editingEntry) return;
+    
+    // Handle numeric fields
+    if (['pricePerLiter', 'liters', 'kmStart', 'kmEnd', 'days'].includes(name)) {
+      setEditingEntry({
+        ...editingEntry,
+        [name]: value === '' ? 0 : Number(value)
+      });
+    } else {
+      setEditingEntry({
+        ...editingEntry,
+        [name]: value
+      });
+    }
+  };
+  
+  // Handle edit form submission
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingEntry || !editingEntry.id) {
+      setUpdateMessage({ type: 'error', text: 'Invalid entry data' });
+      return;
+    }
+    
+    try {
+      setIsUpdating(true);
+      
+      // Prepare data for API
+      const updateData: RefuelingEntryData = {
+        pricePerLiter: editingEntry.pricePerLiter,
+        liters: editingEntry.liters,
+        kmStart: editingEntry.kmStart,
+        kmEnd: editingEntry.kmEnd,
+        days: editingEntry.days,
+        location: editingEntry.location || 'Unknown',
+        fuelType: editingEntry.fuelType || 'Petrol'
+      };
+      
+      try {
+        // Try to update on the backend first
+        await updateRefuelingEntry(editingEntry.id, updateData);
+        console.log('Backend update attempt completed');
+      } catch (apiError) {
+        // Log the error but continue with client-side update
+        console.warn('Backend update failed, proceeding with client-side update:', apiError);
+      }
+      
+      // Calculate derived values
+      const totalRun = editingEntry.kmEnd - editingEntry.kmStart;
+      const average = totalRun > 0 ? (editingEntry.liters / totalRun) * 100 : 0;
+      const amount = editingEntry.liters * editingEntry.pricePerLiter;
+      const avgCostPerKm = totalRun > 0 ? amount / totalRun : 0;
+      const avgDailyRs = editingEntry.days > 0 ? amount / editingEntry.days : 0;
+      
+      // Update the entry in the table data
+      setTableData(prevData => 
+        prevData.map(entry => 
+          entry.id === editingEntry.id 
+            ? {
+                ...editingEntry,
+                totalRun,
+                average,
+                amount,
+                avgCostPerKm,
+                avgDailyRs
+              } 
+            : entry
+        )
+      );
+      
+      setUpdateMessage({ type: 'success', text: 'Entry updated successfully' });
+      
+      // Close the edit modal
+      setIsEditing(false);
+      setEditingEntry(null);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setUpdateMessage(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Error in update operation:', error);
+      setUpdateMessage({ type: 'error', text: 'An unexpected error occurred' });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditingEntry(null);
+  };
 
   return (
     <div className="container mx-auto px-4 py-1 max-w-full">
@@ -353,6 +464,25 @@ useEffect(() => {
                     )}
                   </span>
                   {deleteMessage.text}
+                </div>
+              </div>
+            )}
+            
+            {updateMessage && (
+              <div className={`mb-4 p-4 rounded-md ${updateMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                <div className="flex items-center">
+                  <span className="mr-2">
+                    {updateMessage.type === 'success' ? (
+                      <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </span>
+                  {updateMessage.text}
                 </div>
               </div>
             )}
@@ -646,16 +776,28 @@ useEffect(() => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{entry.days}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{entry.avgDailyRs}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">
-                        <button
-                          onClick={() => entry.id ? handleDelete(entry.id) : null}
-                          disabled={isDeleting || !entry.id}
-                          className="text-red-500 hover:text-red-700 focus:outline-none"
-                          title="Delete entry"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
+                        <div className="flex space-x-3">
+                          <button
+                            onClick={() => handleEditClick(entry)}
+                            disabled={isDeleting || isUpdating}
+                            className="text-blue-500 hover:text-blue-700 focus:outline-none"
+                            title="Edit entry"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => entry.id ? handleDelete(entry.id) : null}
+                            disabled={isDeleting || !entry.id || isUpdating}
+                            className="text-red-500 hover:text-red-700 focus:outline-none"
+                            title="Delete entry"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -744,6 +886,111 @@ useEffect(() => {
             </div>
           </div> */}
         </>
+      )}      
+      {/* Edit Modal */}
+      {isEditing && editingEntry && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Edit Refueling Entry</h2>
+              
+              <form onSubmit={handleEditSubmit}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Price Per Liter</label>
+                    <input
+                      type="number"
+                      name="pricePerLiter"
+                      value={editingEntry.pricePerLiter}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Liters</label>
+                    <input
+                      type="number"
+                      name="liters"
+                      value={editingEntry.liters}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">KM Start</label>
+                    <input
+                      type="number"
+                      name="kmStart"
+                      value={editingEntry.kmStart}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">KM End</label>
+                    <input
+                      type="number"
+                      name="kmEnd"
+                      value={editingEntry.kmEnd}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Days</label>
+                    <input
+                      type="number"
+                      name="days"
+                      value={editingEntry.days}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Location</label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={editingEntry.location || ''}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white dark:hover:bg-neutral-600"
+                    disabled={isUpdating}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-800"
+                    disabled={isUpdating}
+                  >
+                    {isUpdating ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

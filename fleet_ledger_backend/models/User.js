@@ -18,12 +18,26 @@ const User = sequelize.define('User', {
     },
     password: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true, // Allow null for Google auth users
+    },
+    googleId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true
+    },
+    profilePicture: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     role: {
         type: DataTypes.ENUM('admin', 'user'),
         allowNull: false,
         defaultValue: 'user'
+    },
+    authProvider: {
+        type: DataTypes.ENUM('local', 'google'),
+        allowNull: false,
+        defaultValue: 'local'
     }
 }, {
     timestamps: true,
